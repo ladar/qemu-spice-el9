@@ -1,0 +1,700 @@
+#!/bin/bash -ex
+
+# To build QEMU using vagrant.
+# [ "$(basename $PWD)" == "qemu.builder" ] && { vagrant destroy -f && cd ../ && rm -rf qemu.builder/ ; } ; \
+# mkdir qemu.builder && cd qemu.builder && vagrant init --minimal generic/alma9 && \
+# sed -i "s/^end$/  config.vm.hostname = \"qemu.builder\"\n  config.ssh.forward_x11 = true\n  config.ssh.forward_agent = true\n  config.vm.provider :libvirt do \|v, override\|\n    v.cpus = 4\n    v.memory = 8192\n    v.video_vram = 256\n  end\nend/g" Vagrantfile && \
+# vagrant destroy -f && vagrant up --provider=libvirt && vagrant ssh-config > config && \
+# vagrant upload /home/ladar/Documents/Configuration/workstation/alma-9-build-qemu.sh qemu.sh && \
+# vagrant ssh -c 'sudo mv qemu.sh /root/' && \
+# vagrant ssh -c "sudo su -l -c 'bash -ex /root/qemu.sh'" && \
+# printf "get -r RPMS QEMU-v$(date +%Y%m%d)\n"| sftp -F config default
+
+# If necessary the following will reset the guest environment to a blank slate,
+# and then prepare it by installing the official QEMU packages. Once complete,
+# it will attempt an install/replace the official packages will the freshly 
+# built packages RPMS.
+# vagrant destroy -f && vagrant up && vagrant ssh-config > config && \
+# vagrant upload /home/ladar/Documents/Configuration/workstation/alma-9-libvirt.sh libvirt.sh && \
+# vagrant upload RPMS-v$(date +%Y%m%d)/ RPMS && \
+# vagrant ssh -c 'sudo bash -ex libvirt.sh' && \
+# vagrant ssh -c 'cd RPMS ; bash -ex INSTALL.sh'
+
+# Otherwise, to install the new RPMs onto the host machine.
+# cd RPMS-v$(date +%Y%m%d) && bash -ex INSTALL.sh
+
+sudo dnf update --quiet --assumeyes && \
+sudo dnf --enablerepo=extras --quiet --assumeyes install epel-release && sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-9 && \
+sudo dnf --enablerepo=extras --quiet --assumeyes install elrepo-release && sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-elrepo.org && \
+sudo dnf install --quiet --assumeyes https://download1.rpmfusion.org/free/el/rpmfusion-free-release-$(rpm -E "%{?fedora}%{?rhel}").noarch.rpm && sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-el-9 && \
+sudo dnf install --quiet --assumeyes https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-$(rpm -E "%{?fedora}%{?rhel}").noarch.rpm && sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-nonfree-el-9 && \
+sudo dnf install --quiet --assumeyes https://rpms.remirepo.net/enterprise/remi-release-$(rpm -E "%{?rhel}").rpm && sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-remi.el$(rpm -E '%{?rhel}')
+
+sudo sed -i -e "s/^[# ]*baseurl/baseurl/g" /etc/yum.repos.d/almalinux-*.repo
+sudo sed -i -e "s/^[# ]*mirrorlist/# mirrorlist/g" /etc/yum.repos.d/almalinux-*.repo
+
+sudo sed -i 's/&protocol\=https//g' /etc/yum.repos.d/epel.repo
+sudo sed -i 's/\(metalink\=.*\)$/\1\&protocol\=https/g' /etc/yum.repos.d/epel.repo
+sudo sed -i 's/&protocol\=https//g' /etc/yum.repos.d/epel-testing.repo
+sudo sed -i 's/\(metalink\=.*\)$/\1\&protocol\=https/g' /etc/yum.repos.d/epel-testing.repo
+
+sudo sed -i 's/http:\/\//https:\/\//g' /etc/yum.repos.d/elrepo.repo 
+sudo sed -i -e "s/^[# ]*mirrorlist/# mirrorlist/g" /etc/yum.repos.d/elrepo.repo 
+sudo sed -i '/mirrors.coreix.net/d' /etc/yum.repos.d/elrepo.repo
+
+sudo sed -i 's/baseurl\=http:/baseurl\=https:/g' /etc/yum.repos.d/rpmfusion-free-updates.repo
+sudo sed -i 's/metalink\=http:/metalink\=https:/g' /etc/yum.repos.d/rpmfusion-free-updates.repo
+sudo sed -i 's/&protocol\=https//g' /etc/yum.repos.d/rpmfusion-free-updates.repo
+sudo sed -i 's/\(metalink\=.*\)$/\1\&protocol\=https/g' /etc/yum.repos.d/rpmfusion-free-updates.repo
+sudo sed -i 's/baseurl\=http:/baseurl\=https:/g' /etc/yum.repos.d/rpmfusion-free-updates-testing.repo
+sudo sed -i 's/metalink\=http:/metalink\=https:/g' /etc/yum.repos.d/rpmfusion-free-updates-testing.repo
+sudo sed -i 's/&protocol\=https//g' /etc/yum.repos.d/rpmfusion-free-updates-testing.repo
+sudo sed -i 's/\(metalink\=.*\)$/\1\&protocol\=https/g' /etc/yum.repos.d/rpmfusion-free-updates-testing.repo
+sudo sed -i 's/baseurl\=http:/baseurl\=https:/g' /etc/yum.repos.d/rpmfusion-nonfree-updates.repo
+sudo sed -i 's/metalink\=http:/metalink\=https:/g' /etc/yum.repos.d/rpmfusion-nonfree-updates.repo
+sudo sed -i 's/&protocol\=https//g' /etc/yum.repos.d/rpmfusion-nonfree-updates.repo
+sudo sed -i 's/\(metalink\=.*\)$/\1\&protocol\=https/g' /etc/yum.repos.d/rpmfusion-nonfree-updates.repo
+sudo sed -i 's/baseurl\=http:/baseurl\=https:/g' /etc/yum.repos.d/rpmfusion-nonfree-updates-testing.repo
+sudo sed -i 's/metalink\=http:/metalink\=https:/g' /etc/yum.repos.d/rpmfusion-nonfree-updates-testing.repo
+sudo sed -i 's/&protocol\=https//g' /etc/yum.repos.d/rpmfusion-nonfree-updates-testing.repo
+sudo sed -i 's/\(metalink\=.*\)$/\1\&protocol\=https/g' /etc/yum.repos.d/rpmfusion-nonfree-updates-testing.repo
+
+sudo sed -i 's/cdn.remirepo.net/rpms.remirepo.net/g' /etc/yum.repos.d/remi.repo
+sudo sed -i 's/http:\/\//https:\/\//g' /etc/yum.repos.d/remi.repo 
+sudo sed -i 's/http:\/\//https:\/\//g' /etc/yum.repos.d/remi-safe.repo 
+sudo sed -i 's/cdn.remirepo.net/rpms.remirepo.net/g' /etc/yum.repos.d/remi-safe.repo
+sudo sed -i 's/cdn.remirepo.net/rpms.remirepo.net/g' /etc/yum.repos.d/remi-modular.repo
+sudo sed -i 's/http:\/\//https:\/\//g' /etc/yum.repos.d/remi-modular.repo 
+
+# As a final step we clean the cache, and reload it so the new GPG keys get approved.
+sudo dnf --enablerepo=* clean all && sudo dnf --enablerepo=* --quiet --assumeyes makecache && \
+sudo dnf --quiet --assumeyes update && \
+sudo dnf --quiet --assumeyes --with-optional \
+--enablerepo=baseos --enablerepo=appstream --enablerepo=epel --enablerepo=extras --enablerepo=plus \
+--enablerepo=crb --enablerepo=remi --enablerepo=remi-safe --enablerepo=remi-modular --enablerepo=elrepo \
+--enablerepo=rpmfusion-free-updates --enablerepo=rpmfusion-nonfree-updates group install \
+"Development Tools" "Additional Development" "Platform Development" "RPM Development Tools" "Debugging Tools" \
+"Desktop Debugging and Performance Tools" && \
+sudo dnf --quiet --assumeyes --allowerasing \
+--enablerepo=baseos --enablerepo=appstream --enablerepo=epel --enablerepo=extras --enablerepo=plus \
+--enablerepo=crb --enablerepo=remi --enablerepo=remi-safe --enablerepo=remi-modular --enablerepo=elrepo \
+--enablerepo=rpmfusion-free-updates --enablerepo=rpmfusion-nonfree-updates install \
+ acpica-tools alsa-lib-devel asciidoc audit-libs-devel autoconf automake bash bc binutils binutils-devel \
+ bison brlapi-devel byacc bzip2-devel capstone-devel cmake ctags cyrus-sasl-devel daxctl-devel dbus-daemon \
+ dbus-devel dbus-glib-devel dbus-libs dbus-x11 dbusmenu-qt5-devel device-mapper-multipath-devel diffstat \
+ diffutils dosfstools dwarves epel-rpm-macros elfutils elfutils-devel elfutils-libelf-devel expect \
+ findutils flex fuse-devel fuse-encfs fuse-overlayfs fuse-sshfs fuse3 fuse3-devel gawk gcc \
+ gcc-aarch64-linux-gnu gcc-arm-linux-gnu gcc-c++ gcc-powerpc64-linux-gnu gcc-sparc64-linux-gnu \
+ gcc-x86_64-linux-gnu gdb gettext git git-core glib2-devel glib2-static glibc-devel glibc-static gnupg2 \
+ gnutls-devel gnutls-utils gstreamer1-devel gstreamer1-plugins-bad-free-devel \
+ gstreamer1-plugins-base-devel gstreamer1-plugins-ugly gtk3-devel gzip help2man hmaccalc hostname iasl \
+ intltool ipxe-roms-qemu java-devel jna kabi-dw libaio-devel libattr-devel libbpf-devel libcap-devel \
+ libcap-ng-devel libcurl-devel libdbusmenu-devel libdbusmenu-gtk2-devel libdbusmenu-gtk3-devel \
+ libdbusmenu-jsonloader-devel libdrm-devel libepoxy-devel libfdt-devel libiscsi-devel libjpeg-devel \
+ libpmem-devel libpng-devel librbd-devel libseccomp-devel libselinux-devel libslirp-devel libssh-devel \
+ libtasn1-devel libtool libudev-devel liburing-devel libusbx-devel libuuid-devel libxkbcommon-devel \
+ libzstd-devel llvm-toolset ltrace lz4-devel lzo-devel m4 make mesa-libgbm-devel meson module-init-tools \
+ mtools nasm ncurses-devel net-tools newt-devel numactl-devel opensc openssl openssl-devel opus-devel \
+ orc-devel pam-devel patch patchutils pciutils-devel pcre-devel pcre-static pcre2-devel pcsc-lite-devel \
+ perl perl-devel perl-ExtUtils-Embed perl-Fedora-VSP perl-generators perl-Test-Harness pesign \
+ pipewire-jack-audio-connection-kit-devel pixman-devel pkgconf pkgconf-m4 pkgconf-pkg-config pkgconfig \
+ pulseaudio-libs-devel python3-cryptography python3-devel python3-docutils python3-future python3-pytest \
+ python3-sphinx python3-sphinx_rtd_theme rdma-core rdma-core-devel redhat-rpm-config rpm-build rpm-sign \
+ rpmconf rpmdevtools rpmlint rpmrebuild rsync SDL2-devel SDL2_image-devel seabios seabios-bin seavgabios-bin \
+ sgabios-bin snappy-devel softhsm source-highlight sparse sssd-dbus strace systemd-devel systemtap \
+ systemtap-sdt-devel tar tcsh texinfo usbguard-dbus usbredir-devel valgrind valgrind-devel vte291-devel \
+ x264-devel x265-devel xauth xdg-dbus-proxy xmlto xorg-x11-util-macros xorriso xz zlib-devel zlib-static \
+ gobject-introspection-devel gtk-doc usbutils vala wayland-protocols-devel samba-winbind-clients \
+ libnghttp2-devel latexmk python3-sphinx-latex redhat-display-fonts redhat-text-fonts fonts-rpm-macros \
+ pyproject-rpm-macros python3-wheel virt-manager || \
+exit 1
+
+# gstreamer1-libav 
+
+# Packages needed to enable X11 forwarding support.
+sudo dnf --quiet --assumeyes --enablerepo=epel --enablerepo=extras --enablerepo=plus --enablerepo=crb \
+--exclude=minizip1.2 --exclude=minizip1.2-devel install \
+ dbus-x11 xorg-x11-xauth xorg-x11-server-common xorg-x11-server-Xorg xorg-x11-server-Xwayland \
+ mlocate cronie cronie-anacron || \
+exit 1
+
+# Enable the locate database update cron job.
+echo "* * * * * root command bash -c '/usr/bin/updatedb'" | sudo tee /etc/cron.d/updatedb > /dev/null
+
+# Update the SSH server config and restart the service.
+sudo sed -i 's/.*X11Forwarding.*/X11Forwarding yes/g' /etc/ssh/sshd_config
+sudo sed -i 's/.*X11UseLocalhost.*/X11UseLocalhost no/g' /etc/ssh/sshd_config
+sudo sed -i 's/.*X11DisplayOffset.*/X11DisplayOffset 10/g' /etc/ssh/sshd_config
+sudo systemctl restart sshd.service 2> /dev/null
+
+# Mock build user/group setup.
+groupadd mock
+useradd mockbuild 
+usermod -aG mock mockbuild 
+
+## Start the build phase.
+mkdir -p ~/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
+
+# Download the source package files. Note these URLs point to rawhide, and are transient.
+cd ~/rpmbuild/SRPMS/
+
+curl -Lso adobe-source-code-pro-fonts-2.030.1.050-13.fc37.src.rpm https://mirrors.kernel.org/fedora/development/rawhide/Everything/source/tree/Packages/a/adobe-source-code-pro-fonts-2.030.1.050-13.fc37.src.rpm
+curl -Lso edk2-20220826gitba0e0e4c6a17-1.fc38.src.rpm https://mirrors.kernel.org/fedora/development/rawhide/Everything/source/tree/Packages/e/edk2-20220826gitba0e0e4c6a17-1.fc38.src.rpm
+curl -Lso fcode-utils-1.0.2-27.svn1354.fc37.src.rpm https://mirrors.kernel.org/fedora/development/rawhide/Everything/source/tree/Packages/f/fcode-utils-1.0.2-27.svn1354.fc37.src.rpm
+curl -Lso gi-docgen-2022.2-2.fc38.src.rpm https://mirrors.kernel.org/fedora/development/rawhide/Everything/source/tree/Packages/g/gi-docgen-2022.2-2.fc38.src.rpm
+curl -Lso libcacard-2.8.1-3.fc37.src.rpm https://mirrors.kernel.org/fedora/development/rawhide/Everything/source/tree/Packages/l/libcacard-2.8.1-3.fc37.src.rpm
+curl -Lso lzfse-1.0-1.fc38.src.rpm https://mirrors.kernel.org/fedora/development/rawhide/Everything/source/tree/Packages/l/lzfse-1.0-1.fc38.src.rpm
+curl -Lso openbios-20200725-5.git7f28286.fc37.src.rpm https://mirrors.kernel.org/fedora/development/rawhide/Everything/source/tree/Packages/o/openbios-20200725-5.git7f28286.fc37.src.rpm
+curl -Lso python-pefile-2022.5.30-2.fc37.src.rpm https://mirrors.kernel.org/fedora/development/rawhide/Everything/source/tree/Packages/p/python-pefile-2022.5.30-2.fc37.src.rpm
+curl -Lso python-smartypants-2.0.1-14.fc37.src.rpm https://mirrors.kernel.org/fedora/development/37/Everything/source/tree/Packages/p/python-smartypants-2.0.1-14.fc37.src.rpm
+curl -Lso python-virt-firmware-1.6-2.fc38.src.rpm https://mirrors.kernel.org/fedora/development/rawhide/Everything/source/tree/Packages/p/python-virt-firmware-1.6-2.fc38.src.rpm
+curl -Lso qemu-7.1.0-3.fc38.src.rpm https://mirrors.kernel.org/fedora/development/rawhide/Everything/source/tree/Packages/q/qemu-7.1.0-3.fc38.src.rpm
+curl -Lso SLOF-20210217-5.git33a7322d.fc37.src.rpm https://mirrors.kernel.org/fedora/development/rawhide/Everything/source/tree/Packages/s/SLOF-20210217-5.git33a7322d.fc37.src.rpm
+curl -Lso spice-0.15.0-5.fc37.src.rpm https://mirrors.kernel.org/fedora/development/37/Everything/source/tree/Packages/s/spice-0.15.0-5.fc37.src.rpm
+curl -Lso spice-gtk-0.40-1.fc36.src.rpm https://mirrors.kernel.org/fedora/releases/36/Everything/source/tree/Packages/s/spice-gtk-0.40-1.fc36.src.rpm
+curl -Lso spice-protocol-0.14.4-2.fc37.src.rpm https://mirrors.kernel.org/fedora/development/rawhide/Everything/source/tree/Packages/s/spice-protocol-0.14.4-2.fc37.src.rpm
+curl -Lso virglrenderer-0.10.1-1.20220912git19dc97a2.fc38.src.rpm https://mirrors.kernel.org/fedora/development/rawhide/Everything/source/tree/Packages/v/virglrenderer-0.10.1-1.20220912git19dc97a2.fc38.src.rpm
+
+sha256sum -c <<-EOF || exit 1
+4d160446d4bd56e1d2d921a88591e137f0c8e7e4b5d2458a44b88099a93988f0  lzfse-1.0-1.fc38.src.rpm
+250550dbe11eb751e94076808e06119f03ede565223b46d5794949e438790c41  qemu-7.1.0-3.fc38.src.rpm
+2e3634acc3e4295e58213cf0d3db6abd42c90a2d0b7683cd5d99eb3486b5c8f4  spice-0.15.0-5.fc37.src.rpm
+d890a0676d2f0491ac22e1055669381bf2519fc89158376ab8d95a2751f7e27b  spice-gtk-0.40-1.fc36.src.rpm
+fe9e37246c3191598eddc9cc3ffdefc04b1bb93ec46f67e4b0676cc6548e2485  libcacard-2.8.1-3.fc37.src.rpm
+f6776c15516b8fc640e85e1d30cb2bfd81372fc321a4df84d5c17d4d4c780b67  gi-docgen-2022.2-2.fc38.src.rpm
+f4e8d66aa2c09ea08795eec09df90e103c2a5065d58bd39503fbba8fe54442e5  spice-protocol-0.14.4-2.fc37.src.rpm
+37bc912e7e49b359d4f83cac6df57f9752cbf9f4f3b4e9c7a1f00503c7dca215  python-pefile-2022.5.30-2.fc37.src.rpm
+0beac26a1c7e5e09d7ca284445a247b2831398fc95a9149dc20cccd322d789da  python-virt-firmware-1.6-2.fc38.src.rpm
+84254fa43b0951184662d7ca741f29523b5d81eefbff944a3f8df0dc5d14f81e  python-smartypants-2.0.1-14.fc37.src.rpm
+4255ee88baaefc3e0ad19f3b364551ec5b935769acd72f8fee4f38c180f7051d  SLOF-20210217-5.git33a7322d.fc37.src.rpm
+abcd1474eecbd2c4ae3c2894de864c1150b5c004edf26d6bfbd18f65c1366feb  fcode-utils-1.0.2-27.svn1354.fc37.src.rpm
+b9b931a87036374100931f75a0cf8468e1d64737fa19b08f4a418dd0d35323d0  edk2-20220826gitba0e0e4c6a17-1.fc38.src.rpm
+36c7a5c26f05bd2179a558bf82635f1aad3fa60b8e88f6fa9f6c4097ba63d3b7  openbios-20200725-5.git7f28286.fc37.src.rpm
+e1cedfc050073c6f6eedb7069912248479d338c0309f11084cd941f7557fe8f9  adobe-source-code-pro-fonts-2.030.1.050-13.fc37.src.rpm
+1746e5bb40acdac01d3c27ea02ba3f86a6af8e2cc6f7677789b6f56fb0966d3d  virglrenderer-0.10.1-1.20220912git19dc97a2.fc38.src.rpm
+EOF
+
+rpm -i lzfse-1.0-1.fc38.src.rpm && \
+rpm -i qemu-7.1.0-3.fc38.src.rpm && \
+rpm -i spice-0.15.0-5.fc37.src.rpm && \
+rpm -i spice-gtk-0.40-1.fc36.src.rpm && \
+rpm -i libcacard-2.8.1-3.fc37.src.rpm && \
+rpm -i gi-docgen-2022.2-2.fc38.src.rpm && \
+rpm -i spice-protocol-0.14.4-2.fc37.src.rpm && \
+rpm -i python-pefile-2022.5.30-2.fc37.src.rpm && \
+rpm -i python-virt-firmware-1.6-2.fc38.src.rpm && \
+rpm -i python-smartypants-2.0.1-14.fc37.src.rpm && \
+rpm -i SLOF-20210217-5.git33a7322d.fc37.src.rpm && \
+rpm -i fcode-utils-1.0.2-27.svn1354.fc37.src.rpm && \
+rpm -i edk2-20220826gitba0e0e4c6a17-1.fc38.src.rpm && \
+rpm -i openbios-20200725-5.git7f28286.fc37.src.rpm && \
+rpm -i virglrenderer-0.10.1-1.20220912git19dc97a2.fc38.src.rpm && \
+rpm -i adobe-source-code-pro-fonts-2.030.1.050-13.fc37.src.rpm
+
+# Process the build specs.
+cd ~/rpmbuild/SPECS/
+
+patch -p1 <<-EOF 
+diff --git a/SLOF.spec b/SLOF.spec
+index 638fd88..2341a15 100644
+--- a/SLOF.spec
++++ b/SLOF.spec
+@@ -6,13 +6,8 @@
+ # Disable debuginfo because it is of no use to us.
+ %global debug_package %{nil}
+ 
+-%if 0%{?fedora:1}
+ %define cross 1
+ %define targetdir qemu
+-%else
+-%define targetdir qemu-kvm
+-%endif
+-
+ %global gittag qemu-slof-%{gittagdate}
+ 
+ Name:           SLOF
+EOF
+
+# Patch the EDK2 spec file.
+patch -p1 <<-EOF
+diff --git a/edk2.spec b/edk2.spec
+index d703c3a..a9c6091 100644
+--- a/edk2.spec
++++ b/edk2.spec
+@@ -14,24 +14,12 @@ ExclusiveArch: x86_64 aarch64
+ %define TOOLCHAIN      GCC5
+ %define OPENSSL_VER    1.1.1k
+ 
+-%if %{defined rhel}
+-%define build_ovmf 0
+-%define build_aarch64 0
+-%ifarch x86_64
+-  %define build_ovmf 1
+-%endif
+-%ifarch aarch64
+-  %define build_aarch64 1
+-%endif
+-%define build_ovmf_4m 0
+-%else
+ %define build_ovmf 1
+ %define build_ovmf_4m 1
+ %define build_aarch64 1
+-%endif
+ 
+ %global softfloat_version 20180726-gitb64af41
+-%define cross %{defined fedora}
++%define cross 1
+ %define disable_werror %{defined fedora}
+ 
+ 
+@@ -184,21 +172,11 @@ EDK II is a modern, feature-rich, cross-platform firmware development
+ environment for the UEFI and PI specifications. This package contains sample
+ 64-bit UEFI firmware builds for QEMU and KVM.
+ 
+-
+-%if %{defined fedora}
+-%package ovmf-ia32
+-Summary:        Open Virtual Machine Firmware
+-License:        BSD-2-Clause-Patent and OpenSSL
+-Provides:       bundled(openssl)
+-BuildArch:      noarch
+-%description ovmf-ia32
+-EFI Development Kit II
+-Open Virtual Machine Firmware (ia32)
+-
+ %package arm
+ Summary:        ARM Virtual Machine Firmware
+ BuildArch:      noarch
+ License:        BSD-2-Clause-Patent and OpenSSL
++
+ %description arm
+ EFI Development Kit II
+ ARMv7 UEFI Firmware
+@@ -212,10 +190,19 @@ BuildArch:      noarch
+ This package provides tools that are needed to build EFI executables
+ and ROMs using the GNU tools.  You do not need to install this package;
+ you probably want to install edk2-tools only.
+-# endif fedora
+-%endif
+ 
+ 
++%if %{defined fedora}
++%package ovmf-ia32
++Summary:        Open Virtual Machine Firmware
++License:        BSD-2-Clause-Patent and OpenSSL
++Provides:       bundled(openssl)
++BuildArch:      noarch
++%description ovmf-ia32
++EFI Development Kit II
++Open Virtual Machine Firmware (ia32)
++# endif fedora
++%endif
+ 
+ %prep
+ # We needs some special git config options that %%autosetup won't give us.
+@@ -382,11 +369,11 @@ build \${CC_FLAGS} -a AARCH64 \\
+ %endif
+ 
+ 
+-%if %{defined fedora}
+ %if %{build_ovmf}
+ # build microvm
+ build \${OVMF_FLAGS} -a X64 -p OvmfPkg/Microvm/MicrovmX64.dsc
+ 
++%if %{defined fedora}
+ # build ovmf-ia32
+ mkdir -p ovmf-ia32
+ build \${OVMF_FLAGS} -a IA32 -p OvmfPkg/OvmfPkgIa32.dsc
+@@ -404,6 +391,8 @@ build_iso Build/OvmfIa32/DEBUG_%{TOOLCHAIN}/IA32
+ mv Build/OvmfIa32/DEBUG_%{TOOLCHAIN}/IA32/UefiShell.iso ovmf-ia32
+ cp -a Build/OvmfIa32/DEBUG_%{TOOLCHAIN}/IA32/Shell.efi ovmf-ia32
+ cp -a Build/OvmfIa32/DEBUG_%{TOOLCHAIN}/IA32/EnrollDefaultKeys.efi ovmf-ia32
++# endif defined fedora
++%endif
+ # endif build_ovmf
+ %endif
+ 
+@@ -415,9 +404,6 @@ dd of="arm/QEMU_EFI-pflash.raw" if="/dev/zero" bs=1M count=64
+ dd of="arm/QEMU_EFI-pflash.raw" if="arm/QEMU_EFI.fd" conv=notrunc
+ dd of="arm/vars-template-pflash.raw" if="/dev/zero" bs=1M count=64
+ 
+-# endif defined fedora
+-%endif
+-
+ 
+ 
+ %install
+@@ -540,7 +526,6 @@ install -m 0644 edk2-aarch64-verbose.json \\
+ %endif
+ 
+ 
+-%if %{defined fedora}
+ %if %{build_ovmf}
+ # install microvm
+ install -m 0644 Build/MicrovmX64/DEBUG_%{TOOLCHAIN}/FV/MICROVM.fd \\
+@@ -553,12 +538,15 @@ install -p -m 0644 %{_sourcedir}/edk2-ovmf-nosb.json \\
+   %{buildroot}%{_datadir}/qemu/firmware/60-edk2-ovmf-nosb.json
+ 
+ 
++%if %{defined fedora}
+ # install ia32
+ cp -a ovmf-ia32 %{buildroot}%{_datadir}/%{name}
+ 
+ for f in %{_sourcedir}/*edk2-ovmf-ia32*.json; do
+     install -pm 644 \$f %{buildroot}/%{_datadir}/qemu/firmware
+ done
++# endif defined fedora
++%endif
+ # endif build_ovmf
+ %endif
+ 
+@@ -585,8 +573,6 @@ done
+ %py_byte_compile %{python3} %{buildroot}%{_datadir}/edk2/Python
+ %endif
+ 
+-# endif defined fedora
+-%endif
+ 
+ 
+ 
+@@ -630,11 +616,9 @@ virt-fw-vars --input Build/Ovmf3264/DEBUG_%{TOOLCHAIN}/FV/OVMF_VARS.secboot.fd \\
+ %{_datadir}/qemu/firmware/50-edk2-ovmf-amdsev.json
+ %{_datadir}/qemu/firmware/50-edk2-ovmf-inteltdx.json
+ %{_datadir}/qemu/firmware/50-edk2-ovmf.json
+-%if %{defined fedora}
+ %{_datadir}/%{name}/ovmf/MICROVM.fd
+ %{_datadir}/qemu/firmware/60-edk2-ovmf-nosb.json
+ %{_datadir}/qemu/firmware/60-edk2-ovmf-microvm.json
+-%endif
+ %if %{build_ovmf_4m}
+ %{_datadir}/%{name}/ovmf-4m/OVMF_CODE.fd
+ %{_datadir}/%{name}/ovmf-4m/OVMF_CODE.secboot.fd
+@@ -685,25 +669,6 @@ virt-fw-vars --input Build/Ovmf3264/DEBUG_%{TOOLCHAIN}/FV/OVMF_VARS.secboot.fd \\
+ %files tools-doc
+ %doc BaseTools/UserManuals/*.rtf
+ 
+-
+-%if %{defined fedora}
+-%if %{build_ovmf}
+-%files ovmf-ia32
+-%common_files
+-%dir %{_datadir}/%{name}/ovmf-ia32
+-%{_datadir}/%{name}/ovmf-ia32
+-%{_datadir}/%{name}/ovmf-ia32/EnrollDefaultKeys.efi
+-%{_datadir}/%{name}/ovmf-ia32/OVMF_CODE.fd
+-%{_datadir}/%{name}/ovmf-ia32/OVMF_CODE.secboot.fd
+-%{_datadir}/%{name}/ovmf-ia32/OVMF_VARS.fd
+-%{_datadir}/%{name}/ovmf-ia32/OVMF_VARS.secboot.fd
+-%{_datadir}/%{name}/ovmf-ia32/Shell.efi
+-%{_datadir}/%{name}/ovmf-ia32/UefiShell.iso
+-%{_datadir}/qemu/firmware/40-edk2-ovmf-ia32-sb-enrolled.json
+-%{_datadir}/qemu/firmware/50-edk2-ovmf-ia32-sb.json
+-%{_datadir}/qemu/firmware/60-edk2-ovmf-ia32.json
+-%endif
+-
+ %files arm
+ %common_files
+ %dir %{_datadir}/%{name}/arm
+@@ -730,9 +695,24 @@ virt-fw-vars --input Build/Ovmf3264/DEBUG_%{TOOLCHAIN}/FV/OVMF_VARS.secboot.fd \\
+ %dir %{_datadir}/%{name}
+ %{_datadir}/%{name}/Python
+ 
+-# endif fedora
++%if %{defined fedora}
++%if %{build_ovmf}
++%files ovmf-ia32
++%common_files
++%dir %{_datadir}/%{name}/ovmf-ia32
++%{_datadir}/%{name}/ovmf-ia32
++%{_datadir}/%{name}/ovmf-ia32/EnrollDefaultKeys.efi
++%{_datadir}/%{name}/ovmf-ia32/OVMF_CODE.fd
++%{_datadir}/%{name}/ovmf-ia32/OVMF_CODE.secboot.fd
++%{_datadir}/%{name}/ovmf-ia32/OVMF_VARS.fd
++%{_datadir}/%{name}/ovmf-ia32/OVMF_VARS.secboot.fd
++%{_datadir}/%{name}/ovmf-ia32/Shell.efi
++%{_datadir}/%{name}/ovmf-ia32/UefiShell.iso
++%{_datadir}/qemu/firmware/40-edk2-ovmf-ia32-sb-enrolled.json
++%{_datadir}/qemu/firmware/50-edk2-ovmf-ia32-sb.json
++%{_datadir}/qemu/firmware/60-edk2-ovmf-ia32.json
++%endif
+ %endif
+-
+ 
+ %changelog
+ * Tue Sep 20 2022 Gerd Hoffmann <kraxel@redhat.com> - 20220826gitba0e0e4c6a17-1
+EOF
+
+# Patch the QEMU spec file.
+patch -p1 <<-EOF
+diff --git a/qemu.spec b/qemu.spec
+index f0845fc..ebaf35e 100644
+--- a/qemu.spec
++++ b/qemu.spec
+@@ -6,7 +6,7 @@
+ %global libfdt_version 1.6.0
+ %global libseccomp_version 2.4.0
+ %global libusbx_version 1.0.23
+-%global meson_version 0.59.3
++%global meson_version 0.58.2
+ %global usbredir_version 0.7.1
+ %global ipxe_version 20200823-5.git4bd064de
+ 
+@@ -55,7 +55,7 @@
+ %global user_static 1
+ %if 0%{?rhel}
+ # EPEL/RHEL do not have required -static builddeps
+-%global user_static 0
++%global user_static 1
+ %endif
+ 
+ %global have_kvm 0
+@@ -75,7 +75,7 @@
+ %global have_spice 0
+ %endif
+ %if 0%{?rhel} >= 9
+-%global have_spice 0
++%global have_spice 1
+ %endif
+ 
+ # Matches xen ExclusiveArch
+@@ -87,14 +87,14 @@
+ %endif
+ 
+ %global have_liburing 0
+-%if 0%{?fedora}
++%if 0%{?rhel}
+ %ifnarch %{arm}
+ %global have_liburing 1
+ %endif
+ %endif
+ 
+ %global have_virgl 0
+-%if 0%{?fedora}
++%if 0%{?rhel}
+ %global have_virgl 1
+ %endif
+ 
+@@ -114,7 +114,7 @@
+ %global have_dbus_display 0
+ %endif
+ 
+-%global have_sdl_image %{defined fedora}
++%global have_sdl_image %{defined rhel}
+ %global have_fdt 1
+ %global have_opengl 1
+ %global have_usbredir 1
+@@ -151,7 +151,7 @@
+ 
+ %define have_libcacard 1
+ %if 0%{?rhel} >= 9
+-%define have_libcacard 0
++%define have_libcacard 1
+ %endif
+ 
+ # LTO still has issues with qemu on armv7hl and aarch64
+@@ -316,7 +316,7 @@ Summary: QEMU is a FAST! processor emulator
+ Name: qemu
+ Version: 7.1.0
+ Release: %{baserelease}%{?rcrel}%{?dist}
+-Epoch: 2
++Epoch: 1024
+ License: GPLv2 and BSD and MIT and CC-BY
+ URL: http://www.qemu.org/
+ 
+@@ -1462,7 +1462,6 @@ mkdir -p %{static_builddir}
+   --disable-linux-user             \\\\\\
+   --disable-live-block-migration   \\\\\\
+   --disable-lto                    \\\\\\
+-  --disable-lzfse                  \\\\\\
+   --disable-lzo                    \\\\\\
+   --disable-malloc-trim            \\\\\\
+   --disable-membarrier             \\\\\\
+@@ -1556,7 +1555,7 @@ run_configure() {
+         --with-pkgversion="%{name}-%{version}-%{release}" \\
+         --with-suffix="%{name}" \\
+         --firmwarepath="%firmwaredirs" \\
+-        --meson="%{__meson}" \\
++        --meson=internal \\
+         --enable-trace-backends=dtrace \\
+         --with-coroutine=ucontext \\
+         --with-git=git \\
+@@ -1678,6 +1677,7 @@ run_configure \\
+   --enable-curses \\
+   --enable-dmg \\
+   --enable-fuse \\
++  --enable-fuse-lseek \\
+   --enable-gio \\
+ %if %{have_block_gluster}
+   --enable-glusterfs \\
+@@ -2218,9 +2218,9 @@ useradd -r -u 107 -g qemu -G kvm -d / -s /sbin/nologin \\
+ %{_libdir}/%{name}/ui-opengl.so
+ %endif
+ 
+-
+ %files block-dmg
+ %{_libdir}/%{name}/block-dmg-bz2.so
++%{_libdir}/%{name}/block-dmg-lzfse.so
+ %if %{have_block_gluster}
+ %files block-gluster
+ %{_libdir}/%{name}/block-gluster.so
+@@ -2741,10 +2741,10 @@ useradd -r -u 107 -g qemu -G kvm -d / -s /sbin/nologin \\
+ 
+ 
+ %changelog
+-- Thu Sep 08 2022 Davide Cavalca <dcavalca@fedoraproject.org> - 7.1.0-3
++* Thu Sep 08 2022 Davide Cavalca <dcavalca@fedoraproject.org> - 7.1.0-3
+ - Unconditionally enable capstone-devel
+ 
+-- Thu Sep 08 2022 Davide Cavalca <dcavalca@fedoraproject.org> - 7.1.0-2
++* Thu Sep 08 2022 Davide Cavalca <dcavalca@fedoraproject.org> - 7.1.0-2
+ - Bump required meson version
+ 
+ * Wed Aug 31 2022 Eduardo Lima (Etrunko) <etrunko@redhat.com> - 7.1.0-1
+EOF
+
+patch -p1 <<-EOF
+diff --git a/spice-gtk.spec b/spice-gtk.spec
+index 9bd79d1..29f332e 100644
+--- a/spice-gtk.spec
++++ b/spice-gtk.spec
+@@ -31,7 +31,9 @@ BuildRequires: gtk-doc
+ BuildRequires: vala
+ BuildRequires: usbutils
+ BuildRequires: libsoup-devel >= 2.49.91
++%if 0%{?fedora}
+ BuildRequires: libphodav-devel
++%endif
+ BuildRequires: lz4-devel
+ BuildRequires: gtk3-devel
+ BuildRequires: json-glib-devel
+@@ -120,6 +122,9 @@ gpgv2 --quiet --keyring %{SOURCE2} %{SOURCE1} %{SOURCE0}
+ %ifarch s390x # https://gitlab.freedesktop.org/spice/spice-gtk/issues/120
+   -Dusbredir=disabled \\
+ %endif
++%if 0%{?rhel}
++  -Dwebdav=disabled \\
++%endif
+ %if 0%{?flatpak}
+   -Dpolkit=disabled
+ %else
+EOF
+
+sed -i '/alias/d' $HOME/.cshrc
+sed -i '/alias/d' $HOME/.tcshrc
+sed -i '/alias/d' $HOME/.bashrc
+
+rpmbuild -ba --rebuild --clean --undefine="dist" -D "dist .btrh9" --target=$(uname -m) lzfse.spec 2>&1 | tee lzfse.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " lzfse.spec)
+
+rpmbuild -ba --rebuild --clean --undefine="dist" -D "dist .btrh9" --target=$(uname -m) virglrenderer.spec 2>&1 | tee virglrenderer.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " virglrenderer.spec)
+
+rpmbuild -ba --rebuild --clean --undefine="dist" -D "dist .btrh9" --target=$(uname -m) libcacard.spec 2>&1 | tee libcacard.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " libcacard.spec)
+
+rpmbuild -ba --rebuild --clean --undefine="dist" -D "dist .btrh9" --target=$(uname -m) fcode-utils.spec 2>&1 | tee fcode-utils.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " fcode-utils.spec)
+
+rpmbuild -ba --rebuild --clean --undefine="dist" -D "dist .btrh9" --target=$(uname -m) openbios.spec 2>&1 | tee openbios.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " openbios.spec)
+
+rpmbuild -ba --rebuild --clean --undefine="dist" -D "dist .btrh9" --target=$(uname -m) python-pefile.spec 2>&1 | tee python-pefile.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(ls -q  $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " python-pefile.spec ) 2>/dev/null)
+
+rpmbuild -ba --rebuild --clean --undefine="dist" -D "dist .btrh9" --target=$(uname -m) python-virt-firmware.spec 2>&1 | tee python-virt-firmware.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(ls -q  $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " python-virt-firmware.spec ) 2>/dev/null | grep -v "python3-virt-firmware-tests")
+
+rpmbuild -ba --rebuild --clean --undefine="dist" -D "dist .btrh9" --target=$(uname -m) edk2.spec 2>&1 | tee edk2.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(ls -q $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " edk2.spec ) 2>/dev/null)
+
+rpmbuild -ba --rebuild --clean --undefine="dist" -D "dist .btrh9" --target=$(uname -m) SLOF.spec 2>&1 | tee SLOF.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " SLOF.spec)
+
+rpmbuild -ba --rebuild --clean --undefine="dist" -D "dist .btrh9" --target=$(uname -m) spice-protocol.spec 2>&1 | tee spice-protocol.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " spice-protocol.spec)
+
+rpmbuild -ba --rebuild --clean --undefine="dist" -D "dist .btrh9" --target=$(uname -m) spice.spec 2>&1 | tee spice.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(ls -q  $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " spice.spec ) 2>/dev/null)
+
+rpmbuild -ba --rebuild --clean --undefine="dist" -D "dist .btrh9" --target=$(uname -m) qemu.spec 2>&1 | tee qemu.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " qemu.spec )
+
+rpmbuild -ba --rebuild --clean --undefine="dist" -D "dist .btrh9" --target=$(uname -m) adobe-source-code-pro-fonts.spec 2>&1 | tee adobe-source-code-pro-fonts.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " adobe-source-code-pro-fonts.spec )
+
+rpmbuild -ba --rebuild --clean --undefine="dist" -D "dist .btrh9" --target=$(uname -m) python-smartypants.spec 2>&1 | tee python-smartypants.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(ls -q $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " python-smartypants.spec ) 2>/dev/null)
+
+# An RPM is available for python3-typogrify but it requires smartypants which weas just installed.
+dnf install --quiet --assumeyes --enablerepo=* python3-typogrify
+
+rpmbuild -ba --rebuild --clean --undefine="dist" -D "dist .btrh9" --target=$(uname -m) gi-docgen.spec 2>&1 | tee gi-docgen.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(ls -q $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " gi-docgen.spec ) 2>/dev/null)
+
+rpmbuild -ba --rebuild --clean --undefine="dist" -D "dist .btrh9" --target=$(uname -m) spice-gtk.spec 2>&1 | tee spice-gtk.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " spice-gtk.spec )
+
+# Download the dependencies needed for installation, which aren't available from the official, 
+# and/or, EPEL repos. They will be added to the collection of binary packages that were just 
+# built.
+dnf --quiet --enablerepo=remi --enablerepo=remi-debuginfo --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download SDL2_image SDL2_image-debuginfo SDL2_image-devel SDL2_image-debugsource
+dnf --quiet --enablerepo=baseos --enablerepo=baseos-debug --enablerepo=crb --enablerepo=crb-debug --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download pcsc-lite-devel pcsc-lite-libs pcsc-lite-libs-debuginfo pcsc-lite-devel-debuginfo
+dnf --quiet --enablerepo=appstream --enablerepo=appstream-debug --enablerepo=crb --enablerepo=crb-debug --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download mesa-libgbm mesa-libgbm-devel mesa-libgbm-debuginfo
+dnf --quiet --enablerepo=appstream --enablerepo=appstream-debug --enablerepo=crb --enablerepo=crb-debug --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download usbredir usbredir-devel usbredir-debuginfo usbredir-debugsource
+dnf --quiet --enablerepo=appstream --enablerepo=appstream-debug --enablerepo=crb --enablerepo=crb-debug --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download opus opus-devel opus-debuginfo opus-debugsource
+dnf --quiet --enablerepo=baseos --enablerepo=baseos-debug --enablerepo=crb --enablerepo=crb-debug --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download gobject-introspection gobject-introspection-devel gobject-introspection-debuginfo gobject-introspection-debugsource
+dnf --quiet --enablerepo=appstream --enablerepo=appstream-debug --enablerepo=crb --enablerepo=crb-debug --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download libogg libogg-devel libogg-debuginfo libogg-debugsource
+dnf --quiet --enablerepo=crb --enablerepo=crb-debug --arch=noarch --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/noarch/ download python3-markdown
+
+# Consolidate the RPMs.
+mkdir $HOME/RPMS/
+find $HOME/rpmbuild/RPMS/noarch/*rpm $HOME/rpmbuild/RPMS/x86_64/*rpm $HOME/rpmbuild/SRPMS/*btrh*rpm > $HOME/rpm.outputs.txt
+mv $HOME/rpmbuild/RPMS/noarch/*rpm $HOME/rpmbuild/RPMS/x86_64/*rpm $HOME/rpmbuild/SRPMS/*btrh*rpm $HOME/RPMS/
+
+# Remove the packages so we can verify installation with a more typical setup.
+dnf --quiet remove -y edk2-aarch64 edk2-arm edk2-debugsource edk2-ovmf edk2-tools edk2-tools-doc edk2-tools-python libcacard libcacard-debugsource libcacard-devel lzfse lzfse-debugsource- lzfse-devel  lzfse-libs  mesa-libgbm-devel openbios pcsc-lite-devel  qemu qemu-audio-alsa qemu-audio-dbus qemu-audio-oss qemu-audio-pa qemu-audio-sdl qemu-audio-spice qemu-block-curl qemu-block-dmg qemu-block-iscsi qemu-block-rbd qemu-block-ssh qemu-char-baum qemu-char-spice qemu-common qemu-debugsource qemu-device-display-qxl qemu-device-display-vhost-user-gpu qemu-device-display-virtio-gpuqemu-device-display-virtio-gpu-ccw qemu-device-display-virtio-gpu-gl qemu-device-display-virtio-gpu-pci qemu-device-display-virtio-gpu-pci-gl qemu-device-display-virtio-vga qemu-device-display-virtio-vga-gl qemu-device-usb-host qemu-device-usb-redirect qemu-device-usb-smartcard qemu-docs qemu-guest-agent qemu-img qemu-kvm qemu-kvm-core qemu-pr-helper qemu-system-aarch64 qemu-system-aarch64-core qemu-system-alpha qemu-system-alpha-core qemu-system-arm qemu-system-arm-core qemu-system-avr qemu-system-avr-core qemu-system-cris qemu-system-cris-core qemu-system-hppa qemu-system-hppa-core qemu-system-loongarch64 qemu-system-loongarch64-core qemu-system-m68k qemu-system-m68k-core qemu-system-microblaze qemu-system-microblaze-core qemu-system-mips qemu-system-mips-core qemu-system-nios2 qemu-system-nios2-core qemu-system-or1k qemu-system-or1k-core qemu-system-ppc qemu-system-ppc-core qemu-system-riscv qemu-system-riscv-core qemu-system-rx qemu-system-rx-core qemu-system-s390x qemu-system-s390x-core qemu-system-sh4 qemu-system-sh4-core qemu-system-sparc qemu-system-sparc-core qemu-system-tricore qemu-system-tricore-core qemu-system-x86 qemu-system-x86-core qemu-system-xtensa qemu-system-xtensa-core qemu-tests qemu-tools qemu-ui-curses qemu-ui-dbus qemu-ui-egl-headless qemu-ui-gtk qemu-ui-opengl qemu-ui-sdl qemu-ui-spice-app qemu-ui-spice-core qemu-user qemu-user-binfmt qemu-user-static qemu-user-static-aarch64 qemu-user-static-alpha qemu-user-static-arm qemu-user-static-cris qemu-user-static-hexagon qemu-user-static-hppa qemu-user-static-loongarch64 qemu-user-static-m68k qemu-user-static-microblaze qemu-user-static-mips qemu-user-static-nios2 qemu-user-static-or1k qemu-user-static-ppc qemu-user-static-riscv qemu-user-static-s390x qemu-user-static-sh4 qemu-user-static-sparc qemu-user-static-x86 qemu-user-static-xtensa qemu-virtiofsd SDL2_image SDL2_image-debugsource SDL2_image-devel SLOF-20210217-5 spice-server spice-server-devel virglrenderer virglrenderer-debugsource virglrenderer-devel virglrenderer-test-server qemu-img qemu-kvm qemu-kvm-audio-pa qemu-kvm-block-curl qemu-kvm-block-rbd qemu-kvm-common qemu-kvm-core qemu-kvm-device-display-virtio-gpu qemu-kvm-device-display-virtio-gpu-gl qemu-kvm-device-display-virtio-gpu-pci qemu-kvm-device-display-virtio-gpu-pci-gl qemu-kvm-device-display-virtio-vga qemu-kvm-device-display-virtio-vga-gl qemu-kvm-device-usb-host qemu-kvm-device-usb-redirect qemu-kvm-docs qemu-kvm-tools qemu-kvm-ui-egl-headless qemu-kvm-ui-opengl qemu-pr-helper virtiofsd qemu* $(rpm -qa | grep btrh)
+dnf --quiet config-manager --disable "remi*" "elrepo*" "rpmfusion*" "crb*"
+dnf --quiet --enablerepo=* clean all
+dnf install --quiet -y qemu-img qemu-kvm qemu-kvm-audio-pa qemu-kvm-block-curl qemu-kvm-block-rbd qemu-kvm-common qemu-kvm-core qemu-kvm-device-display-virtio-gpu qemu-kvm-device-display-virtio-gpu-gl qemu-kvm-device-display-virtio-gpu-pci qemu-kvm-device-display-virtio-gpu-pci-gl qemu-kvm-device-display-virtio-vga qemu-kvm-device-display-virtio-vga-gl qemu-kvm-device-usb-host qemu-kvm-device-usb-redirect qemu-kvm-docs qemu-kvm-tools qemu-kvm-ui-egl-headless qemu-kvm-ui-opengl qemu-pr-helper virtiofsd 
+
+cd  $HOME/RPMS/
+tee $HOME/RPMS/INSTALL.sh <<-EOF > /dev/null
+# To generate a current/updated list of RPM files for installation, run the following command.
+export INSTALLPKGS=\$(echo \`ls qemu*rpm spice*rpm opus*rpm usbredir*rpm openbios*rpm lzfse*rpm virglrenderer*rpm libcacard*rpm edk2*rpm SLOF*rpm SDL2*rpm libogg-devel*rpm pcsc-lite-devel*rpm mesa-libgbm-devel*rpm usbredir-devel*rpm opus-devel*rpm gobject-introspection-devel*rpm python3-markdown*rpm | grep -Ev 'debuginfo|debugsource|\\.src\\.rpm'\`)
+
+# This looks is a list of packages which may have been installed using 
+# the system repos, and are either a) not being replaced/upgraded or 
+# b) being replaced by a package with a different name. If any of the 
+# package names below match an installed package, they will be removed
+# after the new packages are installed. We also look for any debuginfo
+# and debugsource packages that are already installed, so they can be 
+# removed. The current install command does not upgrade those packages.
+# Of note are the qemu-kvm-DEVICES and the virtuiofsd packages. The former
+# are being replaced by packages without "kvm" in the name. And the latter
+# package was renamed to qemu-virtiofsd.
+export REMOVEPKGS=\$(echo \`echo 'qemu-kvm-audio-pa qemu-kvm-block-curl qemu-kvm-block-rbd qemu-kvm-common qemu-kvm-debugsource qemu-kvm-device-display-virtio-gpu qemu-kvm-device-display-virtio-gpu-gl qemu-kvm-device-display-virtio-gpu-pci qemu-kvm-device-display-virtio-gpu-pci-gl qemu-kvm-device-display-virtio-vga qemu-kvm-device-display-virtio-vga-gl qemu-kvm-device-usb-host qemu-kvm-device-usb-redirect qemu-kvm-docs qemu-kvm-tools qemu-kvm-ui-egl-headless qemu-kvm-ui-opengl virtiofsd qemu-kvm-audio-pa-debuginfo qemu-kvm-block-curl-debuginfo qemu-kvm-block-rbd-debuginfo qemu-kvm-block-ssh-debuginfo qemu-kvm-common-debuginfo qemu-kvm-core-debuginfo qemu-kvm-debuginfo qemu-kvm-device-display-virtio-gpu-debuginfo qemu-kvm-device-display-virtio-gpu-gl-debuginfo qemu-kvm-device-display-virtio-gpu-pci-debuginfo qemu-kvm-device-display-virtio-gpu-pci-gl-debuginfo qemu-kvm-device-display-virtio-vga-debuginfo qemu-kvm-device-display-virtio-vga-gl-debuginfo qemu-kvm-device-usb-host-debuginfo qemu-kvm-device-usb-redirect-debuginfo qemu-kvm-tests-debuginfo qemu-kvm-tools-debuginfo qemu-kvm-ui-egl-headless-debuginfo qemu-kvm-ui-opengl-debuginfo qemu-guest-agent-debuginfo qemu-img-debuginfo qemu-pr-helper-debuginfo virtiofsd virtiofsd-debuginfo virtiofsd-debugsource' | tr ' ' '\\n' | while read PKG ; do { rpm --quiet -q \$PKG && echo \$PKG ; } ; done\`)
+
+# On the target system, run the following command to install the new version of QEMU.
+if [ "\$REMOVEPKGS" ]; then
+printf "%s\\n" "install \$INSTALLPKGS" "remove \$REMOVEPKGS" "run" "clean all" "exit" | sudo dnf shell --assumeyes
+else 
+printf "%s\\n" "install \$INSTALLPKGS" "run" "clean all" "exit" | sudo dnf shell --assumeyes
+fi
+
+EOF
+
+chmod 744 $HOME/RPMS/INSTALL.sh
+
+# Execute the install script.
+bash -ex $HOME/RPMS/INSTALL.sh
+
+# Move the compiled RPMs to the Vagrant user home directory, so they are easy to fetch via SFTP.
+cd $HOME
+mv $HOME/RPMS/ /home/vagrant/RPMS/
+chmod 744 /home/vagrant/RPMS/ /home/vagrant//RPMS/INSTALL.sh
+chmod 644 /home/vagrant/RPMS/*rpm
+chown -R vagrant:vagrant /home/vagrant/RPMS/
+
+printf "\n\nAll done.\n\n"
+
+
