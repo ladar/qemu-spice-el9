@@ -7,7 +7,7 @@ Use the `INSTALL.sh` script to replace the default packages with the ones in thi
 
 To the best of my knowledge, all of the features available on Fedora are included with these packages, with the exception of webdav support. 
 
-Note, the `qemu-7.1.0-3.btrh9.src.rpm` and the `qemu-user-debuginfo-7.1.0-3.btrh9.x86_64.rpm` exceeded the 100 MiB limit. As a result, those packages have been split into two files.
+Note, the `qemu-*.btrh9.src.rpm` and the `qemu-user-debuginfo-*.btrh9.x86_64.rpm` exceeded the 100 MiB limit. As a result, those packages have been split into four files. Use the following commands to split/reassemble the original RPM files.
 
 ```bash
 # The packages were split using these commands.
@@ -18,7 +18,7 @@ split --numeric-suffixes=01 --number=4 $QEMUDEBUGRPM $QEMUDEBUGRPM.
 
 # To recombine them.
 cat qemu-*.btrh9.src.rpm.{01,02,03,04} > qemu-7.1.0-3.btrh9.src.rpm
-cat qemu-user-debuginfo-7.1.0-3.btrh9.x86_64.rpm.01 qemu-user-debuginfo-7.1.0-3.btrh9.x86_64.rpm.02 > qemu-user-debuginfo-7.1.0-3.btrh9.x86_64.rpm
+cat qemu-user-debuginfo-*.btrh9.x86_64.rpm.{01,02,03,04} > qemu-user-debuginfo-7.1.0-3.btrh9.x86_64.rpm
 ```
 
 Since these packages won't be needed in most cases, I felt this was better than using LFS.
