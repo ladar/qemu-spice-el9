@@ -1,2 +1,2 @@
-qemu-7.1.0-3.btrh9.src.rpm
-qemu-user-debuginfo-7.1.0-3.btrh9.x86_64.rpm
+qemu-*.btrh9.src.rpm
+qemu-user-debuginfo-*.btrh9.x86_64.rpm
