@@ -11,11 +11,13 @@ Note, the `qemu-7.1.0-3.btrh9.src.rpm` and the `qemu-user-debuginfo-7.1.0-3.btrh
 
 ```bash
 # The packages were split using these commands.
-split --numeric-suffixes=01 --number=2 qemu-7.1.0-3.btrh9.src.rpm qemu-7.1.0-3.btrh9.src.rpm.
-split --numeric-suffixes=01 --number=2 qemu-user-debuginfo-7.1.0-3.btrh9.x86_64.rpm qemu-user-debuginfo-7.1.0-3.btrh9.x86_64.rpm.
+export QEMURPM="`ls qemu-*.btrh9.src.rpm`" && \
+export QEMUDEBUGRPM="`ls qemu-user-debuginfo-*.btrh9.x86_64.rpm`" && \
+split --numeric-suffixes=01 --number=4 $QEMURPM $QEMURPM. && \
+split --numeric-suffixes=01 --number=4 $QEMUDEBUGRPM $QEMUDEBUGRPM.
 
 # To recombine them.
-cat qemu-7.1.0-3.btrh9.src.rpm.01 qemu-7.1.0-3.btrh9.src.rpm.02 > qemu-7.1.0-3.btrh9.src.rpm
+cat qemu-*.btrh9.src.rpm.{01,02,03,04} > qemu-7.1.0-3.btrh9.src.rpm
 cat qemu-user-debuginfo-7.1.0-3.btrh9.x86_64.rpm.01 qemu-user-debuginfo-7.1.0-3.btrh9.x86_64.rpm.02 > qemu-user-debuginfo-7.1.0-3.btrh9.x86_64.rpm
 ```
 
