@@ -12,7 +12,7 @@
 # vagrant destroy -f && vagrant up --provider=libvirt && vagrant ssh-config > config && \
 # vagrant upload /home/ladar/Documents/Configuration/workstation/alma-9-build-qemu.sh BUILD.sh && \
 # vagrant ssh -c 'sudo mv BUILD.sh /root/' && \
-# vagrant ssh -c "sudo su -l -c 'bash -eu /root/BUILD.sh'" && \
+# vagrant ssh -c "sudo su -l -c 'time bash -eu /root/BUILD.sh'" && \
 # printf "get -r RPMS QEMU-v$(date +%Y%m%d)\n"| sftp -F config default
 
 # If necessary the following will reset the guest environment to a blank slate,
