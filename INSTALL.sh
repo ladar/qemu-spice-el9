@@ -1,7 +1,7 @@
 #!/bin/bash -eu
 
 # To generate a current/updated list of RPM files for installation, run the following command.
-export INSTALLPKGS=$(echo `ls qemu*rpm spice*rpm opus*rpm usbredir*rpm openbios*rpm lzfse*rpm virglrenderer*rpm libcacard*rpm edk2*rpm SLOF*rpm SDL2*rpm libogg-devel*rpm pcsc-lite-devel*rpm mesa-libgbm-devel*rpm usbredir-devel*rpm opus-devel*rpm gobject-introspection-devel*rpm python3-markdown*rpm | grep -Ev 'debuginfo|debugsource|\.src\.rpm'`)
+export INSTALLPKGS=$(echo `ls qemu*rpm spice*rpm opus*rpm usbredir*rpm openbios*rpm lzfse*rpm virglrenderer*rpm libcacard*rpm edk2*rpm SLOF*rpm SDL2*rpm libogg-devel*rpm pcsc-lite-devel*rpm mesa-libgbm-devel*rpm usbredir-devel*rpm opus-devel*rpm gobject-introspection-devel*rpm python3-markdown*rpm virt-manager*rpm virt-install*rpm | grep -Ev 'debuginfo|debugsource|\.src\.rpm'`)
 
 # This looks is a list of packages which may have been installed using 
 # the system repos, and are either a) not being replaced/upgraded or 

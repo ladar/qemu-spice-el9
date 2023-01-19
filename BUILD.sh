@@ -111,7 +111,7 @@ sudo dnf --quiet --assumeyes --allowerasing \
  x264-devel x265-devel xauth xdg-dbus-proxy xmlto xorg-x11-util-macros xorriso xz zlib-devel zlib-static \
  gobject-introspection-devel gtk-doc usbutils vala wayland-protocols-devel samba-winbind-clients \
  libnghttp2-devel latexmk python3-sphinx-latex redhat-display-fonts redhat-text-fonts fonts-rpm-macros \
- pyproject-rpm-macros python3-wheel virt-manager || \
+ pyproject-rpm-macros python3-wheel virt-manager libvirt-devel libvirt-client || \
 exit 1
 
 # gstreamer1-libav 
@@ -150,7 +150,7 @@ cd ~/rpmbuild/SRPMS/
 
 dnf download --quiet --disablerepo=* --repofrompath="fc36,https://mirrors.kernel.org/fedora/releases/36/Everything/source/tree/" --source spice-gtk || exit 1
 # dnf download --quiet --disablerepo=* --repofrompath="fc37,https://mirrors.kernel.org/fedora/releases/37/Everything/source/tree/" --source python-smartypants || exit 1
-dnf download --quiet --disablerepo=* --repofrompath="rawhide,https://mirrors.kernel.org/fedora/development/rawhide/Everything/source/tree/" --source edk2 fcode-utils gi-docgen libcacard lzfse openbios python-pefile python-smartypants python-virt-firmware qemu SLOF spice spice-protocol virglrenderer || exit 1
+dnf download --quiet --disablerepo=* --repofrompath="rawhide,https://mirrors.kernel.org/fedora/development/rawhide/Everything/source/tree/" --source edk2 fcode-utils gi-docgen libcacard lzfse openbios python-pefile python-smartypants python-virt-firmware qemu SLOF spice spice-protocol virglrenderer virt-manager || exit 1
 rpm -i *src.rpm || exit 1
 
 # Patch the source/spec files.
@@ -411,73 +411,73 @@ sed -i 's/defined rhel/defined nullified/g' edk2.spec
 sed -i 's/defined fedora/defined rhel/g' edk2.spec
 
 # Build the spec files.
-rpmbuild -ba --rebuild --clean --undefine="dist" -D "dist .btrh9" --target=$(uname -m) lzfse.spec 2>&1 | tee lzfse.log > /dev/null && \
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) lzfse.spec 2>&1 | tee lzfse.log > /dev/null && \
 rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " lzfse.spec) || \
 { printf "\n\e[1;91m# The lzfse rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
 printf "\e[1;92m# The lzfse rpmbuild finished.\e[0;0m\n"
 
-rpmbuild -ba --rebuild --clean --undefine="dist" -D "dist .btrh9" --target=$(uname -m) virglrenderer.spec 2>&1 | tee virglrenderer.log > /dev/null && \
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) virglrenderer.spec 2>&1 | tee virglrenderer.log > /dev/null && \
 rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " virglrenderer.spec) || \
 { printf "\n\e[1;91m# The virglrenderer rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
 printf "\e[1;92m# The virglrenderer rpmbuild finished.\e[0;0m\n"
 
-rpmbuild -ba --rebuild --clean --undefine="dist" -D "dist .btrh9" --target=$(uname -m) libcacard.spec 2>&1 | tee libcacard.log > /dev/null && \
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) libcacard.spec 2>&1 | tee libcacard.log > /dev/null && \
 rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " libcacard.spec) || \
 { printf "\n\e[1;91m# The libcacard rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
 printf "\e[1;92m# The libcacard rpmbuild finished.\e[0;0m\n"
 
-rpmbuild -ba --rebuild --clean --undefine="dist" -D "dist .btrh9" --target=$(uname -m) fcode-utils.spec 2>&1 | tee fcode-utils.log > /dev/null && \
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) fcode-utils.spec 2>&1 | tee fcode-utils.log > /dev/null && \
 rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " fcode-utils.spec) || \
 { printf "\n\e[1;91m# The fcode-utils rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
 printf "\e[1;92m# The fcode-utils rpmbuild finished.\e[0;0m\n"
 
-rpmbuild -ba --rebuild --clean --undefine="dist" -D "dist .btrh9" --target=$(uname -m) openbios.spec 2>&1 | tee openbios.log > /dev/null && \
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) openbios.spec 2>&1 | tee openbios.log > /dev/null && \
 rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " openbios.spec) || \
 { printf "\n\e[1;91m# The openbios rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
 printf "\e[1;92m# The openbios rpmbuild finished.\e[0;0m\n"
 
-rpmbuild -ba --rebuild --clean --undefine="dist" -D "dist .btrh9" --target=$(uname -m) python-pefile.spec 2>&1 | tee python-pefile.log > /dev/null && \
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) python-pefile.spec 2>&1 | tee python-pefile.log > /dev/null && \
 rpm -i --replacepkgs --replacefiles $(ls -q  $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " python-pefile.spec ) 2>/dev/null) || \
 { printf "\n\e[1;91m# The python-pefile rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
 printf "\e[1;92m# The python-pefile rpmbuild finished.\e[0;0m\n"
 
-rpmbuild -ba --rebuild --clean --undefine="dist" -D "dist .btrh9" --target=$(uname -m) python-virt-firmware.spec 2>&1 | tee python-virt-firmware.log > /dev/null && \
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) python-virt-firmware.spec 2>&1 | tee python-virt-firmware.log > /dev/null && \
 rpm -i --replacepkgs --replacefiles $(ls -q  $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " python-virt-firmware.spec ) 2>/dev/null | grep -v "python3-virt-firmware-tests") || \
 { printf "\n\e[1;91m# The python-virt-firmware rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
 printf "\e[1;92m# The python-virt-firmware rpmbuild finished.\e[0;0m\n"
 
-rpmbuild -ba --rebuild --clean --undefine="dist" -D "dist .btrh9" --target=$(uname -m) edk2.spec 2>&1 | tee edk2.log > /dev/null && \
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) edk2.spec 2>&1 | tee edk2.log > /dev/null && \
 rpm -i --replacepkgs --replacefiles $(ls -q $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " edk2.spec ) 2>/dev/null) || \
 { printf "\n\e[1;91m# The edk2 rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
 printf "\e[1;92m# The edk2 rpmbuild finished.\e[0;0m\n"
 
-rpmbuild -ba --rebuild --clean --undefine="dist" -D "dist .btrh9" --target=$(uname -m) SLOF.spec 2>&1 | tee SLOF.log > /dev/null && \
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) SLOF.spec 2>&1 | tee SLOF.log > /dev/null && \
 rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " SLOF.spec) || \
 { printf "\n\e[1;91m# The SLOF rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
 printf "\e[1;92m# The SLOF rpmbuild finished.\e[0;0m\n"
 
-rpmbuild -ba --rebuild --clean --undefine="dist" -D "dist .btrh9" --target=$(uname -m) spice-protocol.spec 2>&1 | tee spice-protocol.log > /dev/null && \
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) spice-protocol.spec 2>&1 | tee spice-protocol.log > /dev/null && \
 rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " spice-protocol.spec) || \
 { printf "\n\e[1;91m# The spice-protocol rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
 printf "\e[1;92m# The spice-protocol rpmbuild finished.\e[0;0m\n"
 
-rpmbuild -ba --rebuild --clean --undefine="dist" -D "dist .btrh9" --target=$(uname -m) spice.spec 2>&1 | tee spice.log > /dev/null && \
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) spice.spec 2>&1 | tee spice.log > /dev/null && \
 rpm -i --replacepkgs --replacefiles $(ls -q  $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " spice.spec ) 2>/dev/null) || \
 { printf "\n\e[1;91m# The spice rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
 printf "\e[1;92m# The spice rpmbuild finished.\e[0;0m\n"
 
-rpmbuild -ba --rebuild --clean --undefine="dist" -D "dist .btrh9" --target=$(uname -m) qemu.spec 2>&1 | tee qemu.log > /dev/null && \
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) qemu.spec 2>&1 | tee qemu.log > /dev/null && \
 rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " qemu.spec ) || \
 { printf "\n\e[1;91m# The qemu rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
 printf "\e[1;92m# The qemu rpmbuild finished.\e[0;0m\n"
 
 # No longer needed.
-# rpmbuild -ba --rebuild --clean --undefine="dist" -D "dist .btrh9" --target=$(uname -m) adobe-source-code-pro-fonts.spec 2>&1 | tee adobe-source-code-pro-fonts.log > /dev/null && \
+# rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) adobe-source-code-pro-fonts.spec 2>&1 | tee adobe-source-code-pro-fonts.log > /dev/null && \
 # rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " adobe-source-code-pro-fonts.spec ) || \
 # { printf "\n\e[1;91m# The adobe-source-code-pro-fonts rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
 # printf "\e[1;92m# The adobe-source-code-pro-fonts rpmbuild finished.\e[0;0m\n"
 
-rpmbuild -ba --rebuild --clean --undefine="dist" -D "dist .btrh9" --target=$(uname -m) python-smartypants.spec 2>&1 | tee python-smartypants.log > /dev/null && \
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) python-smartypants.spec 2>&1 | tee python-smartypants.log > /dev/null && \
 rpm -i --replacepkgs --replacefiles $(ls -q $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " python-smartypants.spec ) 2>/dev/null) || \
 { printf "\n\e[1;91m# The python-smartypants rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
 printf "\e[1;92m# The python-smartypants rpmbuild finished.\e[0;0m\n"
@@ -485,15 +485,20 @@ printf "\e[1;92m# The python-smartypants rpmbuild finished.\e[0;0m\n"
 # An RPM is available for python3-typogrify but it requires smartypants which weas just installed.
 dnf install --quiet --assumeyes --enablerepo=* python3-typogrify
 
-rpmbuild -ba --rebuild --clean --undefine="dist" -D "dist .btrh9" --target=$(uname -m) gi-docgen.spec 2>&1 | tee gi-docgen.log > /dev/null && \
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) gi-docgen.spec 2>&1 | tee gi-docgen.log > /dev/null && \
 rpm -i --replacepkgs --replacefiles $(ls -q $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " gi-docgen.spec ) 2>/dev/null) || \
 { printf "\n\e[1;91m# The gi-docgen rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
 printf "\e[1;92m# The gi-docgen rpmbuild finished.\e[0;0m\n"
 
-rpmbuild -ba --rebuild --clean --undefine="dist" -D "dist .btrh9" --target=$(uname -m) spice-gtk.spec 2>&1 | tee spice-gtk.log > /dev/null && \
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) spice-gtk.spec 2>&1 | tee spice-gtk.log > /dev/null && \
 rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " spice-gtk.spec ) || \
 { printf "\n\e[1;91m# The spice-gtk rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
 printf "\e[1;92m# The spice-gtk rpmbuild finished.\e[0;0m\n"
+
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) virt-manager.spec 2>&1 | tee virt-manager.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(ls -q $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " virt-manager.spec ) 2>/dev/null) || \
+{ printf "\n\e[1;91m# The virt-manager rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
+printf "\e[1;92m# The virt-manager rpmbuild finished.\e[0;0m\n"
 
 # Download the dependencies needed for installation, which aren't available from the official, 
 # and/or, EPEL repos. They will be added to the collection of binary packages that were just 
@@ -517,7 +522,7 @@ tee $HOME/RPMS/INSTALL.sh <<-EOF > /dev/null
 #!/bin/bash -eu
 
 # To generate a current/updated list of RPM files for installation, run the following command.
-export INSTALLPKGS=\$(echo \`ls qemu*rpm spice*rpm opus*rpm usbredir*rpm openbios*rpm lzfse*rpm virglrenderer*rpm libcacard*rpm edk2*rpm SLOF*rpm SDL2*rpm libogg-devel*rpm pcsc-lite-devel*rpm mesa-libgbm-devel*rpm usbredir-devel*rpm opus-devel*rpm gobject-introspection-devel*rpm python3-markdown*rpm | grep -Ev 'debuginfo|debugsource|\\.src\\.rpm'\`)
+export INSTALLPKGS=\$(echo \`ls qemu*rpm spice*rpm opus*rpm usbredir*rpm openbios*rpm lzfse*rpm virglrenderer*rpm libcacard*rpm edk2*rpm SLOF*rpm SDL2*rpm libogg-devel*rpm pcsc-lite-devel*rpm mesa-libgbm-devel*rpm usbredir-devel*rpm opus-devel*rpm gobject-introspection-devel*rpm python3-markdown*rpm virt-manager*rpm virt-install*rpm | grep -Ev 'debuginfo|debugsource|\\.src\\.rpm'\`)
 
 # This looks is a list of packages which may have been installed using 
 # the system repos, and are either a) not being replaced/upgraded or 
@@ -546,7 +551,7 @@ chmod 744 $HOME/RPMS/INSTALL.sh
 chmod 744 $HOME/RPMS/BUILD.sh
 
 # This will remove QEMU and its dependencies and then reinstall the distro version of QEMU. 
-dnf --quiet --assumeyes remove edk2-aarch64 edk2-arm edk2-debugsource edk2-ovmf edk2-tools edk2-tools-doc edk2-tools-python libcacard libcacard-debugsource libcacard-devel lzfse lzfse-debugsource- lzfse-devel  lzfse-libs  mesa-libgbm-devel openbios pcsc-lite-devel  qemu qemu-audio-alsa qemu-audio-dbus qemu-audio-oss qemu-audio-pa qemu-audio-sdl qemu-audio-spice qemu-block-curl qemu-block-dmg qemu-block-iscsi qemu-block-rbd qemu-block-ssh qemu-char-baum qemu-char-spice qemu-common qemu-debugsource qemu-device-display-qxl qemu-device-display-vhost-user-gpu qemu-device-display-virtio-gpuqemu-device-display-virtio-gpu-ccw qemu-device-display-virtio-gpu-gl qemu-device-display-virtio-gpu-pci qemu-device-display-virtio-gpu-pci-gl qemu-device-display-virtio-vga qemu-device-display-virtio-vga-gl qemu-device-usb-host qemu-device-usb-redirect qemu-device-usb-smartcard qemu-docs qemu-guest-agent qemu-img qemu-kvm qemu-kvm-core qemu-pr-helper qemu-system-aarch64 qemu-system-aarch64-core qemu-system-alpha qemu-system-alpha-core qemu-system-arm qemu-system-arm-core qemu-system-avr qemu-system-avr-core qemu-system-cris qemu-system-cris-core qemu-system-hppa qemu-system-hppa-core qemu-system-loongarch64 qemu-system-loongarch64-core qemu-system-m68k qemu-system-m68k-core qemu-system-microblaze qemu-system-microblaze-core qemu-system-mips qemu-system-mips-core qemu-system-nios2 qemu-system-nios2-core qemu-system-or1k qemu-system-or1k-core qemu-system-ppc qemu-system-ppc-core qemu-system-riscv qemu-system-riscv-core qemu-system-rx qemu-system-rx-core qemu-system-s390x qemu-system-s390x-core qemu-system-sh4 qemu-system-sh4-core qemu-system-sparc qemu-system-sparc-core qemu-system-tricore qemu-system-tricore-core qemu-system-x86 qemu-system-x86-core qemu-system-xtensa qemu-system-xtensa-core qemu-tests qemu-tools qemu-ui-curses qemu-ui-dbus qemu-ui-egl-headless qemu-ui-gtk qemu-ui-opengl qemu-ui-sdl qemu-ui-spice-app qemu-ui-spice-core qemu-user qemu-user-binfmt qemu-user-static qemu-user-static-aarch64 qemu-user-static-alpha qemu-user-static-arm qemu-user-static-cris qemu-user-static-hexagon qemu-user-static-hppa qemu-user-static-loongarch64 qemu-user-static-m68k qemu-user-static-microblaze qemu-user-static-mips qemu-user-static-nios2 qemu-user-static-or1k qemu-user-static-ppc qemu-user-static-riscv qemu-user-static-s390x qemu-user-static-sh4 qemu-user-static-sparc qemu-user-static-x86 qemu-user-static-xtensa qemu-virtiofsd SDL2_image SDL2_image-debugsource SDL2_image-devel SLOF-20210217-5 spice-server spice-server-devel virglrenderer virglrenderer-debugsource virglrenderer-devel virglrenderer-test-server qemu-img qemu-kvm qemu-kvm-audio-pa qemu-kvm-block-curl qemu-kvm-block-rbd qemu-kvm-common qemu-kvm-core qemu-kvm-device-display-virtio-gpu qemu-kvm-device-display-virtio-gpu-gl qemu-kvm-device-display-virtio-gpu-pci qemu-kvm-device-display-virtio-gpu-pci-gl qemu-kvm-device-display-virtio-vga qemu-kvm-device-display-virtio-vga-gl qemu-kvm-device-usb-host qemu-kvm-device-usb-redirect qemu-kvm-docs qemu-kvm-tools qemu-kvm-ui-egl-headless qemu-kvm-ui-opengl qemu-pr-helper virtiofsd qemu* $(rpm -qa | grep btrh)
+dnf --quiet --assumeyes remove edk2-aarch64 edk2-arm edk2-debugsource edk2-ovmf edk2-tools edk2-tools-doc edk2-tools-python lzfse lzfse-debugsource- lzfse-devel  lzfse-libs  mesa-libgbm-devel openbios pcsc-lite-devel  qemu qemu-audio-alsa qemu-audio-dbus qemu-audio-oss qemu-audio-pa qemu-audio-sdl qemu-audio-spice qemu-block-curl qemu-block-dmg qemu-block-iscsi qemu-block-rbd qemu-block-ssh qemu-char-baum qemu-char-spice qemu-common qemu-debugsource qemu-device-display-qxl qemu-device-display-vhost-user-gpu qemu-device-display-virtio-gpuqemu-device-display-virtio-gpu-ccw qemu-device-display-virtio-gpu-gl qemu-device-display-virtio-gpu-pci qemu-device-display-virtio-gpu-pci-gl qemu-device-display-virtio-vga qemu-device-display-virtio-vga-gl qemu-device-usb-host qemu-device-usb-redirect qemu-device-usb-smartcard qemu-docs qemu-guest-agent qemu-img qemu-kvm qemu-kvm-core qemu-pr-helper qemu-system-aarch64 qemu-system-aarch64-core qemu-system-alpha qemu-system-alpha-core qemu-system-arm qemu-system-arm-core qemu-system-avr qemu-system-avr-core qemu-system-cris qemu-system-cris-core qemu-system-hppa qemu-system-hppa-core qemu-system-loongarch64 qemu-system-loongarch64-core qemu-system-m68k qemu-system-m68k-core qemu-system-microblaze qemu-system-microblaze-core qemu-system-mips qemu-system-mips-core qemu-system-nios2 qemu-system-nios2-core qemu-system-or1k qemu-system-or1k-core qemu-system-ppc qemu-system-ppc-core qemu-system-riscv qemu-system-riscv-core qemu-system-rx qemu-system-rx-core qemu-system-s390x qemu-system-s390x-core qemu-system-sh4 qemu-system-sh4-core qemu-system-sparc qemu-system-sparc-core qemu-system-tricore qemu-system-tricore-core qemu-system-x86 qemu-system-x86-core qemu-system-xtensa qemu-system-xtensa-core qemu-tests qemu-tools qemu-ui-curses qemu-ui-dbus qemu-ui-egl-headless qemu-ui-gtk qemu-ui-opengl qemu-ui-sdl qemu-ui-spice-app qemu-ui-spice-core qemu-user qemu-user-binfmt qemu-user-static qemu-user-static-aarch64 qemu-user-static-alpha qemu-user-static-arm qemu-user-static-cris qemu-user-static-hexagon qemu-user-static-hppa qemu-user-static-loongarch64 qemu-user-static-m68k qemu-user-static-microblaze qemu-user-static-mips qemu-user-static-nios2 qemu-user-static-or1k qemu-user-static-ppc qemu-user-static-riscv qemu-user-static-s390x qemu-user-static-sh4 qemu-user-static-sparc qemu-user-static-x86 qemu-user-static-xtensa qemu-virtiofsd SDL2_image SDL2_image-debugsource SDL2_image-devel SLOF-20210217-5 spice-server spice-server-devel virglrenderer virglrenderer-debugsource virglrenderer-devel virglrenderer-test-server qemu-img qemu-kvm qemu-kvm-audio-pa qemu-kvm-block-curl qemu-kvm-block-rbd qemu-kvm-common qemu-kvm-core qemu-kvm-device-display-virtio-gpu qemu-kvm-device-display-virtio-gpu-gl qemu-kvm-device-display-virtio-gpu-pci qemu-kvm-device-display-virtio-gpu-pci-gl qemu-kvm-device-display-virtio-vga qemu-kvm-device-display-virtio-vga-gl qemu-kvm-device-usb-host qemu-kvm-device-usb-redirect qemu-kvm-docs qemu-kvm-tools qemu-kvm-ui-egl-headless qemu-kvm-ui-opengl qemu-pr-helper virtiofsd qemu* $(rpm -qa | grep btrh)
 dnf --quiet --assumeyes config-manager --disable "remi*" "elrepo*" "rpmfusion*" "crb*"
 dnf --quiet --enablerepo=* clean all
 dnf --quiet --assumeyes install qemu-img qemu-kvm qemu-kvm-audio-pa qemu-kvm-block-curl qemu-kvm-block-rbd qemu-kvm-common qemu-kvm-core qemu-kvm-device-display-virtio-gpu qemu-kvm-device-display-virtio-gpu-gl qemu-kvm-device-display-virtio-gpu-pci qemu-kvm-device-display-virtio-gpu-pci-gl qemu-kvm-device-display-virtio-vga qemu-kvm-device-display-virtio-vga-gl qemu-kvm-device-usb-host qemu-kvm-device-usb-redirect qemu-kvm-docs qemu-kvm-tools qemu-kvm-ui-egl-headless qemu-kvm-ui-opengl qemu-pr-helper virtiofsd 
