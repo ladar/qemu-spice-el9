@@ -85,7 +85,7 @@ sudo dnf --quiet --assumeyes --allowerasing \
 --enablerepo=crb --enablerepo=remi --enablerepo=remi-safe --enablerepo=remi-modular --enablerepo=elrepo \
 --enablerepo=rpmfusion-free-updates --enablerepo=rpmfusion-nonfree-updates install \
  acpica-tools alsa-lib-devel asciidoc audit-libs-devel autoconf automake bash bc binutils binutils-devel \
- bison brlapi-devel byacc bzip2-devel capstone-devel cmake ctags cyrus-sasl-devel daxctl-devel dbus-daemon \
+ bison brlapi-devel byacc bzip2-devel cmake ctags cyrus-sasl-devel daxctl-devel dbus-daemon \
  dbus-devel dbus-glib-devel dbus-libs dbus-x11 dbusmenu-qt5-devel device-mapper-multipath-devel diffstat \
  diffutils dosfstools dwarves epel-rpm-macros elfutils elfutils-devel elfutils-libelf-devel expect \
  findutils flex fuse-devel fuse-encfs fuse-overlayfs fuse-sshfs fuse3 fuse3-devel gawk gcc \
@@ -114,14 +114,39 @@ sudo dnf --quiet --assumeyes --allowerasing \
  pyproject-rpm-macros python3-wheel virt-manager libvirt-devel libvirt-client || \
 exit 1
 
-# gstreamer1-libav 
-
 # Packages needed to enable X11 forwarding support.
 sudo dnf --quiet --assumeyes --enablerepo=epel --enablerepo=extras --enablerepo=plus --enablerepo=crb \
 --exclude=minizip1.2 --exclude=minizip1.2-devel install \
  dbus-x11 xorg-x11-xauth xorg-x11-server-common xorg-x11-server-Xorg xorg-x11-server-Xwayland \
  mlocate cronie cronie-anacron || \
 exit 1
+
+
+# capstone / capstone-devel / python3-capstone will be available via the repos when 9.2 ships ...
+
+curl -LOs https://archive.org/download/capstone-el9/capstone-4.0.2-9.el9.x86_64.rpm 
+curl -LOs https://archive.org/download/capstone-el9/capstone-devel-4.0.2-9.el9.x86_64.rpm
+curl -LOs https://archive.org/download/capstone-el9/python3-capstone-4.0.2-9.el9.x86_64.rpm
+curl -LOs https://archive.org/download/libblkio-eln125/libblkio-1.2.2-2.eln125.x86_64.rpm
+curl -LOs https://archive.org/download/libblkio-eln125/libblkio-devel-1.2.2-2.eln125.x86_64.rpm
+
+sha256sum -c <<-EOF || { printf "\n\e[1;91m# The capstone/libblkio download failed.\e[0;0m\n\n" ; exit 1 ; }
+c9bbc363427bb3b8b1f307dcc8c182a2ccf9b5e20bf82ff5f8b5d60fc29c0676  capstone-4.0.2-9.el9.x86_64.rpm
+7a2e83c57b609ac6dd67f622eddcc62a209088b35b439951ddb5dad754e48538  capstone-devel-4.0.2-9.el9.x86_64.rpm
+637892248b0875e1b2ca2e14039ca20fa1a7d91f765385040f58e8487dca83ad  libblkio-1.2.2-2.eln125.x86_64.rpm
+6f0ab5cf409c448b32ee9bdf6875d2e8c7557475dc294edf80fbcc478516c25e  libblkio-devel-1.2.2-2.eln125.x86_64.rpm
+8fa3fc7717fd5bf0e0fef87bc46baa52559338b031d92e0789391a0739d278ce  python3-capstone-4.0.2-9.el9.x86_64.rpm
+EOF
+
+dnf --quiet --assumeyes install libblkio-1.2.2-2.eln125.x86_64.rpm libblkio-devel-1.2.2-2.eln125.x86_64.rpm \
+capstone-4.0.2-9.el9.x86_64.rpm capstone-devel-4.0.2-9.el9.x86_64.rpm python3-capstone-4.0.2-9.el9.x86_64.rpm || \
+{ printf "\n\e[1;91m# The capstone/libblkio install failed.\e[0;0m\n\n" ; exit 1 ; }
+
+rm --force libblkio-1.2.2-2.eln125.x86_64.rpm libblkio-devel-1.2.2-2.eln125.x86_64.rpm \
+capstone-4.0.2-9.el9.x86_64.rpm capstone-devel-4.0.2-9.el9.x86_64.rpm python3-capstone-4.0.2-9.el9.x86_64.rpm
+
+
+
 
 # Enable the locate database update cron job.
 echo "* * * * * root command bash -c '/usr/bin/updatedb'" | sudo tee /etc/cron.d/updatedb > /dev/null
@@ -518,11 +543,26 @@ find $HOME/rpmbuild/RPMS/noarch/*rpm $HOME/rpmbuild/RPMS/x86_64/*rpm $HOME/rpmbu
 mv $HOME/rpmbuild/RPMS/noarch/*rpm $HOME/rpmbuild/RPMS/x86_64/*rpm $HOME/rpmbuild/SRPMS/*btrh*rpm $HOME/RPMS/
 
 cd  $HOME/RPMS/
+
+curl -LOs https://archive.org/download/capstone-el9/capstone-4.0.2-9.el9.x86_64.rpm 
+curl -LOs https://archive.org/download/capstone-el9/capstone-devel-4.0.2-9.el9.x86_64.rpm
+curl -LOs https://archive.org/download/capstone-el9/python3-capstone-4.0.2-9.el9.x86_64.rpm
+curl -LOs https://archive.org/download/libblkio-eln125/libblkio-1.2.2-2.eln125.x86_64.rpm
+curl -LOs https://archive.org/download/libblkio-eln125/libblkio-devel-1.2.2-2.eln125.x86_64.rpm
+
+sha256sum -c <<-EOF || { printf "\n\e[1;91m# The capstone/libblkio download failed.\e[0;0m\n\n" ; exit 1 ; }
+c9bbc363427bb3b8b1f307dcc8c182a2ccf9b5e20bf82ff5f8b5d60fc29c0676  capstone-4.0.2-9.el9.x86_64.rpm
+7a2e83c57b609ac6dd67f622eddcc62a209088b35b439951ddb5dad754e48538  capstone-devel-4.0.2-9.el9.x86_64.rpm
+637892248b0875e1b2ca2e14039ca20fa1a7d91f765385040f58e8487dca83ad  libblkio-1.2.2-2.eln125.x86_64.rpm
+6f0ab5cf409c448b32ee9bdf6875d2e8c7557475dc294edf80fbcc478516c25e  libblkio-devel-1.2.2-2.eln125.x86_64.rpm
+8fa3fc7717fd5bf0e0fef87bc46baa52559338b031d92e0789391a0739d278ce  python3-capstone-4.0.2-9.el9.x86_64.rpm
+EOF
+
 tee $HOME/RPMS/INSTALL.sh <<-EOF > /dev/null
 #!/bin/bash -eu
 
 # To generate a current/updated list of RPM files for installation, run the following command.
-export INSTALLPKGS=\$(echo \`ls qemu*rpm spice*rpm opus*rpm usbredir*rpm openbios*rpm lzfse*rpm virglrenderer*rpm libcacard*rpm edk2*rpm SLOF*rpm SDL2*rpm libogg-devel*rpm pcsc-lite-devel*rpm mesa-libgbm-devel*rpm usbredir-devel*rpm opus-devel*rpm gobject-introspection-devel*rpm python3-markdown*rpm virt-manager*rpm virt-install*rpm | grep -Ev 'debuginfo|debugsource|\\.src\\.rpm'\`)
+export INSTALLPKGS=\$(echo \`ls qemu*rpm spice*rpm opus*rpm usbredir*rpm openbios*rpm capstone*rpm libblkio*rpm lzfse*rpm virglrenderer*rpm libcacard*rpm edk2*rpm SLOF*rpm SDL2*rpm libogg-devel*rpm pcsc-lite-devel*rpm mesa-libgbm-devel*rpm usbredir-devel*rpm opus-devel*rpm gobject-introspection-devel*rpm python3-markdown*rpm virt-manager*rpm virt-install*rpm | grep -Ev 'debuginfo|debugsource|\\.src\\.rpm'\`)
 
 # This looks is a list of packages which may have been installed using 
 # the system repos, and are either a) not being replaced/upgraded or 
@@ -543,6 +583,9 @@ printf "%s\\n" "install \$INSTALLPKGS" "remove \$REMOVEPKGS" "run" "clean all" "
 else 
 printf "%s\\n" "install \$INSTALLPKGS" "run" "clean all" "exit" | sudo dnf shell --assumeyes
 fi
+
+[ ! -f /usr/bin/qemu-kvm ] && [ -f /usr/bin/qemu-system-x86_64 ] && sudo ln -s /usr/bin/qemu-system-x86_64 /usr/bin/qemu-kvm
+[ ! -f /usr/libexec/qemu-kvm ] && && [ -f /usr/bin/qemu-kvm ] && sudo ln -s /usr/bin/qemu-kvm /usr/libexec/qemu-kvm
 
 EOF
 
@@ -574,213 +617,3 @@ chown -R vagrant:vagrant /home/vagrant/RPMS/
 
 printf "\n\nAll done.\n\n"
 
-
-
-### Previous edk2 patch.
-# patch -p1 <<-EOF
-# diff --git a/edk2.spec b/edk2.spec
-# index d703c3a..a9c6091 100644
-# --- a/edk2.spec
-# +++ b/edk2.spec
-# @@ -14,24 +14,12 @@ ExclusiveArch: x86_64 aarch64
-#  %define TOOLCHAIN      GCC5
-#  %define OPENSSL_VER    1.1.1k
- 
-# -%if %{defined rhel}
-# -%define build_ovmf 0
-# -%define build_aarch64 0
-# -%ifarch x86_64
-# -  %define build_ovmf 1
-# -%endif
-# -%ifarch aarch64
-# -  %define build_aarch64 1
-# -%endif
-# -%define build_ovmf_4m 0
-# -%else
-#  %define build_ovmf 1
-#  %define build_ovmf_4m 1
-#  %define build_aarch64 1
-# -%endif
- 
-#  %global softfloat_version 20180726-gitb64af41
-# -%define cross %{defined fedora}
-# +%define cross 1
-#  %define disable_werror %{defined fedora}
- 
- 
-# @@ -184,21 +172,11 @@ EDK II is a modern, feature-rich, cross-platform firmware development
-#  environment for the UEFI and PI specifications. This package contains sample
-#  64-bit UEFI firmware builds for QEMU and KVM.
- 
-# -
-# -%if %{defined fedora}
-# -%package ovmf-ia32
-# -Summary:        Open Virtual Machine Firmware
-# -License:        BSD-2-Clause-Patent and OpenSSL
-# -Provides:       bundled(openssl)
-# -BuildArch:      noarch
-# -%description ovmf-ia32
-# -EFI Development Kit II
-# -Open Virtual Machine Firmware (ia32)
-# -
-#  %package arm
-#  Summary:        ARM Virtual Machine Firmware
-#  BuildArch:      noarch
-#  License:        BSD-2-Clause-Patent and OpenSSL
-# +
-#  %description arm
-#  EFI Development Kit II
-#  ARMv7 UEFI Firmware
-# @@ -212,10 +190,19 @@ BuildArch:      noarch
-#  This package provides tools that are needed to build EFI executables
-#  and ROMs using the GNU tools.  You do not need to install this package;
-#  you probably want to install edk2-tools only.
-# -# endif fedora
-# -%endif
- 
- 
-# +%if %{defined fedora}
-# +%package ovmf-ia32
-# +Summary:        Open Virtual Machine Firmware
-# +License:        BSD-2-Clause-Patent and OpenSSL
-# +Provides:       bundled(openssl)
-# +BuildArch:      noarch
-# +%description ovmf-ia32
-# +EFI Development Kit II
-# +Open Virtual Machine Firmware (ia32)
-# +# endif fedora
-# +%endif
- 
-#  %prep
-#  # We needs some special git config options that %%autosetup won't give us.
-# @@ -382,11 +369,11 @@ build \${CC_FLAGS} -a AARCH64 \\
-#  %endif
- 
- 
-# -%if %{defined fedora}
-#  %if %{build_ovmf}
-#  # build microvm
-#  build \${OVMF_FLAGS} -a X64 -p OvmfPkg/Microvm/MicrovmX64.dsc
- 
-# +%if %{defined fedora}
-#  # build ovmf-ia32
-#  mkdir -p ovmf-ia32
-#  build \${OVMF_FLAGS} -a IA32 -p OvmfPkg/OvmfPkgIa32.dsc
-# @@ -404,6 +391,8 @@ build_iso Build/OvmfIa32/DEBUG_%{TOOLCHAIN}/IA32
-#  mv Build/OvmfIa32/DEBUG_%{TOOLCHAIN}/IA32/UefiShell.iso ovmf-ia32
-#  cp -a Build/OvmfIa32/DEBUG_%{TOOLCHAIN}/IA32/Shell.efi ovmf-ia32
-#  cp -a Build/OvmfIa32/DEBUG_%{TOOLCHAIN}/IA32/EnrollDefaultKeys.efi ovmf-ia32
-# +# endif defined fedora
-# +%endif
-#  # endif build_ovmf
-#  %endif
- 
-# @@ -415,9 +404,6 @@ dd of="arm/QEMU_EFI-pflash.raw" if="/dev/zero" bs=1M count=64
-#  dd of="arm/QEMU_EFI-pflash.raw" if="arm/QEMU_EFI.fd" conv=notrunc
-#  dd of="arm/vars-template-pflash.raw" if="/dev/zero" bs=1M count=64
- 
-# -# endif defined fedora
-# -%endif
-# -
- 
- 
-#  %install
-# @@ -540,7 +526,6 @@ install -m 0644 edk2-aarch64-verbose.json \\
-#  %endif
- 
- 
-# -%if %{defined fedora}
-#  %if %{build_ovmf}
-#  # install microvm
-#  install -m 0644 Build/MicrovmX64/DEBUG_%{TOOLCHAIN}/FV/MICROVM.fd \\
-# @@ -553,12 +538,15 @@ install -p -m 0644 %{_sourcedir}/edk2-ovmf-nosb.json \\
-#    %{buildroot}%{_datadir}/qemu/firmware/60-edk2-ovmf-nosb.json
- 
- 
-# +%if %{defined fedora}
-#  # install ia32
-#  cp -a ovmf-ia32 %{buildroot}%{_datadir}/%{name}
- 
-#  for f in %{_sourcedir}/*edk2-ovmf-ia32*.json; do
-#      install -pm 644 \$f %{buildroot}/%{_datadir}/qemu/firmware
-#  done
-# +# endif defined fedora
-# +%endif
-#  # endif build_ovmf
-#  %endif
- 
-# @@ -585,8 +573,6 @@ done
-#  %py_byte_compile %{python3} %{buildroot}%{_datadir}/edk2/Python
-#  %endif
- 
-# -# endif defined fedora
-# -%endif
- 
- 
- 
-# @@ -630,11 +616,9 @@ virt-fw-vars --input Build/Ovmf3264/DEBUG_%{TOOLCHAIN}/FV/OVMF_VARS.secboot.fd \\
-#  %{_datadir}/qemu/firmware/50-edk2-ovmf-amdsev.json
-#  %{_datadir}/qemu/firmware/50-edk2-ovmf-inteltdx.json
-#  %{_datadir}/qemu/firmware/50-edk2-ovmf.json
-# -%if %{defined fedora}
-#  %{_datadir}/%{name}/ovmf/MICROVM.fd
-#  %{_datadir}/qemu/firmware/60-edk2-ovmf-nosb.json
-#  %{_datadir}/qemu/firmware/60-edk2-ovmf-microvm.json
-# -%endif
-#  %if %{build_ovmf_4m}
-#  %{_datadir}/%{name}/ovmf-4m/OVMF_CODE.fd
-#  %{_datadir}/%{name}/ovmf-4m/OVMF_CODE.secboot.fd
-# @@ -685,25 +669,6 @@ virt-fw-vars --input Build/Ovmf3264/DEBUG_%{TOOLCHAIN}/FV/OVMF_VARS.secboot.fd \\
-#  %files tools-doc
-#  %doc BaseTools/UserManuals/*.rtf
- 
-# -
-# -%if %{defined fedora}
-# -%if %{build_ovmf}
-# -%files ovmf-ia32
-# -%common_files
-# -%dir %{_datadir}/%{name}/ovmf-ia32
-# -%{_datadir}/%{name}/ovmf-ia32
-# -%{_datadir}/%{name}/ovmf-ia32/EnrollDefaultKeys.efi
-# -%{_datadir}/%{name}/ovmf-ia32/OVMF_CODE.fd
-# -%{_datadir}/%{name}/ovmf-ia32/OVMF_CODE.secboot.fd
-# -%{_datadir}/%{name}/ovmf-ia32/OVMF_VARS.fd
-# -%{_datadir}/%{name}/ovmf-ia32/OVMF_VARS.secboot.fd
-# -%{_datadir}/%{name}/ovmf-ia32/Shell.efi
-# -%{_datadir}/%{name}/ovmf-ia32/UefiShell.iso
-# -%{_datadir}/qemu/firmware/40-edk2-ovmf-ia32-sb-enrolled.json
-# -%{_datadir}/qemu/firmware/50-edk2-ovmf-ia32-sb.json
-# -%{_datadir}/qemu/firmware/60-edk2-ovmf-ia32.json
-# -%endif
-# -
-#  %files arm
-#  %common_files
-#  %dir %{_datadir}/%{name}/arm
-# @@ -730,9 +695,24 @@ virt-fw-vars --input Build/Ovmf3264/DEBUG_%{TOOLCHAIN}/FV/OVMF_VARS.secboot.fd \\
-#  %dir %{_datadir}/%{name}
-#  %{_datadir}/%{name}/Python
- 
-# -# endif fedora
-# +%if %{defined fedora}
-# +%if %{build_ovmf}
-# +%files ovmf-ia32
-# +%common_files
-# +%dir %{_datadir}/%{name}/ovmf-ia32
-# +%{_datadir}/%{name}/ovmf-ia32
-# +%{_datadir}/%{name}/ovmf-ia32/EnrollDefaultKeys.efi
-# +%{_datadir}/%{name}/ovmf-ia32/OVMF_CODE.fd
-# +%{_datadir}/%{name}/ovmf-ia32/OVMF_CODE.secboot.fd
-# +%{_datadir}/%{name}/ovmf-ia32/OVMF_VARS.fd
-# +%{_datadir}/%{name}/ovmf-ia32/OVMF_VARS.secboot.fd
-# +%{_datadir}/%{name}/ovmf-ia32/Shell.efi
-# +%{_datadir}/%{name}/ovmf-ia32/UefiShell.iso
-# +%{_datadir}/qemu/firmware/40-edk2-ovmf-ia32-sb-enrolled.json
-# +%{_datadir}/qemu/firmware/50-edk2-ovmf-ia32-sb.json
-# +%{_datadir}/qemu/firmware/60-edk2-ovmf-ia32.json
-# +%endif
-#  %endif
-# -
- 
-#  %changelog
-#  * Tue Sep 20 2022 Gerd Hoffmann <kraxel@redhat.com> - 20220826gitba0e0e4c6a17-1
-# EOF
