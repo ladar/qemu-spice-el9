@@ -25,14 +25,14 @@
 #   sREMAINS APPLICABLE EVEN IF YOU HAVE BEEN ADVISED OF THE RISKS.
 
 # To build QEMU using vagrant.
-# [ "$(basename $PWD)" == "qemu.builder" ] && { vagrant destroy -f && cd ../ && rm -rf qemu.builder/ ; } ; \
-# mkdir qemu.builder && cd qemu.builder && vagrant init --minimal generic/alma9 && \
-# sed -i "s/^end$/  config.vm.hostname = \"qemu.builder\"\n  config.ssh.forward_x11 = true\n  config.ssh.forward_agent = true\n  config.vm.provider :libvirt do \|v, override\|\n    v.cpus = 6\n    v.machine_type = 'q35'\n    v.nested = true\n    v.cpu_mode = 'host-passthrough'\n    v.memory = 8192\n    v.video_vram = 256\n  end\nend/g" Vagrantfile && \
+# [ "$(basename $PWD)" == "qemu-builder" ] && { vagrant destroy -f && cd ../ && rm -rf qemu-builder/ ; } ; \
+# mkdir qemu-builder && cd qemu-builder && vagrant init --minimal generic/alma9 && \
+# sed -i "s/^end$/  config.vm.hostname = \"qemu.builder\"\n  config.ssh.forward_x11 = true\n  config.ssh.forward_agent = true\n  config.vm.provider :libvirt do \|v, override\|\n    v.cpus = 12\n    v.machine_type = 'q35'\n    v.nested = true\n    v.cpu_mode = 'host-passthrough'\n    v.memory = 12384\n    v.video_vram = 512\n  end\nend/g" Vagrantfile && \
 # vagrant destroy -f && vagrant up --provider=libvirt && vagrant ssh-config > config && \
 # vagrant upload /home/ladar/Documents/Configuration/workstation/alma-9-build-qemu.sh BUILD.sh && \
 # vagrant ssh -c 'sudo mv BUILD.sh /root/' && \
 # vagrant ssh -c "sudo su -l -c 'time bash -eu /root/BUILD.sh'" && \
-# printf "get -r RPMS QEMU-v$(date +%Y%m%d)\n"| sftp -F config default
+# printf "get -r RPMS\n"| sftp -F config default
 
 # If necessary the following will reset the guest environment to a blank slate,
 # and then prepare it by installing the official QEMU packages. Once complete,
@@ -47,59 +47,65 @@
 # Otherwise, to install the new RPMs onto the host machine.
 # cd RPMS-v$(date +%Y%m%d) && bash -ex INSTALL.sh
 
-sudo dnf update --quiet --assumeyes && \
-sudo dnf --enablerepo=extras --quiet --assumeyes install epel-release && sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-9 && \
-sudo dnf --enablerepo=extras --quiet --assumeyes install elrepo-release && sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-elrepo.org && \
-sudo dnf install --quiet --assumeyes https://download1.rpmfusion.org/free/el/rpmfusion-free-release-$(rpm -E "%{?fedora}%{?rhel}").noarch.rpm && sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-el-9 && \
-sudo dnf install --quiet --assumeyes https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-$(rpm -E "%{?fedora}%{?rhel}").noarch.rpm && sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-nonfree-el-9 && \
-sudo dnf install --quiet --assumeyes https://rpms.remirepo.net/enterprise/remi-release-$(rpm -E "%{?rhel}").rpm && sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-remi.el$(rpm -E '%{?rhel}')
+sed -i '/metadata_expire/d' /etc/dnf/dnf.conf
+sed -i '/mirrorlist_expire/d' /etc/dnf/dnf.conf
+printf "\nmetadata_expire=9800\nmirrorlist_expire=9800\n\n" >> /etc/dnf/dnf.conf
 
-sudo sed -i -e "s/^[# ]*baseurl/baseurl/g" /etc/yum.repos.d/almalinux-*.repo
-sudo sed -i -e "s/^[# ]*mirrorlist/# mirrorlist/g" /etc/yum.repos.d/almalinux-*.repo
+dnf clean all --enablerepo=*
+dnf update --quiet --assumeyes && \
+dnf --enablerepo=extras --quiet --assumeyes install epel-release && sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-9 && \
+dnf --enablerepo=extras --quiet --assumeyes install elrepo-release && sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-elrepo.org && \
+dnf install --quiet --assumeyes https://download1.rpmfusion.org/free/el/rpmfusion-free-release-$(rpm -E "%{?fedora}%{?rhel}").noarch.rpm && sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-el-9 && \
+dnf install --quiet --assumeyes https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-$(rpm -E "%{?fedora}%{?rhel}").noarch.rpm && sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-nonfree-el-9 && \
+dnf install --quiet --assumeyes https://rpms.remirepo.net/enterprise/remi-release-$(rpm -E "%{?rhel}").rpm && sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-remi.el$(rpm -E '%{?rhel}')
 
-sudo sed -i 's/&protocol\=https//g' /etc/yum.repos.d/epel.repo
-sudo sed -i 's/\(metalink\=.*\)$/\1\&protocol\=https/g' /etc/yum.repos.d/epel.repo
-sudo sed -i 's/&protocol\=https//g' /etc/yum.repos.d/epel-testing.repo
-sudo sed -i 's/\(metalink\=.*\)$/\1\&protocol\=https/g' /etc/yum.repos.d/epel-testing.repo
+sed -i -e "s/^[# ]*baseurl/baseurl/g" /etc/yum.repos.d/almalinux-*.repo
+sed -i -e "s/^[# ]*mirrorlist/# mirrorlist/g" /etc/yum.repos.d/almalinux-*.repo
 
-sudo sed -i 's/http:\/\//https:\/\//g' /etc/yum.repos.d/elrepo.repo 
-sudo sed -i -e "s/^[# ]*mirrorlist/# mirrorlist/g" /etc/yum.repos.d/elrepo.repo 
-sudo sed -i '/mirrors.coreix.net/d' /etc/yum.repos.d/elrepo.repo
+sed -i 's/&protocol\=https//g' /etc/yum.repos.d/epel.repo
+sed -i 's/\(metalink\=.*\)$/\1\&protocol\=https/g' /etc/yum.repos.d/epel.repo
+sed -i 's/&protocol\=https//g' /etc/yum.repos.d/epel-testing.repo
+sed -i 's/\(metalink\=.*\)$/\1\&protocol\=https/g' /etc/yum.repos.d/epel-testing.repo
 
-sudo sed -i 's/baseurl\=http:/baseurl\=https:/g' /etc/yum.repos.d/rpmfusion-free-updates.repo
-sudo sed -i 's/metalink\=http:/metalink\=https:/g' /etc/yum.repos.d/rpmfusion-free-updates.repo
-sudo sed -i 's/&protocol\=https//g' /etc/yum.repos.d/rpmfusion-free-updates.repo
-sudo sed -i 's/\(metalink\=.*\)$/\1\&protocol\=https/g' /etc/yum.repos.d/rpmfusion-free-updates.repo
-sudo sed -i 's/baseurl\=http:/baseurl\=https:/g' /etc/yum.repos.d/rpmfusion-free-updates-testing.repo
-sudo sed -i 's/metalink\=http:/metalink\=https:/g' /etc/yum.repos.d/rpmfusion-free-updates-testing.repo
-sudo sed -i 's/&protocol\=https//g' /etc/yum.repos.d/rpmfusion-free-updates-testing.repo
-sudo sed -i 's/\(metalink\=.*\)$/\1\&protocol\=https/g' /etc/yum.repos.d/rpmfusion-free-updates-testing.repo
-sudo sed -i 's/baseurl\=http:/baseurl\=https:/g' /etc/yum.repos.d/rpmfusion-nonfree-updates.repo
-sudo sed -i 's/metalink\=http:/metalink\=https:/g' /etc/yum.repos.d/rpmfusion-nonfree-updates.repo
-sudo sed -i 's/&protocol\=https//g' /etc/yum.repos.d/rpmfusion-nonfree-updates.repo
-sudo sed -i 's/\(metalink\=.*\)$/\1\&protocol\=https/g' /etc/yum.repos.d/rpmfusion-nonfree-updates.repo
-sudo sed -i 's/baseurl\=http:/baseurl\=https:/g' /etc/yum.repos.d/rpmfusion-nonfree-updates-testing.repo
-sudo sed -i 's/metalink\=http:/metalink\=https:/g' /etc/yum.repos.d/rpmfusion-nonfree-updates-testing.repo
-sudo sed -i 's/&protocol\=https//g' /etc/yum.repos.d/rpmfusion-nonfree-updates-testing.repo
-sudo sed -i 's/\(metalink\=.*\)$/\1\&protocol\=https/g' /etc/yum.repos.d/rpmfusion-nonfree-updates-testing.repo
+sed -i 's/http:\/\//https:\/\//g' /etc/yum.repos.d/elrepo.repo 
+sed -i -e "s/^[# ]*mirrorlist/# mirrorlist/g" /etc/yum.repos.d/elrepo.repo 
+sed -i '/mirrors.coreix.net/d' /etc/yum.repos.d/elrepo.repo
 
-sudo sed -i 's/cdn.remirepo.net/rpms.remirepo.net/g' /etc/yum.repos.d/remi.repo
-sudo sed -i 's/http:\/\//https:\/\//g' /etc/yum.repos.d/remi.repo 
-sudo sed -i 's/http:\/\//https:\/\//g' /etc/yum.repos.d/remi-safe.repo 
-sudo sed -i 's/cdn.remirepo.net/rpms.remirepo.net/g' /etc/yum.repos.d/remi-safe.repo
-sudo sed -i 's/cdn.remirepo.net/rpms.remirepo.net/g' /etc/yum.repos.d/remi-modular.repo
-sudo sed -i 's/http:\/\//https:\/\//g' /etc/yum.repos.d/remi-modular.repo 
+sed -i 's/baseurl\=http:/baseurl\=https:/g' /etc/yum.repos.d/rpmfusion-free-updates.repo
+sed -i 's/metalink\=http:/metalink\=https:/g' /etc/yum.repos.d/rpmfusion-free-updates.repo
+sed -i 's/&protocol\=https//g' /etc/yum.repos.d/rpmfusion-free-updates.repo
+sed -i 's/\(metalink\=.*\)$/\1\&protocol\=https/g' /etc/yum.repos.d/rpmfusion-free-updates.repo
+sed -i 's/baseurl\=http:/baseurl\=https:/g' /etc/yum.repos.d/rpmfusion-free-updates-testing.repo
+sed -i 's/metalink\=http:/metalink\=https:/g' /etc/yum.repos.d/rpmfusion-free-updates-testing.repo
+sed -i 's/&protocol\=https//g' /etc/yum.repos.d/rpmfusion-free-updates-testing.repo
+sed -i 's/\(metalink\=.*\)$/\1\&protocol\=https/g' /etc/yum.repos.d/rpmfusion-free-updates-testing.repo
+sed -i 's/baseurl\=http:/baseurl\=https:/g' /etc/yum.repos.d/rpmfusion-nonfree-updates.repo
+sed -i 's/metalink\=http:/metalink\=https:/g' /etc/yum.repos.d/rpmfusion-nonfree-updates.repo
+sed -i 's/&protocol\=https//g' /etc/yum.repos.d/rpmfusion-nonfree-updates.repo
+sed -i 's/\(metalink\=.*\)$/\1\&protocol\=https/g' /etc/yum.repos.d/rpmfusion-nonfree-updates.repo
+sed -i 's/baseurl\=http:/baseurl\=https:/g' /etc/yum.repos.d/rpmfusion-nonfree-updates-testing.repo
+sed -i 's/metalink\=http:/metalink\=https:/g' /etc/yum.repos.d/rpmfusion-nonfree-updates-testing.repo
+sed -i 's/&protocol\=https//g' /etc/yum.repos.d/rpmfusion-nonfree-updates-testing.repo
+sed -i 's/\(metalink\=.*\)$/\1\&protocol\=https/g' /etc/yum.repos.d/rpmfusion-nonfree-updates-testing.repo
+
+sed -i 's/cdn.remirepo.net/rpms.remirepo.net/g' /etc/yum.repos.d/remi.repo
+sed -i 's/http:\/\//https:\/\//g' /etc/yum.repos.d/remi.repo 
+sed -i 's/http:\/\//https:\/\//g' /etc/yum.repos.d/remi-safe.repo 
+sed -i 's/cdn.remirepo.net/rpms.remirepo.net/g' /etc/yum.repos.d/remi-safe.repo
+sed -i 's/cdn.remirepo.net/rpms.remirepo.net/g' /etc/yum.repos.d/remi-modular.repo
+sed -i 's/http:\/\//https:\/\//g' /etc/yum.repos.d/remi-modular.repo 
 
 # As a final step we clean the cache, and reload it so the new GPG keys get approved.
-sudo dnf --enablerepo=* clean all && sudo dnf --enablerepo=* --quiet --assumeyes makecache && \
-sudo dnf --quiet --assumeyes update && \
-sudo dnf --quiet --assumeyes --with-optional \
+dnf --enablerepo=* clean all && dnf --enablerepo=* --quiet --assumeyes makecache && \
+dnf --quiet --assumeyes update && \
+dnf --quiet --assumeyes --with-optional \
 --enablerepo=baseos --enablerepo=appstream --enablerepo=epel --enablerepo=extras --enablerepo=plus \
 --enablerepo=crb --enablerepo=remi --enablerepo=remi-safe --enablerepo=remi-modular --enablerepo=elrepo \
 --enablerepo=rpmfusion-free-updates --enablerepo=rpmfusion-nonfree-updates group install \
 "Development Tools" "Additional Development" "Platform Development" "RPM Development Tools" "Debugging Tools" \
-"Desktop Debugging and Performance Tools" && \
-sudo dnf --quiet --assumeyes --allowerasing \
+"Desktop Debugging and Performance Tools" "KDE Software Development" "KDE Plasma Workspaces" \
+"KDE Plasma Workspaces" "KDE Frameworks 5 Software Development" && \
+dnf --quiet --assumeyes --allowerasing \
 --enablerepo=baseos --enablerepo=appstream --enablerepo=epel --enablerepo=extras --enablerepo=plus \
 --enablerepo=crb --enablerepo=remi --enablerepo=remi-safe --enablerepo=remi-modular --enablerepo=elrepo \
 --enablerepo=rpmfusion-free-updates --enablerepo=rpmfusion-nonfree-updates install \
@@ -107,10 +113,10 @@ sudo dnf --quiet --assumeyes --allowerasing \
  bison brlapi-devel byacc bzip2-devel cmake ctags cyrus-sasl-devel daxctl-devel dbus-daemon \
  dbus-devel dbus-glib-devel dbus-libs dbus-x11 dbusmenu-qt5-devel device-mapper-multipath-devel diffstat \
  diffutils dosfstools dwarves epel-rpm-macros elfutils elfutils-devel elfutils-libelf-devel expect \
- findutils flex fuse-devel fuse-encfs fuse-overlayfs fuse-sshfs fuse3 fuse3-devel gawk gcc \
+ findutils flex fuse-devel fuse-encfs fuse-overlayfs fuse-sshfs fuse3 fuse3-devel gawk gcc rpm-sign \
  gcc-aarch64-linux-gnu gcc-arm-linux-gnu gcc-c++ gcc-powerpc64-linux-gnu gcc-sparc64-linux-gnu \
  gcc-x86_64-linux-gnu gdb gettext git git-core glib2-devel glib2-static glibc-devel glibc-static gnupg2 \
- gnutls-devel gnutls-utils gstreamer1-devel gstreamer1-plugins-bad-free-devel \
+ gnutls-devel gnutls-utils gstreamer1-devel gstreamer1-plugins-bad-free-devel rpm-build seabios \
  gstreamer1-plugins-base-devel gstreamer1-plugins-ugly gtk3-devel gzip help2man hmaccalc hostname iasl \
  intltool ipxe-roms-qemu java-devel jna kabi-dw libaio-devel libattr-devel libbpf-devel libcap-devel \
  libcap-ng-devel libcurl-devel libdbusmenu-devel libdbusmenu-gtk2-devel libdbusmenu-gtk3-devel \
@@ -123,22 +129,32 @@ sudo dnf --quiet --assumeyes --allowerasing \
  perl perl-devel perl-ExtUtils-Embed perl-Fedora-VSP perl-generators perl-Test-Harness pesign \
  pipewire-jack-audio-connection-kit-devel pixman-devel pkgconf pkgconf-m4 pkgconf-pkg-config pkgconfig \
  pulseaudio-libs-devel python3-cryptography python3-devel python3-docutils python3-future python3-pytest \
- python3-sphinx python3-sphinx_rtd_theme python3-tomli rdma-core rdma-core-devel redhat-rpm-config rpm-build rpm-sign \
- rpmconf rpmdevtools rpmlint rpmrebuild rsync SDL2-devel SDL2_image-devel seabios seabios-bin seavgabios-bin \
+ python3-sphinx python3-sphinx_rtd_theme python3-tomli rdma-core rdma-core-devel redhat-rpm-config \
+ rpmconf rpmdevtools rpmlint rpmrebuild rsync SDL2-devel SDL2_image-devel seabios-bin seavgabios-bin \
  sgabios-bin snappy-devel softhsm source-highlight sparse sssd-dbus strace systemd-devel systemtap \
  systemtap-sdt-devel tar tcsh texinfo usbguard-dbus usbredir-devel valgrind valgrind-devel vte291-devel \
  x264-devel x265-devel xauth xdg-dbus-proxy xmlto xorg-x11-util-macros xorriso xz zlib-devel zlib-static \
  gobject-introspection-devel gtk-doc usbutils vala wayland-protocols-devel samba-winbind-clients \
  libnghttp2-devel latexmk python3-sphinx-latex redhat-display-fonts redhat-text-fonts fonts-rpm-macros \
- pyproject-rpm-macros python3-wheel virt-manager libvirt-devel libvirt-client || \
-exit 1
+ pyproject-rpm-macros python3-wheel virt-manager libvirt-devel libvirt-client libosinfo \
+ python3-typogrify python3-smartypants gi-docgen gi-docgen-fonts selinux-policy-devel policycoreutils-devel \
+ libvala vala libvala-devel libssh2 libssh2-devel numactl numactl-devel augeas device-mapper-devel \
+ libpcap-devel libarchive-devel libtirpc-devel parted-devel rpcgen sanlock-devel scrub \
+ wireshark-devel yajl-devel libsmi sanlock-lib wireshark wireshark-cli sanlock librados-devel \
+ librbd-devel file-devel qt5-qtbase-private-devel xdg-user-dirs kf5-kwindowsystem-devel \
+ polkit-qt5-1-devel kf5-filesystem kf5-kwindowsystem polkit-qt5-1 krdc-devel \
+ libvncserver-devel freerdp freerdp-libs krdc krdc-libs libvncserver libwinpr \
+ perl-LockFile-Simple perl-Sys-Virt perl-XML-NamespaceSupport perl-XML-SAX perl-podlators \
+ perl-XML-SAX-Base perl-XML-Simple || exit 1
 
 # Packages needed to enable X11 forwarding support.
-sudo dnf --quiet --assumeyes --enablerepo=epel --enablerepo=extras --enablerepo=plus --enablerepo=crb \
+dnf --quiet --assumeyes --enablerepo=epel --enablerepo=extras --enablerepo=plus --enablerepo=crb \
 --exclude=minizip1.2 --exclude=minizip1.2-devel install \
  dbus-x11 xorg-x11-xauth xorg-x11-server-common xorg-x11-server-Xorg xorg-x11-server-Xwayland \
- mlocate cronie cronie-anacron || \
-exit 1
+ libvala vala libvala-devel libssh2 libssh2-devel numactl numactl-devel augeas device-mapper-devel\
+ libpcap-devel libarchive-devel libtirpc-devel parted-devel rpcgen sanlock-devel scrub \
+ wireshark-devel yajl-devel libsmi sanlock-lib wireshark wireshark-cli sanlock \
+ librados-devel librbd-devel mlocate cronie cronie-anacron || exit 1
 
 
 # capstone / capstone-devel / python3-capstone will be available via the repos when 9.2 ships ...
@@ -171,9 +187,9 @@ capstone-4.0.2-9.el9.x86_64.rpm capstone-devel-4.0.2-9.el9.x86_64.rpm python3-ca
 echo "* * * * * root command bash -c '/usr/bin/updatedb'" | sudo tee /etc/cron.d/updatedb > /dev/null
 
 # Update the SSH server config and restart the service.
-sudo sed -i 's/.*X11Forwarding.*/X11Forwarding yes/g' /etc/ssh/sshd_config
-sudo sed -i 's/.*X11UseLocalhost.*/X11UseLocalhost no/g' /etc/ssh/sshd_config
-sudo sed -i 's/.*X11DisplayOffset.*/X11DisplayOffset 10/g' /etc/ssh/sshd_config
+sed -i 's/.*X11Forwarding.*/X11Forwarding yes/g' /etc/ssh/sshd_config
+sed -i 's/.*X11UseLocalhost.*/X11UseLocalhost no/g' /etc/ssh/sshd_config
+sed -i 's/.*X11DisplayOffset.*/X11DisplayOffset 10/g' /etc/ssh/sshd_config
 sudo systemctl restart sshd.service 2> /dev/null
 
 # Disable the command aliases since they sometimes break compile logic.
@@ -192,9 +208,12 @@ mkdir -p ~/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
 # Download the source package files. Note these URLs point to rawhide, and are transient.
 cd ~/rpmbuild/SRPMS/
 
+# These soruce packages are downloaded but unused.
+# libcmpiutil
+
 dnf download --quiet --disablerepo=* --repofrompath="fc36,https://mirrors.kernel.org/fedora/releases/36/Everything/source/tree/" --source spice-gtk || exit 1
-# dnf download --quiet --disablerepo=* --repofrompath="fc37,https://mirrors.kernel.org/fedora/releases/37/Everything/source/tree/" --source python-smartypants || exit 1
-dnf download --quiet --disablerepo=* --repofrompath="rawhide,https://mirrors.kernel.org/fedora/development/rawhide/Everything/source/tree/" --source edk2 fcode-utils gi-docgen libcacard lzfse openbios python-pefile python-smartypants python-virt-firmware qemu SLOF spice spice-protocol virglrenderer virt-manager || exit 1
+dnf download --quiet --disablerepo=* --repofrompath="rawhide,https://mirrors.kernel.org/fedora/development/rawhide/Everything/source/tree/" --source edk2 fcode-utils libcacard lzfse openbios python-pefile python-virt-firmware qemu SLOF spice spice-protocol virglrenderer virt-manager virt-viewer virt-backup libcmpiutil passt  libvirt libvirt-designer libvirt-glib libvirt-dbus libvirt-python  osinfo-db-tools libosinfo || exit 1
+dnf download --quiet --disablerepo=* --repofrompath="rawhide,https://mirrors.kernel.org/fedora/development/rawhide/Everything/source/tree/" --source qt-virt-manager qtermwidget lxqt-build-tools liblxqt libqtxdg chunkfs gtk-vnc
 rpm -i *src.rpm || exit 1
 
 # Patch the source/spec files.
@@ -224,74 +243,21 @@ index 638fd88..2341a15 100644
  Name:           SLOF
 EOF
 
-# # # Patch the EDK2 spec file.
-# patch -p1 <<-EOF
-# diff --git a/edk2.spec b/edk2.spec
-# index bd358d1..f8376bd 100644
-# --- a/edk2.spec
-# +++ b/edk2.spec
-# @@ -14,25 +14,12 @@ ExclusiveArch: x86_64 aarch64
-#  %define TOOLCHAIN      GCC5
-#  %define OPENSSL_VER    1.1.1k
+patch -p1 <<-EOF 
+diff --git a/virt-viewer.spec b/virt-viewer.spec
+index 0284701..2453c04 100644
+--- a/virt-viewer.spec
++++ b/virt-viewer.spec
+@@ -2,7 +2,7 @@
  
-# -%if %{defined rhel}
-# -%define build_ovmf 0
-# -%define build_aarch64 0
-# -%ifarch x86_64
-# -  %define build_ovmf 1
-# -%endif
-# -%ifarch aarch64
-# -  %define build_aarch64 1
-# -%endif
-# -%else
-#  %define build_ovmf 1
-#  %define build_aarch64 1
-# -%endif
-# -
-#  %global softfloat_version 20180726-gitb64af41
-# -%define cross %{defined fedora}
-# +%define cross 1
-#  %define disable_werror %{defined fedora}
- 
-# -
-#  Name:       edk2
-#  Version:    %{GITDATE}git%{GITCOMMIT}
-#  Release:    5%{?dist}
-# @@ -187,7 +174,6 @@ environment for the UEFI and PI specifications. This package contains sample
-#  64-bit UEFI firmware builds for QEMU and KVM.
- 
- 
-# -%if %{defined fedora}
-#  %package ovmf-ia32
-#  Summary:        Open Virtual Machine Firmware
-#  License:        BSD-2-Clause-Patent and OpenSSL
-# @@ -223,8 +209,6 @@ BuildArch:      noarch
-#  This package provides tools that are needed to build EFI executables
-#  and ROMs using the GNU tools.  You do not need to install this package;
-#  you probably want to install edk2-tools only.
-# -# endif fedora
-# -%endif
- 
- 
- 
-# @@ -543,7 +527,6 @@ done
-#  %doc BaseTools/UserManuals/*.rtf
- 
- 
-# -%if %{defined fedora}
-#  %if %{build_ovmf}
-#  %files ovmf-ia32
-#  %common_files
-# @@ -591,8 +574,6 @@ done
-#  %dir %{_datadir}/%{name}
-#  %{_datadir}/%{name}/Python
- 
-# -# endif fedora
-# -%endif
- 
- 
-#  %changelog
-# EOF
+ %if 0%{?rhel} >= 9
+ %global with_govirt 0
+-%global with_spice 0
++%global with_spice 1
+ %else
+ # Disabled since it is still stuck on soup2
+ %global with_govirt 0
+EOF
 
 # Patch the QEMU spec file.
 patch -p1 <<-EOF
@@ -451,8 +417,68 @@ index 9bd79d1..29f332e 100644
  %else
 EOF
 
+patch -p1 <<-EOF
+diff --git a/liblxqt.spec b/liblxqt.spec
+index 64a52b9..fa175d8 100644
+--- a/liblxqt.spec
++++ b/liblxqt.spec
+@@ -108,6 +108,8 @@ touch -r %{SOURCE1} %{buildroot}%{rpm_macros_dir}/macros.lxqt
+ %license COPYING
+ %doc AUTHORS README.md
+ %dir %{_datadir}/lxqt/translations/%{name}
++%{_datadir}/lxqt/translations/liblxqt/liblxqt_ast.qm
++%{_datadir}/lxqt/translations/liblxqt/liblxqt_arn.qm
+ 
+ %changelog
+ * Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.2.0-2
+EOF
+
+patch -p1 <<-PATCH
+diff --git a/qtermwidget.spec b/qtermwidget.spec
+index e93ec2e..a199bbc 100644
+--- a/qtermwidget.spec
++++ b/qtermwidget.spec
+@@ -54,15 +54,22 @@ This package provides translations for the qtermwidget package.
+ %if 0%{?el7}
+ scl enable devtoolset-7 - <<\\EOF
+ %endif
+-%{cmake_lxqt} -DPULL_TRANSLATIONS=NO ..
+ 
+-make %{?_smp_mflags} -C %{_vpath_builddir}
++mkdir build
++cd build
++
++%cmake3 -DPULL_TRANSLATIONS=NO ..
++
++%cmake_build
++
+ %if 0%{?el7}
+ EOF
+ %endif
+ 
+ %install
+-make install/fast DESTDIR=%{buildroot} -C %{_vpath_builddir}
++cd build
++%cmake_install
++
+ %find_lang qtermwidget --with-qt
+ 
+ %ldconfig_scriptlets
+@@ -81,7 +88,7 @@ make install/fast DESTDIR=%{buildroot} -C %{_vpath_builddir}
+ %{_libdir}/cmake/%{name}%{SOVERSION}
+ 
+ 
+-%files l10n -f qtermwidget.lang
++%files l10n -f build/qtermwidget.lang
+ %license LICENSE
+ %doc AUTHORS CHANGELOG README.md
+ %dir %{_datadir}/qtermwidget5/translations
+PATCH
+
+# Some changes are just easier with sed.
 sed -i 's/defined rhel/defined nullified/g' edk2.spec
 sed -i 's/defined fedora/defined rhel/g' edk2.spec
+sed -i "s/^Version:\([\t ]*\).*/Version:\1$(date +%Y%m%d)/g" passt.spec 
 
 # Build the spec files.
 rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) lzfse.spec 2>&1 | tee lzfse.log > /dev/null && \
@@ -505,44 +531,110 @@ rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btr
 { printf "\n\e[1;91m# The spice-protocol rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
 printf "\e[1;92m# The spice-protocol rpmbuild finished.\e[0;0m\n"
 
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) spice-gtk.spec 2>&1 | tee spice-gtk.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " spice-gtk.spec ) || \
+{ printf "\n\e[1;91m# The spice-gtk rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
+printf "\e[1;92m# The spice-gtk rpmbuild finished.\e[0;0m\n"
+
 rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) spice.spec 2>&1 | tee spice.log > /dev/null && \
 rpm -i --replacepkgs --replacefiles $(ls -q  $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " spice.spec ) 2>/dev/null) || \
 { printf "\n\e[1;91m# The spice rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
 printf "\e[1;92m# The spice rpmbuild finished.\e[0;0m\n"
+
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) passt.spec 2>&1 | tee passt.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " passt.spec ) || \
+{ printf "\n\e[1;91m# The passt rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
+printf "\n\e[1;92m# The passt rpmbuild finished.\e[0;0m\n"
 
 rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) qemu.spec 2>&1 | tee qemu.log > /dev/null && \
 rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " qemu.spec ) || \
 { printf "\n\e[1;91m# The qemu rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
 printf "\e[1;92m# The qemu rpmbuild finished.\e[0;0m\n"
 
-# No longer needed.
-# rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) adobe-source-code-pro-fonts.spec 2>&1 | tee adobe-source-code-pro-fonts.log > /dev/null && \
-# rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " adobe-source-code-pro-fonts.spec ) || \
-# { printf "\n\e[1;91m# The adobe-source-code-pro-fonts rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
-# printf "\e[1;92m# The adobe-source-code-pro-fonts rpmbuild finished.\e[0;0m\n"
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) libosinfo.spec 2>&1 | tee libosinfo.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " libosinfo.spec ) || \
+{ printf "\n\e[1;91m# The libosinfo rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
+printf "\e[1;92m# The libosinfo rpmbuild finished.\e[0;0m\n"
 
-rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) python-smartypants.spec 2>&1 | tee python-smartypants.log > /dev/null && \
-rpm -i --replacepkgs --replacefiles $(ls -q $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " python-smartypants.spec ) 2>/dev/null) || \
-{ printf "\n\e[1;91m# The python-smartypants rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
-printf "\e[1;92m# The python-smartypants rpmbuild finished.\e[0;0m\n"
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) osinfo-db-tools.spec 2>&1 | tee osinfo-db-tools.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " osinfo-db-tools.spec ) || \
+{ printf "\n\e[1;91m# The osinfo-db-tools rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
+printf "\e[1;92m# The osinfo-db-tools rpmbuild finished.\e[0;0m\n"
 
-# An RPM is available for python3-typogrify but it requires smartypants which weas just installed.
-dnf install --quiet --assumeyes --enablerepo=* python3-typogrify
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) libvirt-glib.spec 2>&1 | tee libvirt-glib.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " libvirt-glib.spec ) || \
+{ printf "\n\e[1;91m# The libvirt-glib rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
+printf "\e[1;92m# The libvirt-glib rpmbuild finished.\e[0;0m\n"
 
-rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) gi-docgen.spec 2>&1 | tee gi-docgen.log > /dev/null && \
-rpm -i --replacepkgs --replacefiles $(ls -q $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " gi-docgen.spec ) 2>/dev/null) || \
-{ printf "\n\e[1;91m# The gi-docgen rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
-printf "\e[1;92m# The gi-docgen rpmbuild finished.\e[0;0m\n"
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) libvirt-dbus.spec 2>&1 | tee libvirt-dbus.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " libvirt-dbus.spec ) || \
+{ printf "\n\e[1;91m# The libvirt-dbus rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
+printf "\e[1;92m# The libvirt-dbus rpmbuild finished.\e[0;0m\n"
 
-rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) spice-gtk.spec 2>&1 | tee spice-gtk.log > /dev/null && \
-rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " spice-gtk.spec ) || \
-{ printf "\n\e[1;91m# The spice-gtk rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
-printf "\e[1;92m# The spice-gtk rpmbuild finished.\e[0;0m\n"
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" -D "with_modular_daemons 1" --target=$(uname -m) libvirt.spec 2>&1 | tee libvirt.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(rpmspec -q --builtrpms --undefine="dist" -D "dist .btrh9"  -D "with_modular_daemons 1" --target=$(uname -m) --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " libvirt.spec | sed 's/libvirt-admin/libvirt-daemon/g' ) || \
+{ printf "\n\e[1;91m# The libvirt rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
+printf "\e[1;92m# The libvirt rpmbuild finished.\e[0;0m\n"
+
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) libvirt-designer.spec 2>&1 | tee libvirt-designer.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " libvirt-designer.spec ) || \
+{ printf "\n\e[1;91m# The libvirt-designer rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
+printf "\e[1;92m# The libvirt-designer rpmbuild finished.\e[0;0m\n"
+
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) libvirt-python.spec 2>&1 | tee libvirt-python.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles  $(ls -q $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " libvirt-python.spec ) 2>/dev/null) || \
+{ printf "\n\e[1;91m# The libvirt-python rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
+printf "\e[1;92m# The libvirt-python rpmbuild finished.\e[0;0m\n"
+
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) lxqt-build-tools.spec 2>&1 | tee lxqt-build-tools.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " lxqt-build-tools.spec ) || \
+{ printf "\n\e[1;91m# The lxqt-build-tools rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
+printf "\e[1;92m# The lxqt-build-tools rpmbuild finished.\e[0;0m\n"
+
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) libqtxdg.spec 2>&1 | tee libqtxdg.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " libqtxdg.spec ) || \
+{ printf "\n\e[1;91m# The libqtxdg rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
+printf "\e[1;92m# The libqtxdg rpmbuild finished.\e[0;0m\n"
+
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) liblxqt.spec 2>&1 | tee liblxqt.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " liblxqt.spec ) || \
+{ printf "\n\e[1;91m# The liblxqt rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
+printf "\e[1;92m# The liblxqt rpmbuild finished.\e[0;0m\n"
+
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) qtermwidget.spec 2>&1 | tee qtermwidget.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " qtermwidget.spec ) || \
+{ printf "\n\e[1;91m# The qtermwidget rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
+printf "\e[1;92m# The qtermwidget rpmbuild finished.\e[0;0m\n"
+
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) qt-virt-manager.spec 2>&1 | tee qt-virt-manager.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " qt-virt-manager.spec ) || \
+{ printf "\n\e[1;91m# The qt-virt-manager rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
+printf "\e[1;92m# The qt-virt-manager rpmbuild finished.\e[0;0m\n"
+
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) chunkfs.spec 2>&1 | tee chunkfs.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " chunkfs.spec ) || \
+{ printf "\n\e[1;91m# The chunkfs rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
+printf "\e[1;92m# The chunkfs rpmbuild finished.\e[0;0m\n"
+
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) gtk-vnc.spec 2>&1 | tee gtk-vnc.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(ls -q $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " gtk-vnc.spec ) 2>/dev/null) || \
+{ printf "\n\e[1;91m# The gtk-vnc rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
+printf "\e[1;92m# The gtk-vnc rpmbuild finished.\e[0;0m\n"
 
 rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) virt-manager.spec 2>&1 | tee virt-manager.log > /dev/null && \
 rpm -i --replacepkgs --replacefiles $(ls -q $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " virt-manager.spec ) 2>/dev/null) || \
 { printf "\n\e[1;91m# The virt-manager rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
 printf "\e[1;92m# The virt-manager rpmbuild finished.\e[0;0m\n"
+
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) virt-backup.spec 2>&1 | tee virt-backup.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " virt-backup.spec ) || \
+{ printf "\n\e[1;91m# The virt-backup rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
+printf "\e[1;92m# The virt-backup rpmbuild finished.\e[0;0m\n"
+
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) virt-viewer.spec 2>&1 | tee virt-viewer.log > /dev/null && \
+rpm -i --replacepkgs --replacefiles $(ls -q $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " virt-viewer.spec ) 2>/dev/null) || \
+{ printf "\n\e[1;91m# The virt-viewer rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
+printf "\e[1;92m# The virt-viewer rpmbuild finished.\e[0;0m\n"
 
 # Download the dependencies needed for installation, which aren't available from the official, 
 # and/or, EPEL repos. They will be added to the collection of binary packages that were just 
@@ -602,7 +694,7 @@ tee $HOME/RPMS/INSTALL.sh <<-EOF > /dev/null
 #   sREMAINS APPLICABLE EVEN IF YOU HAVE BEEN ADVISED OF THE RISKS.
 
 # To generate a current/updated list of RPM files for installation, run the following command.
-export INSTALLPKGS=\$(echo \`ls qemu*rpm spice*rpm opus*rpm usbredir*rpm openbios*rpm capstone*rpm libblkio*rpm lzfse*rpm virglrenderer*rpm libcacard*rpm edk2*rpm SLOF*rpm SDL2*rpm libogg-devel*rpm pcsc-lite-devel*rpm mesa-libgbm-devel*rpm usbredir-devel*rpm opus-devel*rpm gobject-introspection-devel*rpm python3-markdown*rpm virt-manager*rpm virt-install*rpm | grep -Ev 'debuginfo|debugsource|\\.src\\.rpm'\`)
+export INSTALLPKGS=\$(echo \`ls qemu*rpm spice*rpm opus*rpm usbredir*rpm openbios*rpm capstone*rpm libblkio*rpm lzfse*rpm virglrenderer*rpm libcacard*rpm edk2*rpm SLOF*rpm SDL2*rpm libogg-devel*rpm pcsc-lite-devel*rpm mesa-libgbm-devel*rpm usbredir-devel*rpm opus-devel*rpm gobject-introspection-devel*rpm python3-markdown*rpm virt-manager*rpm virt-viewer*rpm virt-install*rpm virt-backup*rpm passt*rpm qtermwidget*rpm gvnc*rpm gtk-vnc*rpm chunkfs*rpm qt-remote-viewer*rpm qt-virt-manager*rpm liblxqt*rpm libqtxdg*rpm libvirt*rpm osinfo*rpm libosinfo*rpm lxqt-build-tools*rpm python3-libvirt*rpm | grep -Ev 'debuginfo|debugsource|\\.src\\.rpm'\`)
 
 # This looks is a list of packages which may have been installed using 
 # the system repos, and are either a) not being replaced/upgraded or 
@@ -614,14 +706,17 @@ export INSTALLPKGS=\$(echo \`ls qemu*rpm spice*rpm opus*rpm usbredir*rpm openbio
 # Of note are the qemu-kvm-DEVICES and the virtuiofsd packages. The former
 # are being replaced by packages without "kvm" in the name. And the latter
 # package was renamed to qemu-virtiofsd.
-export REMOVEPKGS=\$(echo \`echo 'edk2 edk2-aarch64 edk2-arm edk2-debugsource edk2-ext4 edk2-ovmf edk2-ovmf-experimental edk2-ovmf-ia32 edk2-tools edk2-tools-debuginfo edk2-tools-doc edk2-tools-python qemu-kvm-audio-pa qemu-kvm-block-curl qemu-kvm-block-rbd qemu-kvm-common qemu-kvm-debugsource qemu-kvm-device-display-virtio-gpu qemu-kvm-device-display-virtio-gpu-gl qemu-kvm-device-display-virtio-gpu-pci qemu-kvm-device-display-virtio-gpu-pci-gl qemu-kvm-device-display-virtio-vga qemu-kvm-device-display-virtio-vga-gl qemu-kvm-device-usb-host qemu-kvm-device-usb-redirect qemu-kvm-docs qemu-kvm-tools qemu-kvm-ui-egl-headless qemu-kvm-ui-opengl virtiofsd qemu-kvm-audio-pa-debuginfo qemu-kvm-block-curl-debuginfo qemu-kvm-block-rbd-debuginfo qemu-kvm-block-ssh-debuginfo qemu-kvm-common-debuginfo qemu-kvm-core-debuginfo qemu-kvm-debuginfo qemu-kvm-device-display-virtio-gpu-debuginfo qemu-kvm-device-display-virtio-gpu-gl-debuginfo qemu-kvm-device-display-virtio-gpu-pci-debuginfo qemu-kvm-device-display-virtio-gpu-pci-gl-debuginfo qemu-kvm-device-display-virtio-vga-debuginfo qemu-kvm-device-display-virtio-vga-gl-debuginfo qemu-kvm-device-usb-host-debuginfo qemu-kvm-device-usb-redirect-debuginfo qemu-kvm-tests-debuginfo qemu-kvm-tools-debuginfo qemu-kvm-ui-egl-headless-debuginfo qemu-kvm-ui-opengl-debuginfo qemu-guest-agent-debuginfo qemu-img-debuginfo qemu-pr-helper-debuginfo virtiofsd virtiofsd-debuginfo virtiofsd-debugsource virglrenderer virglrenderer-debuginfo virglrenderer-debugsource virglrenderer-devel virglrenderer-test-server virglrenderer-test-server-debuginfo virt-install virt-manager virt-manager-common' | tr ' ' '\\n' | while read PKG ; do { rpm --quiet -q \$PKG && echo \$PKG ; } ; done\`)
+export REMOVEPKGS=\$(echo \`echo 'edk2 edk2-aarch64 edk2-arm edk2-debugsource edk2-ext4 edk2-ovmf edk2-ovmf-experimental edk2-ovmf-ia32 edk2-tools edk2-tools-debuginfo edk2-tools-doc edk2-tools-python virtiofsd virtiofsd-debuginfo virtiofsd-debugsource virglrenderer virglrenderer-debuginfo virglrenderer-debugsource virglrenderer-devel virglrenderer-test-server virglrenderer-test-server-debuginfo virt-install virt-manager virt-manager-common virt-viewer virt-viewer-debuginfo virt-viewer-debugsource virt-backup gtk-vnc2 gtk-vnc2-devel gtk-vnc-debuginfo gtk-vnc-debugsource gvnc gvnc-devel gvncpulse gvncpulse-devel gvnc-tools libvirt-client libvirt-client-debuginfo libvirt-daemon libvirt-daemon-config-network libvirt-daemon-debuginfo libvirt-daemon-driver-interface libvirt-daemon-driver-interface-debuginfo libvirt-daemon-driver-network libvirt-daemon-driver-network-debuginfo libvirt-daemon-driver-nodedev libvirt-daemon-driver-nodedev-debuginfo libvirt-daemon-driver-nwfilter libvirt-daemon-driver-nwfilter-debuginfo libvirt-daemon-driver-qemu libvirt-daemon-driver-qemu-debuginfo libvirt-daemon-driver-secret libvirt-daemon-driver-secret-debuginfo libvirt-daemon-driver-storage libvirt-daemon-driver-storage-core libvirt-daemon-driver-storage-core-debuginfo libvirt-daemon-driver-storage-disk libvirt-daemon-driver-storage-disk-debuginfo libvirt-daemon-driver-storage-iscsi libvirt-daemon-driver-storage-iscsi-debuginfo libvirt-daemon-driver-storage-logical libvirt-daemon-driver-storage-logical-debuginfo libvirt-daemon-driver-storage-mpath libvirt-daemon-driver-storage-mpath-debuginfo libvirt-daemon-driver-storage-rbd libvirt-daemon-driver-storage-rbd-debuginfo libvirt-daemon-driver-storage-scsi libvirt-daemon-driver-storage-scsi-debuginfo libvirt-daemon-kvm libvirt-debuginfo libvirt-devel libvirt-glib libvirt-libs libvirt-libs-debuginfo libvirt-lock-sanlock-debuginfo libvirt-nss-debuginfo libvirt-wireshark-debuginfo python3-libvirt qemu-ga-win qemu-guest-agent qemu-guest-agent-debuginfo qemu-img qemu-img-debuginfo qemu-kvm qemu-kvm-audio-pa qemu-kvm-audio-pa-debuginfo qemu-kvm-block-curl qemu-kvm-block-curl-debuginfo qemu-kvm-block-rbd qemu-kvm-block-rbd-debuginfo qemu-kvm-block-ssh-debuginfo qemu-kvm-common qemu-kvm-common-debuginfo qemu-kvm-core qemu-kvm-core-debuginfo qemu-kvm-debuginfo qemu-kvm-debugsource qemu-kvm-device-display-virtio-gpu qemu-kvm-device-display-virtio-gpu-debuginfo qemu-kvm-device-display-virtio-gpu-gl qemu-kvm-device-display-virtio-gpu-gl-debuginfo qemu-kvm-device-display-virtio-gpu-pci qemu-kvm-device-display-virtio-gpu-pci-debuginfo qemu-kvm-device-display-virtio-gpu-pci-gl qemu-kvm-device-display-virtio-gpu-pci-gl-debuginfo qemu-kvm-device-display-virtio-vga qemu-kvm-device-display-virtio-vga-debuginfo qemu-kvm-device-display-virtio-vga-gl qemu-kvm-device-display-virtio-vga-gl-debuginfo qemu-kvm-device-usb-host qemu-kvm-device-usb-host-debuginfo qemu-kvm-device-usb-redirect qemu-kvm-device-usb-redirect-debuginfo qemu-kvm-docs qemu-kvm-tests-debuginfo qemu-kvm-tools qemu-kvm-tools-debuginfo qemu-kvm-ui-egl-headless qemu-kvm-ui-egl-headless-debuginfo qemu-kvm-ui-opengl qemu-kvm-ui-opengl-debuginfo qemu-pr-helper qemu-pr-helper-debuginfo virtiofsd libosinfo libosinfo-debuginfo libosinfo-debugsource python3-libvirt python3-libvirt-debuginfo' | tr ' ' '\\n' | while read PKG ; do { rpm --quiet -q \$PKG && rpm -q \$PKG | grep -v '\\.btrh9\\.' ; } ; done\`)
+
+# Ensure previous attempts/transactions don't break the install attempt.
+dnf clean all --enablerepo=* &>/dev/null
 
 # The adobe-source-code-pro-fonts package might be required.
 # On the target system, run the following command to install the new version of QEMU.
 if [ "\$REMOVEPKGS" ]; then
-printf "%s\\n" "install \$INSTALLPKGS" "remove \$REMOVEPKGS" "run" "clean all" "exit" | sudo dnf shell --assumeyes
+printf "%s\\n" "install \$INSTALLPKGS" "remove \$REMOVEPKGS" "reinstall \$INSTALLPKGS" "run" "clean all" "exit" | dnf shell --assumeyes
 else 
-printf "%s\\n" "install \$INSTALLPKGS" "run" "clean all" "exit" | sudo dnf shell --assumeyes
+printf "%s\\n" "install \$INSTALLPKGS" "reinstall \$INSTALLPKGS" "run" "clean all" "exit" | dnf shell --assumeyes
 fi
 
 [ ! -f /usr/bin/qemu-kvm ] && [ -f /usr/bin/qemu-system-x86_64 ] && sudo ln -s /usr/bin/qemu-system-x86_64 /usr/bin/qemu-kvm
@@ -656,6 +751,6 @@ chmod 644 /home/vagrant/RPMS/*rpm
 chown -R vagrant:vagrant /home/vagrant/RPMS/
 
 source /etc/os-release
-[ "$REDHAT_SUPPORT_PRODUCT_VERSION" == "9.1" ] && printf "\n\e[1;91m# It appears RHEL v9.2 has shipped. The capstone libs can probably be removed.\e[0;0m"
+[ "$REDHAT_SUPPORT_PRODUCT_VERSION" == "9.2" ] && printf "\n\e[1;91m# It appears RHEL v9.2 has shipped. The capstone libs can probably be removed.\e[0;0m"
 
 printf "\n\nAll done.\n\n"
