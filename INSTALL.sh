@@ -7,7 +7,7 @@
 #   been installed from distro repositories, and replaces them with 
 #   improved versions. 
 
-# License: This scirpt is hereby placed in the public domain, AND IS 
+# License: This script is hereby placed in the public domain, AND IS 
 #   ROVIDED BY THE AUTHORS 'AS IS' WITHOUT ANY EXPRESS, IMPLIED, OR
 #   IMAGINARY WARRANTIES. THIS INCLUDES BUT IS NOT LIMITED TO, THE IMPLIED
 #   WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE,
@@ -21,8 +21,40 @@
 #   APPLIES REGARDLESS OF JURISDICTION, PHYSICAL OR VIRTUAL LOCATION, AND
 #   sREMAINS APPLICABLE EVEN IF YOU HAVE BEEN ADVISED OF THE RISKS.
 
+if [ ! $(sudo dnf repolist --quiet baseos 2>&1 | grep -Eo "^baseos") ]; then  
+ printf "\nThe baseos repo is required but doesn't appear to be enabled.\n\n"
+ exit 1
+fi
+
+if [ ! $(sudo dnf repolist --quiet appstream 2>&1 | grep -Eo "^appstream") ]; then  
+ printf "\nThe appstream repo is required but doesn't appear to be enabled.\n\n"
+ exit 1
+fi
+if [ ! $(sudo dnf repolist --quiet epel 2>&1 | grep -Eo "^epel") ]; then  
+ printf "\nThe epel repo is required but doesn't appear to be installed (or enabled).\n\n"
+ exit 1
+fi
+
 # To generate a current/updated list of RPM files for installation, run the following command.
-export INSTALLPKGS=$(echo `ls qemu*rpm spice*rpm opus*rpm usbredir*rpm openbios*rpm capstone*rpm libblkio*rpm lzfse*rpm virglrenderer*rpm libcacard*rpm edk2*rpm SLOF*rpm SDL2*rpm libogg-devel*rpm pcsc-lite-devel*rpm mesa-libgbm-devel*rpm usbredir-devel*rpm opus-devel*rpm gobject-introspection-devel*rpm python3-markdown*rpm virt-manager*rpm virt-viewer*rpm virt-install*rpm virt-backup*rpm passt*rpm qtermwidget*rpm gvnc*rpm gtk-vnc*rpm chunkfs*rpm qt-remote-viewer*rpm qt-virt-manager*rpm liblxqt*rpm libqtxdg*rpm libvirt*rpm osinfo*rpm libosinfo*rpm lxqt-build-tools*rpm python3-libvirt*rpm | grep -Ev 'debuginfo|debugsource|\.src\.rpm'`)
+export INSTALLPKGS=$(echo `ls qemu*rpm spice*rpm opus*rpm usbredir*rpm openbios*rpm capstone*rpm libblkio*rpm lzfse*rpm virglrenderer*rpm libcacard*rpm edk2*rpm SLOF*rpm SDL2*rpm libogg-devel*rpm pcsc-lite-devel*rpm mesa-libgbm-devel*rpm usbredir-devel*rpm opus-devel*rpm gobject-introspection-devel*rpm python3-markdown*rpm virt-manager*rpm virt-viewer*rpm virt-install*rpm virt-backup*rpm passt*rpm libphodav*rpm gvnc*rpm gtk-vnc*rpm chunkfs*rpm osinfo*rpm libosinfo*rpm libvirt*rpm python3-libvirt*rpm | grep -Ev 'qemu-guest-agent|qemu-tests|debuginfo|debugsource|\.src\.rpm'`)
+
+# Add the remmina packages.
+## export INSTALLPKGS=$(echo $INSTALLPKGS `ls remmina*rpm | grep -Ev 'debuginfo|debugsource|\.src\.rpm'`)
+
+# Add the mesa packages.
+## export INSTALLPKGS=$(echo $INSTALLPKGS `ls mesa*rpm | grep -Ev 'debuginfo|debugsource|\.src\.rpm'`)
+
+# Add the avahi packages.
+## export INSTALLPKGS=$(echo $INSTALLPKGS `ls avahi*rpm | grep -Ev 'debuginfo|debugsource|\.src\.rpm'`)
+
+# Add the xorg driver packages.
+## export INSTALLPKGS=$(echo $INSTALLPKGS `ls xorg-x11*rpm | grep -Ev 'debuginfo|debugsource|\.src\.rpm'`)
+
+# Add the pcre2-static package.
+## export INSTALLPKGS=$(echo $INSTALLPKGS `ls pcre2-static-*rpm | grep -Ev 'debuginfo|debugsource|\.src\.rpm'`)
+
+# Add the qt version of virt manager.
+## export INSTALLPKGS=$(echo $INSTALLPKGS `ls qtermwidget*rpm liblxqt*rpm libqtxdg*rpm lxqt-build-tools*rpm qt-remote-viewer*rpm qt-virt-manager*rpm | grep -Ev 'debuginfo|debugsource|\.src\.rpm'`)
 
 # This looks is a list of packages which may have been installed using 
 # the system repos, and are either a) not being replaced/upgraded or 
@@ -34,7 +66,7 @@ export INSTALLPKGS=$(echo `ls qemu*rpm spice*rpm opus*rpm usbredir*rpm openbios*
 # Of note are the qemu-kvm-DEVICES and the virtuiofsd packages. The former
 # are being replaced by packages without "kvm" in the name. And the latter
 # package was renamed to qemu-virtiofsd.
-export REMOVEPKGS=$(echo `echo 'edk2 edk2-aarch64 edk2-arm edk2-debugsource edk2-ext4 edk2-ovmf edk2-ovmf-experimental edk2-ovmf-ia32 edk2-tools edk2-tools-debuginfo edk2-tools-doc edk2-tools-python virtiofsd virtiofsd-debuginfo virtiofsd-debugsource virglrenderer virglrenderer-debuginfo virglrenderer-debugsource virglrenderer-devel virglrenderer-test-server virglrenderer-test-server-debuginfo virt-install virt-manager virt-manager-common virt-viewer virt-viewer-debuginfo virt-viewer-debugsource virt-backup gtk-vnc2 gtk-vnc2-devel gtk-vnc-debuginfo gtk-vnc-debugsource gvnc gvnc-devel gvncpulse gvncpulse-devel gvnc-tools libvirt-client libvirt-client-debuginfo libvirt-daemon libvirt-daemon-config-network libvirt-daemon-debuginfo libvirt-daemon-driver-interface libvirt-daemon-driver-interface-debuginfo libvirt-daemon-driver-network libvirt-daemon-driver-network-debuginfo libvirt-daemon-driver-nodedev libvirt-daemon-driver-nodedev-debuginfo libvirt-daemon-driver-nwfilter libvirt-daemon-driver-nwfilter-debuginfo libvirt-daemon-driver-qemu libvirt-daemon-driver-qemu-debuginfo libvirt-daemon-driver-secret libvirt-daemon-driver-secret-debuginfo libvirt-daemon-driver-storage libvirt-daemon-driver-storage-core libvirt-daemon-driver-storage-core-debuginfo libvirt-daemon-driver-storage-disk libvirt-daemon-driver-storage-disk-debuginfo libvirt-daemon-driver-storage-iscsi libvirt-daemon-driver-storage-iscsi-debuginfo libvirt-daemon-driver-storage-logical libvirt-daemon-driver-storage-logical-debuginfo libvirt-daemon-driver-storage-mpath libvirt-daemon-driver-storage-mpath-debuginfo libvirt-daemon-driver-storage-rbd libvirt-daemon-driver-storage-rbd-debuginfo libvirt-daemon-driver-storage-scsi libvirt-daemon-driver-storage-scsi-debuginfo libvirt-daemon-kvm libvirt-debuginfo libvirt-devel libvirt-glib libvirt-libs libvirt-libs-debuginfo libvirt-lock-sanlock-debuginfo libvirt-nss-debuginfo libvirt-wireshark-debuginfo python3-libvirt qemu-ga-win qemu-guest-agent qemu-guest-agent-debuginfo qemu-img qemu-img-debuginfo qemu-kvm qemu-kvm-audio-pa qemu-kvm-audio-pa-debuginfo qemu-kvm-block-curl qemu-kvm-block-curl-debuginfo qemu-kvm-block-rbd qemu-kvm-block-rbd-debuginfo qemu-kvm-block-ssh-debuginfo qemu-kvm-common qemu-kvm-common-debuginfo qemu-kvm-core qemu-kvm-core-debuginfo qemu-kvm-debuginfo qemu-kvm-debugsource qemu-kvm-device-display-virtio-gpu qemu-kvm-device-display-virtio-gpu-debuginfo qemu-kvm-device-display-virtio-gpu-gl qemu-kvm-device-display-virtio-gpu-gl-debuginfo qemu-kvm-device-display-virtio-gpu-pci qemu-kvm-device-display-virtio-gpu-pci-debuginfo qemu-kvm-device-display-virtio-gpu-pci-gl qemu-kvm-device-display-virtio-gpu-pci-gl-debuginfo qemu-kvm-device-display-virtio-vga qemu-kvm-device-display-virtio-vga-debuginfo qemu-kvm-device-display-virtio-vga-gl qemu-kvm-device-display-virtio-vga-gl-debuginfo qemu-kvm-device-usb-host qemu-kvm-device-usb-host-debuginfo qemu-kvm-device-usb-redirect qemu-kvm-device-usb-redirect-debuginfo qemu-kvm-docs qemu-kvm-tests-debuginfo qemu-kvm-tools qemu-kvm-tools-debuginfo qemu-kvm-ui-egl-headless qemu-kvm-ui-egl-headless-debuginfo qemu-kvm-ui-opengl qemu-kvm-ui-opengl-debuginfo qemu-pr-helper qemu-pr-helper-debuginfo virtiofsd libosinfo libosinfo-debuginfo libosinfo-debugsource python3-libvirt python3-libvirt-debuginfo' | tr ' ' '\n' | while read PKG ; do { rpm --quiet -q $PKG && rpm -q $PKG | grep -v '\.btrh9\.' ; } ; done`)
+export REMOVEPKGS=$(echo `echo 'edk2-debugsource edk2-tools-debuginfo virtiofsd virtiofsd-debuginfo virtiofsd-debugsource virglrenderer-debuginfo virglrenderer-debugsource virglrenderer-test-server-debuginfo virt-install virt-manager virt-manager-common virt-viewer virt-viewer-debuginfo virt-viewer-debugsource virt-backup gtk-vnc2 gtk-vnc2-devel gtk-vnc-debuginfo gtk-vnc-debugsource gvnc gvnc-devel gvncpulse gvncpulse-devel gvnc-tools libvirt-client libvirt-client-debuginfo libvirt-daemon libvirt-daemon-config-network libvirt-daemon-debuginfo libvirt-daemon-driver-interface libvirt-daemon-driver-interface-debuginfo libvirt-daemon-driver-network libvirt-daemon-driver-network-debuginfo libvirt-daemon-driver-nodedev libvirt-daemon-driver-nodedev-debuginfo libvirt-daemon-driver-nwfilter libvirt-daemon-driver-nwfilter-debuginfo libvirt-daemon-driver-qemu libvirt-daemon-driver-qemu-debuginfo libvirt-daemon-driver-secret libvirt-daemon-driver-secret-debuginfo libvirt-daemon-driver-storage libvirt-daemon-driver-storage-core libvirt-daemon-driver-storage-core-debuginfo libvirt-daemon-driver-storage-disk libvirt-daemon-driver-storage-disk-debuginfo libvirt-daemon-driver-storage-iscsi libvirt-daemon-driver-storage-iscsi-debuginfo libvirt-daemon-driver-storage-logical libvirt-daemon-driver-storage-logical-debuginfo libvirt-daemon-driver-storage-mpath libvirt-daemon-driver-storage-mpath-debuginfo libvirt-daemon-driver-storage-rbd libvirt-daemon-driver-storage-rbd-debuginfo libvirt-daemon-driver-storage-scsi libvirt-daemon-driver-storage-scsi-debuginfo libvirt-daemon-kvm libvirt-debuginfo libvirt-devel libvirt-glib libvirt-libs libvirt-libs-debuginfo libvirt-lock-sanlock-debuginfo libvirt-nss-debuginfo libvirt-wireshark-debuginfo python3-libvirt qemu-ga-win qemu-guest-agent qemu-guest-agent-debuginfo qemu-img qemu-img-debuginfo qemu-kvm qemu-kvm-audio-pa qemu-kvm-audio-pa-debuginfo qemu-kvm-block-curl qemu-kvm-block-curl-debuginfo qemu-kvm-block-rbd qemu-kvm-block-rbd-debuginfo qemu-kvm-block-ssh-debuginfo qemu-kvm-common qemu-kvm-common-debuginfo qemu-kvm-core qemu-kvm-core-debuginfo qemu-kvm-debuginfo qemu-kvm-debugsource qemu-kvm-device-display-virtio-gpu qemu-kvm-device-display-virtio-gpu-debuginfo qemu-kvm-device-display-virtio-gpu-gl qemu-kvm-device-display-virtio-gpu-gl-debuginfo qemu-kvm-device-display-virtio-gpu-pci qemu-kvm-device-display-virtio-gpu-pci-debuginfo qemu-kvm-device-display-virtio-gpu-pci-gl qemu-kvm-device-display-virtio-gpu-pci-gl-debuginfo qemu-kvm-device-display-virtio-vga qemu-kvm-device-display-virtio-vga-debuginfo qemu-kvm-device-display-virtio-vga-gl qemu-kvm-device-display-virtio-vga-gl-debuginfo qemu-kvm-device-usb-host qemu-kvm-device-usb-host-debuginfo qemu-kvm-device-usb-redirect qemu-kvm-device-usb-redirect-debuginfo qemu-kvm-docs qemu-kvm-tests-debuginfo qemu-kvm-tools qemu-kvm-tools-debuginfo qemu-kvm-ui-egl-headless qemu-kvm-ui-egl-headless-debuginfo qemu-kvm-ui-opengl qemu-kvm-ui-opengl-debuginfo qemu-pr-helper qemu-pr-helper-debuginfo virtiofsd libosinfo libosinfo-debuginfo libosinfo-debugsource python3-libvirt python3-libvirt-debuginfo' | tr ' ' '\n' | while read PKG ; do { rpm --quiet -q $PKG && rpm -q $PKG | grep -v '\.btrh9\.' ; } ; done`)
 
 # Ensure previous attempts/transactions don't break the install attempt.
 dnf clean all --enablerepo=* &>/dev/null
@@ -44,7 +76,7 @@ dnf clean all --enablerepo=* &>/dev/null
 if [ "$REMOVEPKGS" ]; then
 printf "%s\n" "install $INSTALLPKGS" "remove $REMOVEPKGS" "run" "clean all" "reinstall $INSTALLPKGS" "exit" | dnf shell --assumeyes
 else 
-printf "%s\n" "install $INSTALLPKGS" "reinstall $INSTALLPKGS" "run" "clean all" "reinstall $INSTALLPKGS" "exit" | dnf shell --assumeyes
+printf "%s\n" "install $INSTALLPKGS" "run" "clean all" "reinstall $INSTALLPKGS" "exit" | dnf shell --assumeyes
 fi
 
 [ ! -f /usr/bin/qemu-kvm ] && [ -f /usr/bin/qemu-system-x86_64 ] && sudo ln -s /usr/bin/qemu-system-x86_64 /usr/bin/qemu-kvm
