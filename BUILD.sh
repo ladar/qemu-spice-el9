@@ -189,30 +189,20 @@ dnf --quiet --assumeyes --enablerepo=epel --enablerepo=extras --enablerepo=plus 
  wireshark-devel yajl-devel libsmi sanlock-lib wireshark wireshark-cli sanlock \
  librados-devel librbd-devel mlocate cronie cronie-anacron || exit 1
 
-# capstone / capstone-devel / python3-capstone will be available via the repos when 9.2 ships ...
-curl -LOs https://archive.org/download/capstone-el9/capstone-4.0.2-9.el9.x86_64.rpm 
-curl -LOs https://archive.org/download/capstone-el9/capstone-devel-4.0.2-9.el9.x86_64.rpm
-curl -LOs https://archive.org/download/capstone-el9/python3-capstone-4.0.2-9.el9.x86_64.rpm
 curl -LOs https://archive.org/download/libblkio-eln125/libblkio-1.2.2-2.eln125.x86_64.rpm
 curl -LOs https://archive.org/download/libblkio-eln125/libblkio-devel-1.2.2-2.eln125.x86_64.rpm
 
-sha256sum -c <<-EOF || { printf "\n\e[1;91m# The capstone/libblkio download failed.\e[0;0m\n\n" ; exit 1 ; }
-c9bbc363427bb3b8b1f307dcc8c182a2ccf9b5e20bf82ff5f8b5d60fc29c0676  capstone-4.0.2-9.el9.x86_64.rpm
-7a2e83c57b609ac6dd67f622eddcc62a209088b35b439951ddb5dad754e48538  capstone-devel-4.0.2-9.el9.x86_64.rpm
+sha256sum -c <<-EOF || { printf "\n\e[1;91m# The libblkio download failed.\e[0;0m\n\n" ; exit 1 ; }
 637892248b0875e1b2ca2e14039ca20fa1a7d91f765385040f58e8487dca83ad  libblkio-1.2.2-2.eln125.x86_64.rpm
 6f0ab5cf409c448b32ee9bdf6875d2e8c7557475dc294edf80fbcc478516c25e  libblkio-devel-1.2.2-2.eln125.x86_64.rpm
-8fa3fc7717fd5bf0e0fef87bc46baa52559338b031d92e0789391a0739d278ce  python3-capstone-4.0.2-9.el9.x86_64.rpm
 EOF
 
-dnf --quiet --assumeyes install libblkio-1.2.2-2.eln125.x86_64.rpm libblkio-devel-1.2.2-2.eln125.x86_64.rpm \
-capstone-4.0.2-9.el9.x86_64.rpm capstone-devel-4.0.2-9.el9.x86_64.rpm python3-capstone-4.0.2-9.el9.x86_64.rpm || \
+dnf --quiet --assumeyes --enablerepo=epel --enablerepo=extras --enablerepo=plus --enablerepo=crb install \
+capstone capstone-devel python3-capstone \
+libblkio-1.2.2-2.eln125.x86_64.rpm libblkio-devel-1.2.2-2.eln125.x86_64.rpm || \
 { printf "\n\e[1;91m# The capstone/libblkio install failed.\e[0;0m\n\n" ; exit 1 ; }
 
-rm --force libblkio-1.2.2-2.eln125.x86_64.rpm libblkio-devel-1.2.2-2.eln125.x86_64.rpm \
-capstone-4.0.2-9.el9.x86_64.rpm capstone-devel-4.0.2-9.el9.x86_64.rpm python3-capstone-4.0.2-9.el9.x86_64.rpm
-
-
-
+rm --force libblkio-1.2.2-2.eln125.x86_64.rpm libblkio-devel-1.2.2-2.eln125.x86_64.rpm 
 
 # Enable the locate database update cron job.
 echo "* * * * * root command bash -c '/usr/bin/updatedb'" | sudo tee /etc/cron.d/updatedb > /dev/null
@@ -1130,16 +1120,34 @@ printf "\e[1;92m# The remmina rpmbuild finished.\e[0;0m\n"
 
 
 
-# Download the dependencies needed for installation, which aren't available from the official, 
-# and/or, EPEL repos. They will be added to the collection of binary packages that were just 
-# built.
+# Download various dependencies needed for installation. We add them to the repo as RPMs if 
+# they aren't available from the official, and/or, EPEL repos.
+
+# SDL2
 dnf --quiet --enablerepo=remi --enablerepo=remi-debuginfo --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download SDL2_image SDL2_image-debuginfo SDL2_image-devel SDL2_image-debugsource
-dnf --quiet --enablerepo=baseos --enablerepo=baseos-debug --enablerepo=crb --enablerepo=crb-debuginfo --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download pcsc-lite-devel pcsc-lite-libs pcsc-lite-libs-debuginfo pcsc-lite-devel-debuginfo
+
+# pcsc-lite
+dnf --quiet --enablerepo=baseos --enablerepo=baseos-debug --enablerepo=crb --enablerepo=crb-debuginfo --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download pcsc-lite pcsc-lite-debuginfo pcsc-lite-debugsource pcsc-lite-devel pcsc-lite-devel-debuginfo pcsc-lite-libs pcsc-lite-libs-debuginfo pcsc-lite-ccid pcsc-lite-ccid-debuginfo pcsc-lite-ccid-debugsource
+
+# mesa-libgbm
 dnf --quiet --enablerepo=appstream --enablerepo=appstream-debug --enablerepo=crb --enablerepo=crb-debuginfo --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download mesa-libgbm mesa-libgbm-devel mesa-libgbm-debuginfo
+
+# usbredir
 dnf --quiet --enablerepo=appstream --enablerepo=appstream-debug --enablerepo=crb --enablerepo=crb-debuginfo --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download usbredir usbredir-devel usbredir-debuginfo usbredir-debugsource
+
+# opus
 dnf --quiet --enablerepo=appstream --enablerepo=appstream-debug --enablerepo=crb --enablerepo=crb-debuginfo --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download opus opus-devel opus-debuginfo opus-debugsource
+
+# gobject-introspection
 dnf --quiet --enablerepo=baseos --enablerepo=baseos-debug --enablerepo=crb --enablerepo=crb-debuginfo --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download gobject-introspection gobject-introspection-devel gobject-introspection-debuginfo gobject-introspection-debugsource
+
+# libogg
 dnf --quiet --enablerepo=appstream --enablerepo=appstream-debug --enablerepo=crb --enablerepo=crb-debuginfo --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download libogg libogg-devel libogg-debuginfo libogg-debugsource
+
+# capstone
+dnf --quiet --enablerepo=appstream --enablerepo=appstream-debug --enablerepo=crb --enablerepo=crb-debuginfo --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download capstone capstone-devel capstone-debuginfo capstone-debugsource python3-capstone python3-capstone-debuginfo
+
+# python3-markdown
 dnf --quiet --enablerepo=crb --enablerepo=crb-debuginfo --arch=noarch --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/noarch/ download python3-markdown
 
 # Consolidate the RPMs.
@@ -1148,11 +1156,14 @@ find $HOME/rpmbuild/RPMS/noarch/*rpm $HOME/rpmbuild/RPMS/x86_64/*rpm $HOME/rpmbu
 mv $HOME/rpmbuild/RPMS/noarch/*rpm $HOME/rpmbuild/RPMS/x86_64/*rpm $HOME/rpmbuild/SRPMS/*btrh*rpm $HOME/RPMS/
 
 cd $HOME/RPMS/
-curl -LOs https://archive.org/download/capstone-el9/capstone-4.0.2-9.el9.x86_64.rpm 
-curl -LOs https://archive.org/download/capstone-el9/capstone-devel-4.0.2-9.el9.x86_64.rpm
-curl -LOs https://archive.org/download/capstone-el9/python3-capstone-4.0.2-9.el9.x86_64.rpm
+
 curl -LOs https://archive.org/download/libblkio-eln125/libblkio-1.2.2-2.eln125.x86_64.rpm
 curl -LOs https://archive.org/download/libblkio-eln125/libblkio-devel-1.2.2-2.eln125.x86_64.rpm
+
+sha256sum -c <<-EOF || { printf "\n\e[1;91m# The libblkio download failed.\e[0;0m\n\n" ; exit 1 ; }
+637892248b0875e1b2ca2e14039ca20fa1a7d91f765385040f58e8487dca83ad  libblkio-1.2.2-2.eln125.x86_64.rpm
+6f0ab5cf409c448b32ee9bdf6875d2e8c7557475dc294edf80fbcc478516c25e  libblkio-devel-1.2.2-2.eln125.x86_64.rpm
+EOF
 
 tee $HOME/RPMS/INSTALL.sh <<-EOF > /dev/null
 #!/bin/bash -eu
@@ -1193,7 +1204,7 @@ if [ ! \$(sudo dnf repolist --quiet epel 2>&1 | grep -Eo "^epel") ]; then
 fi
 
 # To generate a current/updated list of RPM files for installation, run the following command.
-export INSTALLPKGS=\$(echo \`ls qemu*rpm spice*rpm opus*rpm usbredir*rpm openbios*rpm capstone*rpm libblkio*rpm lzfse*rpm virglrenderer*rpm libcacard*rpm edk2*rpm SLOF*rpm SDL2*rpm libogg-devel*rpm pcsc-lite-devel*rpm mesa-libgbm-devel*rpm usbredir-devel*rpm opus-devel*rpm gobject-introspection-devel*rpm python3-markdown*rpm virt-manager*rpm virt-viewer*rpm virt-install*rpm virt-backup*rpm passt*rpm libphodav*rpm gvnc*rpm gtk-vnc*rpm chunkfs*rpm osinfo*rpm libosinfo*rpm libvirt*rpm python3-libvirt*rpm | grep -Ev 'qemu-guest-agent|qemu-tests|debuginfo|debugsource|\\.src\\.rpm'\`)
+export INSTALLPKGS=\$(echo \`ls qemu*rpm spice*rpm opus*rpm usbredir*rpm openbios*rpm capstone*rpm python3-capstone*rpm libblkio*rpm lzfse*rpm virglrenderer*rpm libcacard*rpm edk2*rpm SLOF*rpm SDL2*rpm libogg-devel*rpm pcsc-lite*rpm mesa-libgbm-devel*rpm usbredir-devel*rpm opus-devel*rpm gobject-introspection-devel*rpm python3-markdown*rpm virt-manager*rpm virt-viewer*rpm virt-install*rpm virt-backup*rpm passt*rpm libphodav*rpm gvnc*rpm gtk-vnc*rpm chunkfs*rpm osinfo*rpm libosinfo*rpm libvirt*rpm python3-libvirt*rpm | grep -Ev 'qemu-guest-agent|qemu-tests|debuginfo|debugsource|\\.src\\.rpm'\`)
 
 # Add the remmina packages.
 ## export INSTALLPKGS=\$(echo \$INSTALLPKGS \`ls remmina*rpm | grep -Ev 'debuginfo|debugsource|\\.src\\.rpm'\`)
@@ -1223,12 +1234,11 @@ export INSTALLPKGS=\$(echo \`ls qemu*rpm spice*rpm opus*rpm usbredir*rpm openbio
 # Of note are the qemu-kvm-DEVICES and the virtuiofsd packages. The former
 # are being replaced by packages without "kvm" in the name. And the latter
 # package was renamed to qemu-virtiofsd.
-export REMOVEPKGS=\$(echo \`echo 'edk2-debugsource edk2-tools-debuginfo virtiofsd virtiofsd-debuginfo virtiofsd-debugsource virglrenderer-debuginfo virglrenderer-debugsource virglrenderer-test-server-debuginfo virt-install virt-manager virt-manager-common virt-viewer virt-viewer-debuginfo virt-viewer-debugsource virt-backup gtk-vnc2 gtk-vnc2-devel gtk-vnc-debuginfo gtk-vnc-debugsource gvnc gvnc-devel gvncpulse gvncpulse-devel gvnc-tools libvirt-client libvirt-client-debuginfo libvirt-daemon libvirt-daemon-config-network libvirt-daemon-debuginfo libvirt-daemon-driver-interface libvirt-daemon-driver-interface-debuginfo libvirt-daemon-driver-network libvirt-daemon-driver-network-debuginfo libvirt-daemon-driver-nodedev libvirt-daemon-driver-nodedev-debuginfo libvirt-daemon-driver-nwfilter libvirt-daemon-driver-nwfilter-debuginfo libvirt-daemon-driver-qemu libvirt-daemon-driver-qemu-debuginfo libvirt-daemon-driver-secret libvirt-daemon-driver-secret-debuginfo libvirt-daemon-driver-storage libvirt-daemon-driver-storage-core libvirt-daemon-driver-storage-core-debuginfo libvirt-daemon-driver-storage-disk libvirt-daemon-driver-storage-disk-debuginfo libvirt-daemon-driver-storage-iscsi libvirt-daemon-driver-storage-iscsi-debuginfo libvirt-daemon-driver-storage-logical libvirt-daemon-driver-storage-logical-debuginfo libvirt-daemon-driver-storage-mpath libvirt-daemon-driver-storage-mpath-debuginfo libvirt-daemon-driver-storage-rbd libvirt-daemon-driver-storage-rbd-debuginfo libvirt-daemon-driver-storage-scsi libvirt-daemon-driver-storage-scsi-debuginfo libvirt-daemon-kvm libvirt-debuginfo libvirt-devel libvirt-glib libvirt-libs libvirt-libs-debuginfo libvirt-lock-sanlock-debuginfo libvirt-nss-debuginfo libvirt-wireshark-debuginfo python3-libvirt qemu-ga-win qemu-guest-agent qemu-guest-agent-debuginfo qemu-img qemu-img-debuginfo qemu-kvm qemu-kvm-audio-pa qemu-kvm-audio-pa-debuginfo qemu-kvm-block-curl qemu-kvm-block-curl-debuginfo qemu-kvm-block-rbd qemu-kvm-block-rbd-debuginfo qemu-kvm-block-ssh-debuginfo qemu-kvm-common qemu-kvm-common-debuginfo qemu-kvm-core qemu-kvm-core-debuginfo qemu-kvm-debuginfo qemu-kvm-debugsource qemu-kvm-device-display-virtio-gpu qemu-kvm-device-display-virtio-gpu-debuginfo qemu-kvm-device-display-virtio-gpu-gl qemu-kvm-device-display-virtio-gpu-gl-debuginfo qemu-kvm-device-display-virtio-gpu-pci qemu-kvm-device-display-virtio-gpu-pci-debuginfo qemu-kvm-device-display-virtio-gpu-pci-gl qemu-kvm-device-display-virtio-gpu-pci-gl-debuginfo qemu-kvm-device-display-virtio-vga qemu-kvm-device-display-virtio-vga-debuginfo qemu-kvm-device-display-virtio-vga-gl qemu-kvm-device-display-virtio-vga-gl-debuginfo qemu-kvm-device-usb-host qemu-kvm-device-usb-host-debuginfo qemu-kvm-device-usb-redirect qemu-kvm-device-usb-redirect-debuginfo qemu-kvm-docs qemu-kvm-tests-debuginfo qemu-kvm-tools qemu-kvm-tools-debuginfo qemu-kvm-ui-egl-headless qemu-kvm-ui-egl-headless-debuginfo qemu-kvm-ui-opengl qemu-kvm-ui-opengl-debuginfo qemu-pr-helper qemu-pr-helper-debuginfo virtiofsd libosinfo libosinfo-debuginfo libosinfo-debugsource python3-libvirt python3-libvirt-debuginfo' | tr ' ' '\\n' | while read PKG ; do { rpm --quiet -q \$PKG && rpm -q \$PKG | grep -v '\\.btrh9\\.' ; } ; done\`)
+export REMOVEPKGS=\$(echo \`echo 'edk2-debugsource edk2-tools-debuginfo virglrenderer-debuginfo virglrenderer-debugsource virglrenderer-test-server-debuginfo virt-install virt-manager virt-manager-common virt-viewer virt-viewer-debuginfo virt-viewer-debugsource virt-backup gtk-vnc2 gtk-vnc2-devel gtk-vnc-debuginfo gtk-vnc-debugsource gvnc gvnc-devel gvncpulse gvncpulse-devel gvnc-tools libvirt-client libvirt-client-debuginfo libvirt-daemon libvirt-daemon-config-network libvirt-daemon-debuginfo libvirt-daemon-driver-interface libvirt-daemon-driver-interface-debuginfo libvirt-daemon-driver-network libvirt-daemon-driver-network-debuginfo libvirt-daemon-driver-nodedev libvirt-daemon-driver-nodedev-debuginfo libvirt-daemon-driver-nwfilter libvirt-daemon-driver-nwfilter-debuginfo libvirt-daemon-driver-qemu libvirt-daemon-driver-qemu-debuginfo libvirt-daemon-driver-secret libvirt-daemon-driver-secret-debuginfo libvirt-daemon-driver-storage libvirt-daemon-driver-storage-core libvirt-daemon-driver-storage-core-debuginfo libvirt-daemon-driver-storage-disk libvirt-daemon-driver-storage-disk-debuginfo libvirt-daemon-driver-storage-iscsi libvirt-daemon-driver-storage-iscsi-debuginfo libvirt-daemon-driver-storage-logical libvirt-daemon-driver-storage-logical-debuginfo libvirt-daemon-driver-storage-mpath libvirt-daemon-driver-storage-mpath-debuginfo libvirt-daemon-driver-storage-rbd libvirt-daemon-driver-storage-rbd-debuginfo libvirt-daemon-driver-storage-scsi libvirt-daemon-driver-storage-scsi-debuginfo libvirt-daemon-kvm libvirt-debuginfo libvirt-devel libvirt-glib libvirt-libs libvirt-libs-debuginfo libvirt-lock-sanlock-debuginfo libvirt-nss-debuginfo libvirt-wireshark-debuginfo python3-libvirt qemu-ga-win qemu-guest-agent qemu-guest-agent-debuginfo qemu-img qemu-img-debuginfo qemu-kvm qemu-kvm-audio-pa qemu-kvm-audio-pa-debuginfo qemu-kvm-block-curl qemu-kvm-block-curl-debuginfo qemu-kvm-block-rbd qemu-kvm-block-rbd-debuginfo qemu-kvm-block-ssh-debuginfo qemu-kvm-common qemu-kvm-common-debuginfo qemu-kvm-core qemu-kvm-core-debuginfo qemu-kvm-debuginfo qemu-kvm-debugsource qemu-kvm-device-display-virtio-gpu qemu-kvm-device-display-virtio-gpu-debuginfo qemu-kvm-device-display-virtio-gpu-gl qemu-kvm-device-display-virtio-gpu-gl-debuginfo qemu-kvm-device-display-virtio-gpu-pci qemu-kvm-device-display-virtio-gpu-pci-debuginfo qemu-kvm-device-display-virtio-gpu-pci-gl qemu-kvm-device-display-virtio-gpu-pci-gl-debuginfo qemu-kvm-device-display-virtio-vga qemu-kvm-device-display-virtio-vga-debuginfo qemu-kvm-device-display-virtio-vga-gl qemu-kvm-device-display-virtio-vga-gl-debuginfo qemu-kvm-device-usb-host qemu-kvm-device-usb-host-debuginfo qemu-kvm-device-usb-redirect qemu-kvm-device-usb-redirect-debuginfo qemu-kvm-docs qemu-kvm-tests-debuginfo qemu-kvm-tools qemu-kvm-tools-debuginfo qemu-kvm-ui-egl-headless qemu-kvm-ui-egl-headless-debuginfo qemu-kvm-ui-opengl qemu-kvm-ui-opengl-debuginfo qemu-pr-helper qemu-pr-helper-debuginfo virtiofsd libosinfo libosinfo-debuginfo libosinfo-debugsource python3-libvirt python3-libvirt-debuginfo pcsc-lite pcsc-lite-debuginfo pcsc-lite-debugsource pcsc-lite-devel pcsc-lite-devel-debuginfo pcsc-lite-libs pcsc-lite-libs-debuginfo pcsc-lite-ccid pcsc-lite-ccid-debuginfo pcsc-lite-ccid-debugsource' | tr ' ' '\\n' | while read PKG ; do { rpm --quiet -q \$PKG && rpm -q \$PKG | grep -v '\\.btrh9\\.' ; } ; done\`)
 
 # Ensure previous attempts/transactions don't break the install attempt.
 dnf clean all --enablerepo=* &>/dev/null
 
-# The adobe-source-code-pro-fonts package might be required.
 # On the target system, run the following command to install the new version of QEMU.
 if [ "\$REMOVEPKGS" ]; then
 printf "%s\\n" "install \$INSTALLPKGS" "remove \$REMOVEPKGS" "run" "clean all" "reinstall \$INSTALLPKGS" "exit" | dnf shell --assumeyes
@@ -1250,7 +1260,7 @@ chmod 744 $HOME/RPMS/BUILD.sh
 cd $HOME
 dnf --quiet --assumeyes remove edk2* lzfse* mesa* openbios* pcsc* qemu* SDL2* SLOF* spice* virglrenderer* virtiofsd* $(rpm -qa | grep btrh)
 dnf --quiet --enablerepo=* clean all
-dnf --quiet --assumeyes install qemu* libvirt* virt* virtiofsd
+dnf --quiet --assumeyes install qemu* libvirt* virt* 
 dnf --quiet --assumeyes config-manager --disable "remi*" "elrepo*" "rpmfusion*" "crb*"
 
 # This quiets DNF by default, which allows INSTALL.sh to run silently on the virtual 
@@ -1275,8 +1285,5 @@ mv $HOME/RPMS/ /home/vagrant/RPMS/
 chmod 744 /home/vagrant/RPMS/ /home/vagrant//RPMS/INSTALL.sh /home/vagrant//RPMS/BUILD.sh
 chmod 644 /home/vagrant/RPMS/*rpm
 chown -R vagrant:vagrant /home/vagrant/RPMS/
-
-source /etc/os-release
-[ "$REDHAT_SUPPORT_PRODUCT_VERSION" == "9.2" ] && printf "\n\e[1;91m# It appears RHEL v9.2 has shipped. The capstone libs can probably be removed.\e[0;0m"
 
 printf "\n\nAll done.\n\n"
