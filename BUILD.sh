@@ -174,20 +174,60 @@ dnf --quiet --assumeyes --allowerasing \
  texlive-section texlive-sectsty texlive-seminar texlive-sepnum \
  texlive-stackengine texlive-tabu texlive-textcase texlive-tocloft \
  texlive-translator texlive-typehtml texlive-ucharcat texlive-ulem \
- texlive-xltxtra texlive-xtab tpm2-pkcs11 tpm2-pkcs11-tools  \
+ texlive-xltxtra texlive-xtab tpm2-pkcs11 tpm2-pkcs11-tools wireshark wireshark-cli \
  doxygen-latex json-c-devel libcmocka trousers trousers-devel \
  trousers-static python3-flake8 python3-mccabe gcc-riscv64-linux-gnu binutils-riscv64-linux-gnu \
  python3-pycodestyle python3-pyflakes clang-devel clang-analyzer nfs-utils virtiofsd \
- iscsi-initiator-utils lzop swtpm-tools systemd-container mdevctl nethogs || exit 1
+ iscsi-initiator-utils lzop swtpm-tools systemd-container mdevctl nethogs kf5-kwallet-devel \
+ libappindicator-gtk3-devel libsecret-devel vte291-devel webkit2gtk3-devel webkit2gtk3-jsc-devel \
+ kf5-kwindowsystem-devel krdc-devel libseccomp-devel opensc polkit-qt5-1-devel qt5-linguist \
+ qt5-qtbase-private-devel qt5-qtmultimedia-devel qt5-qttools-devel wireshark-devel qt5-designer \
+ qt5-doctools qt5-qtdeclarative-devel qt5-qttools qt5-qttools-common qt5-qttools-libs-designer \
+ qt5-qttools-libs-designercomponents qt5-qttools-libs-help libpcap-devel augeas-devel \
+ createrepo_c createrepo_c-libs gjs gperf hivex-devel icoutils jansson-devel libconfig-devel \
+ lua-devel lua-rpm-macros netpbm netpbm-progs ocaml ocaml-compiler-libs ocaml-fileutils \
+ ocaml-fileutils-devel ocaml-findlib ocaml-findlib-devel ocaml-gettext ocaml-gettext-devel \
+ ocaml-hivex ocaml-hivex-devel ocaml-ocamldoc ocaml-runtime perl-Devel-Symdump perl-Locale-gettext \
+ perl-Pod-Coverage perl-Test-Pod perl-Test-Pod-Coverage perl-Text-CharWidth perl-Text-WrapI18N \
+ perl-YAML-Tiny po4a ruby ruby-default-gems ruby-devel ruby-libs rubygem-bigdecimal rubygem-bundler \
+ rubygem-io-console rubygem-irb rubygem-json rubygem-power_assert rubygem-psych rubygem-rake \
+ rubygem-rdoc rubygem-test-unit rubygems supermin-devel perl-hivex attr cryptsetup dhclient \
+ syslinux syslinux-extlinux dhcp-common ipcalc syslinux-extlinux-nonlinux syslinux-nonlinux \
+ geolite2-city geolite2-country perl-Expect perl-IO-Tty libldm-devel libldm php-devel \
+ php-cli php-common php-fedora-autoloader php-nikic-php-parser4 golang golang-src golang-bin \
+ debootstrap keyrings-filesystem dpkg debian-keyring ubu-keyring hfsplus-tools kpartx \
+ ntfs-3g ntfsprogs ntfs-3g-system-compression ntfs-3g-libs which zerofree hexedit || exit 1
 
-# Packages needed to enable X11 forwarding support.
-dnf --quiet --assumeyes --enablerepo=epel --enablerepo=extras --enablerepo=plus --enablerepo=crb \
---exclude=minizip1.2 --exclude=minizip1.2-devel install \
+# Packages needed to enable X11 forwarding support along with some graphical tools
+# which are helpful when we need to troubleshoot. 
+dnf --quiet --assumeyes --enablerepo=baseos --enablerepo=appstream --enablerepo=epel \
+--enablerepo=extras --enablerepo=plus --enablerepo=crb --exclude=minizip1.2 \
+--exclude=minizip1.2-devel install \
  dbus-x11 xorg-x11-xauth xorg-x11-server-common xorg-x11-server-Xorg xorg-x11-server-Xwayland \
  libvala vala libvala-devel libssh2 libssh2-devel numactl numactl-devel augeas device-mapper-devel\
- libpcap-devel libarchive-devel libtirpc-devel parted-devel rpcgen sanlock-devel scrub \
- wireshark-devel yajl-devel libsmi sanlock-lib wireshark wireshark-cli sanlock \
- librados-devel librbd-devel mlocate cronie cronie-anacron || exit 1
+ libarchive-devel libtirpc-devel parted-devel rpcgen sanlock-devel scrub \
+ yajl-devel libsmi sanlock-lib  sanlock librados-devel librbd-devel mlocate cronie \
+ cronie-anacron gedit gedit-plugin-bookmarks gedit-plugin-bracketcompletion \
+ gedit-plugin-codecomment gedit-plugin-colorpicker gedit-plugin-colorschemer \
+ gedit-plugin-commander gedit-plugin-drawspaces gedit-plugin-findinfiles \
+ gedit-plugin-joinlines gedit-plugin-multiedit gedit-plugin-sessionsaver \
+ gedit-plugin-smartspaces gedit-plugin-synctex gedit-plugin-terminal \
+ gedit-plugin-textsize gedit-plugin-translate gedit-plugin-wordcompletion gedit-plugins \
+ gedit-plugins-data gspell gvfs http-parser libpeas-gtk libpeas-loader-python3 xterm \
+ xterm-resize zenity libpeas gtkspell3 ctpl-libs geany geany-devel geany-libgeany \
+ geany-plugins-addons geany-plugins-autoclose geany-plugins-automark geany-plugins-codenav \
+ geany-plugins-commander geany-plugins-common geany-plugins-debugger \
+ geany-plugins-defineformat geany-plugins-geanyctags geany-plugins-geanydoc \
+ geany-plugins-geanyextrasel geany-plugins-geanygendoc geany-plugins-geanyinsertnum \
+ geany-plugins-geanymacro geany-plugins-geanyminiscript geany-plugins-geanynumberedbookmarks \
+ geany-plugins-geanypg geany-plugins-geanyprj geany-plugins-geanyvc geany-plugins-geniuspaste \
+ geany-plugins-git-changebar geany-plugins-keyrecord geany-plugins-latex \
+ geany-plugins-lineoperations geany-plugins-lipsum geany-plugins-markdown geany-plugins-overview \
+ geany-plugins-pairtaghighlighter geany-plugins-pohelper geany-plugins-pretty-printer \
+ geany-plugins-projectorganizer geany-plugins-scope geany-plugins-sendmail geany-plugins-shiftcolumn \
+ geany-plugins-spellcheck geany-plugins-tableconvert geany-plugins-treebrowser \
+ geany-plugins-updatechecker geany-plugins-vimode geany-plugins-workbench geany-plugins-xmlsnippets \
+ gedit-plugin-editorconfig libgit2 python3-editorconfig meld || exit 1
 
 curl -LOs https://archive.org/download/libblkio-eln125/libblkio-1.2.2-2.eln125.x86_64.rpm
 curl -LOs https://archive.org/download/libblkio-eln125/libblkio-devel-1.2.2-2.eln125.x86_64.rpm
@@ -238,7 +278,6 @@ sha256sum -c <<-EOF || { printf "\n\e[1;91m# The xorg-x11-drv-qxl download faile
 1c7b841d20cc9da69c1ff9716d4a0231b3d35e3a88145786b3da892246f73e31  xorg-x11-drv-qxl-0.1.5-11.el8.src.rpm
 EOF
 
-
 # Fedora Release Repo
 # https://mirrors.kernel.org/fedora/linux/releases/##/Everything/source/tree
 # Fedora Update Repo
@@ -253,7 +292,7 @@ EOF
 # https://archives.fedoraproject.org/pub/archive/fedora/linux/updates/##/Everything/source/tree
 
 dnf download --quiet --source mesa avahi pcre2 || exit 1
-dnf download --quiet --disablerepo=* --repofrompath="fc36,https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/36/Everything/source/tree" --repofrompath="fc36-updates,https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/36/Everything/source/tree" --source phodav spice-gtk || exit 1
+dnf download --quiet --disablerepo=* --repofrompath="fc36,https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/36/Everything/source/tree" --repofrompath="fc36-updates,https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/36/Everything/source/tree" --source phodav spice-gtk libguestfs guestfs-tools || exit 1
 dnf download --quiet --disablerepo=* --repofrompath="fc38,https://mirrors.kernel.org/fedora/releases/38/Everything/source/tree" --repofrompath="fc38-updates,https://mirrors.kernel.org/fedora/updates/38/Everything/source/tree" --source libvirt-designer || exit 1
 dnf download --quiet --disablerepo=* --repofrompath="rawhide,https://mirrors.kernel.org/fedora/development/rawhide/Everything/source/tree" --source edk2 fcode-utils libcacard lzfse openbios python-pefile python-virt-firmware qemu SLOF spice spice-protocol virglrenderer virt-manager virt-viewer virt-backup passt libvirt libvirt-glib libvirt-dbus libvirt-python osinfo-db-tools libosinfo qt-virt-manager qtermwidget lxqt-build-tools liblxqt libqtxdg chunkfs gtk-vnc remmina xorg-x11-drv-nouveau || exit 1
 rpm -i *src.rpm || exit 1
@@ -456,21 +495,456 @@ index fde84ff..463df9d 100644
  %files ui
 PATCH
 
+patch -p1 <<-PATCH 
+diff --git a/remmina.spec b/remmina.spec
+index 978bc3c..82c7dd8 100644
+--- a/remmina.spec
++++ b/remmina.spec
+@@ -29,10 +29,8 @@ BuildRequires: libsodium-devel
+ BuildRequires: python3-devel
+ BuildRequires: xdg-utils
+ BuildRequires: pkgconfig(appindicator3-0.1)
+-%if 0%{?fedora} || 0%{?rhel} == 8
+ BuildRequires: pkgconfig(avahi-ui)
+ BuildRequires: pkgconfig(avahi-ui-gtk3)
+-%endif
+ BuildRequires: pkgconfig(freerdp2)
+ BuildRequires: pkgconfig(gtk+-3.0)
+ BuildRequires: pkgconfig(json-glib-1.0)
+@@ -45,9 +43,7 @@ BuildRequires: pkgconfig(libsoup-2.4)
+ BuildRequires: pkgconfig(libssh) >= 0.8.0
+ BuildRequires: pkgconfig(libvncserver)
+ BuildRequires: pkgconfig(libpcre2-8)
+-%if 0%{?fedora} || 0%{?rhel} == 8
+ BuildRequires: pkgconfig(spice-client-gtk-3.0)
+-%endif
+ BuildRequires: pkgconfig(vte-2.91)
+ %if 0%{?fedora} >= 37
+ BuildRequires: pkgconfig(webkit2gtk-4.1)
+@@ -136,7 +132,6 @@ computers in front of either large monitors or tiny net-books.
+ This package contains the VNC plugin for the Remmina remote desktop
+ client.
+ 
+-%if 0%{?fedora} || 0%{?rhel} == 8
+ %package plugins-spice
+ Summary: SPICE plugin for Remmina Remote Desktop Client
+ Requires: %{name}%{?_isa} = %{version}-%{release}
+@@ -148,7 +143,6 @@ computers in front of either large monitors or tiny net-books.
+ 
+ This package contains the SPICE plugin for the Remmina remote desktop
+ client.
+-%endif
+ 
+ %package plugins-www
+ Summary: WWW plugin for Remmina Remote Desktop Client
+@@ -221,11 +215,7 @@ that shows up under the display manager session menu.
+     -DCMAKE_INSTALL_LIBDIR=%{_lib} \\
+     -DCMAKE_INSTALL_PREFIX=%{_prefix} \\
+     -DHAVE_LIBAPPINDICATOR=ON \\
+-%if 0%{?fedora} || 0%{?rhel} == 8
+     -DWITH_AVAHI=ON \\
+-%else
+-    -DWITH_AVAHI=OFF \\
+-%endif
+     -DWITH_FREERDP=ON \\
+     -DWITH_GCRYPT=ON \\
+     -DWITH_GETTEXT=ON \\
+@@ -234,11 +224,7 @@ that shows up under the display manager session menu.
+     -DWITH_LIBSSH=ON \\
+     -DWITH_NEWS=OFF \\
+     -DWITH_PYTHONLIBS=ON \\
+-%if 0%{?fedora} || 0%{?rhel} == 8
+     -DWITH_SPICE=ON \\
+-%else
+-    -DWITH_SPICE=OFF \\
+-%endif
+     -DWITH_VTE=ON \\
+ %if 0%{?fedora} || 0%{?rhel} == 8
+     -DWITH_X2GO=ON
+@@ -301,12 +287,10 @@ appstream-util validate-relax --nonet %{buildroot}/%{_datadir}/metainfo/*.appdat
+ %{_datadir}/icons/hicolor/*/emblems/org.remmina.Remmina-vnc-ssh-symbolic.svg
+ %{_datadir}/icons/hicolor/*/emblems/org.remmina.Remmina-vnc-symbolic.svg
+ 
+-%if 0%{?fedora} || 0%{?rhel} == 8
+ %files plugins-spice
+ %{_libdir}/remmina/plugins/remmina-plugin-spice.so
+ %{_datadir}/icons/hicolor/*/emblems/org.remmina.Remmina-spice-ssh-symbolic.svg
+ %{_datadir}/icons/hicolor/*/emblems/org.remmina.Remmina-spice-symbolic.svg
+-%endif
+ 
+ %files plugins-www
+ %{_libdir}/remmina/plugins/remmina-plugin-www.so
+PATCH
+
+patch -p1 <<-PATCH
+diff --git a/libguestfs.spec b/libguestfs.spec
+index 359e6a8..ab5848f 100644
+--- a/libguestfs.spec
++++ b/libguestfs.spec
+@@ -117,10 +117,8 @@ BuildRequires: rpm-devel
+ BuildRequires: cpio
+ BuildRequires: libconfig-devel
+ BuildRequires: xz-devel
+-%if !0%{?rhel}
+ BuildRequires: zip
+ BuildRequires: unzip
+-%endif
+ BuildRequires: systemd-units
+ BuildRequires: netpbm-progs
+ BuildRequires: icoutils
+@@ -130,9 +128,7 @@ BuildRequires: perl(Expect)
+ %endif
+ BuildRequires: libacl-devel
+ BuildRequires: libcap-devel
+-%if !0%{?rhel}
+ BuildRequires: libldm-devel
+-%endif
+ BuildRequires: jansson-devel
+ BuildRequires: systemd-devel
+ BuildRequires: bash-completion
+@@ -173,14 +169,10 @@ BuildRequires: rubygem(json)
+ BuildRequires: rubygem(rdoc)
+ BuildRequires: rubygem(test-unit)
+ BuildRequires: ruby-irb
+-%if !0%{?rhel}
+ BuildRequires: php-devel
+-%endif
+ BuildRequires: gobject-introspection-devel
+ BuildRequires: gjs
+-%if !0%{?rhel}
+ BuildRequires: vala
+-%endif
+ %ifarch %{golang_arches}
+ BuildRequires: golang
+ %endif
+@@ -204,10 +196,8 @@ BuildRequires: bzip2
+ BuildRequires: coreutils
+ BuildRequires: cpio
+ BuildRequires: cryptsetup
+-%if !0%{?rhel}
+ BuildRequires: curl
+ BuildRequires: debootstrap
+-%endif
+ BuildRequires: dhclient
+ BuildRequires: diffutils
+ BuildRequires: dosfstools
+@@ -221,24 +211,18 @@ BuildRequires: gfs2-utils
+ %endif
+ BuildRequires: grep
+ BuildRequires: gzip
+-%if !0%{?rhel}
+ %ifnarch ppc
+ BuildRequires: hfsplus-tools
+ %endif
+-%endif
+ BuildRequires: hivex-libs
+ BuildRequires: iproute
+ BuildRequires: iputils
+ BuildRequires: kernel
+ BuildRequires: kmod
+-%if !0%{?rhel}
+ BuildRequires: kpartx
+-%endif
+ BuildRequires: less
+ BuildRequires: libcap
+-%if !0%{?rhel}
+ BuildRequires: libldm
+-%endif
+ BuildRequires: libselinux
+ BuildRequires: libxml2
+ BuildRequires: lsof
+@@ -246,9 +230,7 @@ BuildRequires: lsscsi
+ BuildRequires: lvm2
+ BuildRequires: lzop
+ BuildRequires: mdadm
+-%if !0%{?rhel}
+ BuildRequires: ntfs-3g ntfsprogs ntfs-3g-system-compression
+-%endif
+ BuildRequires: openssh-clients
+ BuildRequires: parted
+ BuildRequires: pciutils
+@@ -274,15 +256,11 @@ BuildRequires: tar
+ BuildRequires: udev
+ BuildRequires: util-linux
+ BuildRequires: vim-minimal
+-%if !0%{?rhel}
+ BuildRequires: which
+-%endif
+ BuildRequires: xfsprogs
+ BuildRequires: xz
+ BuildRequires: yajl
+-%if !0%{?rhel}
+ BuildRequires: zerofree
+-%endif
+ %if !0%{?rhel}
+ %ifnarch %{arm} aarch64 s390 s390x riscv64
+ # http://zfs-fuse.net/issues/94
+@@ -321,15 +299,13 @@ Requires:      tar
+ 
+ # For qemu direct and libvirt backends.
+ Requires:      qemu-kvm-core
+-%if !0%{?rhel}
+ Suggests:      qemu-block-curl
++%if !0%{?rhel}
+ Suggests:      qemu-block-gluster
+-Suggests:      qemu-block-iscsi
+ %endif
++Suggests:      qemu-block-iscsi
+ Suggests:      qemu-block-rbd
+-%if !0%{?rhel}
+ Suggests:      qemu-block-ssh
+-%endif
+ Recommends:    libvirt-daemon-config-network
+ Requires:      libvirt-daemon-driver-qemu >= 7.1.0
+ Requires:      libvirt-daemon-driver-secret
+@@ -355,7 +331,6 @@ Conflicts:     libguestfs-winsupport
+ Conflicts:     libguestfs-winsupport < 7.2
+ %endif
+ 
+-
+ %description
+ Libguestfs is a library for accessing and modifying virtual machine
+ disk images.  http://libguestfs.org
+@@ -370,14 +345,12 @@ For enhanced features, install:
+ %if !0%{?rhel}
+      libguestfs-forensics  adds filesystem forensics support
+           libguestfs-gfs2  adds Global Filesystem (GFS2) support
+-       libguestfs-hfsplus  adds HFS+ (Mac filesystem) support
+ %endif
++       libguestfs-hfsplus  adds HFS+ (Mac filesystem) support
+  libguestfs-inspect-icons  adds support for inspecting guest icons
+         libguestfs-rescue  enhances virt-rescue shell with more tools
+          libguestfs-rsync  rsync to/from guest filesystems
+-%if !0%{?rhel}
+            libguestfs-ufs  adds UFS (BSD) support
+-%endif
+            libguestfs-xfs  adds XFS support
+ %if !0%{?rhel}
+            libguestfs-zfs  adds ZFS support
+@@ -396,14 +369,10 @@ Language bindings:
+               lua-guestfs  Lua bindings
+    ocaml-libguestfs-devel  OCaml bindings
+          perl-Sys-Guestfs  Perl bindings
+-%if !0%{?rhel}
+            php-libguestfs  PHP bindings
+-%endif
+        python3-libguestfs  Python 3 bindings
+           ruby-libguestfs  Ruby bindings
+-%if !0%{?rhel}
+           libguestfs-vala  Vala language bindings
+-%endif
+ 
+ 
+ %package appliance
+@@ -465,7 +434,6 @@ disk images containing GFS2.
+ %endif
+ 
+ 
+-%if !0%{?rhel}
+ %ifnarch ppc
+ %package hfsplus
+ Summary:       HFS+ support for %{name}
+@@ -476,7 +444,6 @@ Requires:      %{name}%{?_isa} = %{epoch}:%{version}-%{release}
+ This adds HFS+ support to %{name}.  Install it if you want to process
+ disk images containing HFS+ / Mac OS Extended filesystems.
+ %endif
+-%endif
+ 
+ 
+ %package rescue
+@@ -499,7 +466,6 @@ This adds rsync support to %{name}.  Install it if you want to use
+ rsync to upload or download files into disk images.
+ 
+ 
+-%if !0%{?rhel}
+ %package ufs
+ Summary:       UFS (BSD) support for %{name}
+ License:       LGPLv2+
+@@ -508,7 +474,6 @@ Requires:      %{name}%{?_isa} = %{epoch}:%{version}-%{release}
+ %description ufs
+ This adds UFS support to %{name}.  Install it if you want to process
+ disk images containing UFS (BSD filesystems).
+-%endif
+ 
+ 
+ %package xfs
+@@ -619,7 +584,6 @@ Provides:      ruby(guestfs) = %{version}
+ ruby-%{name} contains Ruby bindings for %{name}.
+ 
+ 
+-%if !0%{?rhel}
+ %package -n php-%{name}
+ Summary:       PHP bindings for %{name}
+ Requires:      %{name}%{?_isa} = %{epoch}:%{version}-%{release}
+@@ -628,7 +592,6 @@ Requires: php(api) = %{php_core_api}
+ 
+ %description -n php-%{name}
+ php-%{name} contains PHP bindings for %{name}.
+-%endif
+ 
+ 
+ %package -n lua-guestfs
+@@ -662,7 +625,6 @@ This package is needed if you want to write software using the
+ GObject bindings.  It also contains GObject Introspection information.
+ 
+ 
+-%if !0%{?rhel}
+ %package vala
+ Summary:       Vala for %{name}
+ Requires:      %{name}-devel%{?_isa} = %{epoch}:%{version}-%{release}
+@@ -671,7 +633,6 @@ Requires:      vala
+ 
+ %description vala
+ %{name}-vala contains GObject bindings for %{name}.
+-%endif
+ 
+ 
+ 
+@@ -751,9 +712,6 @@ else
+ fi
+ 
+ %{configure} \\
+-%if 0%{?rhel} && !0%{?eln}
+-  QEMU=%{_libexecdir}/qemu-kvm \\
+-%endif
+   PYTHON=%{__python3} \\
+   --with-default-backend=libvirt \\
+   --enable-appliance-format-auto \\
+@@ -762,10 +720,6 @@ fi
+ %else
+   --with-extra="rhel=%{rhel},release=%{release},libvirt" \\
+ %endif
+-%if 0%{?rhel} && !0%{?eln}
+-  --with-qemu="qemu-kvm qemu-system-%{_build_arch} qemu" \\
+-  --disable-php \\
+-%endif
+ %ifnarch %{golang_arches}
+   --disable-golang \\
+ %endif
+@@ -837,28 +791,19 @@ function move_to
+     echo "\$1" >> "\$2"
+ }
+ 
+-%if !0%{?rhel}
+-move_to curl            zz-packages-dib
+-move_to debootstrap     zz-packages-dib
+-move_to kpartx          zz-packages-dib
+-move_to qemu-img        zz-packages-dib
+-move_to which           zz-packages-dib
+-%else
+-remove curl
+-remove debootstrap
+-remove kpartx
+-remove qemu-img
+-remove which
+-%endif
+ %if !0%{?rhel}
+ move_to sleuthkit       zz-packages-forensics
+ move_to gfs2-utils      zz-packages-gfs2
+-move_to hfsplus-tools   zz-packages-hfsplus
+ %else
+ remove sleuthkit
+ remove gfs2-utils
+-remove hfsplus-tools
+ %endif
++move_to curl            zz-packages-dib
++move_to debootstrap     zz-packages-dib
++move_to kpartx          zz-packages-dib
++move_to qemu-img        zz-packages-dib
++move_to which           zz-packages-dib
++move_to hfsplus-tools   zz-packages-hfsplus
+ move_to iputils         zz-packages-rescue
+ move_to lsof            zz-packages-rescue
+ move_to openssh-clients zz-packages-rescue
+@@ -875,11 +820,9 @@ move_to zfs-fuse        zz-packages-zfs
+ remove zfs-fuse
+ %endif
+ 
+-%if !0%{?rhel}
+ # On Fedora you need kernel-modules-extra to be able to mount
+ # UFS (BSD) filesystems.
+ echo "kernel-modules-extra" > zz-packages-ufs
+-%endif
+ 
+ popd
+ 
+@@ -973,12 +916,10 @@ rm ocaml/html/.gitignore
+ %{_libdir}/guestfs/supermin.d/zz-packages-gfs2
+ %endif
+ 
+-%if !0%{?rhel}
+ %ifnarch ppc
+ %files hfsplus
+ %{_libdir}/guestfs/supermin.d/zz-packages-hfsplus
+ %endif
+-%endif
+ 
+ %files rsync
+ %{_libdir}/guestfs/supermin.d/zz-packages-rsync
+@@ -988,10 +929,8 @@ rm ocaml/html/.gitignore
+ %{_bindir}/virt-rescue
+ %{_mandir}/man1/virt-rescue.1*
+ 
+-%if !0%{?rhel}
+ %files ufs
+ %{_libdir}/guestfs/supermin.d/zz-packages-ufs
+-%endif
+ 
+ %files xfs
+ %{_libdir}/guestfs/supermin.d/zz-packages-xfs
+@@ -1063,13 +1002,11 @@ rm ocaml/html/.gitignore
+ %{_mandir}/man3/guestfs-ruby.3*
+ 
+ 
+-%if !0%{?rhel}
+ %files -n php-%{name}
+ %doc php/README-PHP
+ %dir %{_sysconfdir}/php.d
+ %{_sysconfdir}/php.d/guestfs_php.ini
+ %{_libdir}/php/modules/guestfs_php.so
+-%endif
+ 
+ 
+ %files -n lua-guestfs
+@@ -1094,11 +1031,9 @@ rm ocaml/html/.gitignore
+ %{_mandir}/man3/guestfs-gobject.3*
+ 
+ 
+-%if !0%{?rhel}
+ %files vala
+ %{_datadir}/vala/vapi/libguestfs-gobject-1.0.deps
+ %{_datadir}/vala/vapi/libguestfs-gobject-1.0.vapi
+-%endif
+ 
+ 
+ %ifarch %{golang_arches}
+@@ -4978,3 +4913,4 @@ rm ocaml/html/.gitignore
+ 
+ * Sat Apr  4 2009 Richard Jones <rjones@redhat.com> - 0.9.9-1
+ - Initial build.
++
+PATCH
+
 patch -p1 <<-PATCH
 diff --git a/qemu.spec b/qemu.spec
-index 0472a1b..5f264f1 100644
+index 0472a1b..2f41096 100644
 --- a/qemu.spec
 +++ b/qemu.spec
-@@ -6,7 +6,7 @@
- %global libfdt_version 1.6.0
- %global libseccomp_version 2.4.0
- %global libusbx_version 1.0.23
--%global meson_version 0.61.3
-+%global meson_version 0.58.2
- %global usbredir_version 0.7.1
- %global ipxe_version 20200823-5.git4bd064de
- 
-@@ -55,7 +55,7 @@
+@@ -14,11 +14,13 @@
+ %global need_qemu_kvm 0
+ %ifarch %{ix86}
+ %global kvm_package   system-x86
++%global kvm_target    i386
+ # need_qemu_kvm should only ever be used by x86
+ %global need_qemu_kvm 1
+ %endif
+ %ifarch x86_64
+ %global kvm_package   system-x86
++%global kvm_target    x86_64
+ # need_qemu_kvm should only ever be used by x86
+ %global need_qemu_kvm 1
+ %endif
+@@ -55,7 +57,7 @@
  %global user_static 1
  %if 0%{?rhel}
  # EPEL/RHEL do not have required -static builddeps
@@ -479,7 +953,7 @@ index 0472a1b..5f264f1 100644
  %endif
  
  %global have_kvm 0
-@@ -75,7 +75,7 @@
+@@ -75,7 +77,7 @@
  %global have_spice 0
  %endif
  %if 0%{?rhel} >= 9
@@ -488,7 +962,7 @@ index 0472a1b..5f264f1 100644
  %endif
  
  # Matches xen ExclusiveArch
-@@ -87,14 +87,14 @@
+@@ -87,14 +89,14 @@
  %endif
  
  %global have_liburing 0
@@ -505,7 +979,7 @@ index 0472a1b..5f264f1 100644
  %global have_virgl 1
  %endif
  
-@@ -114,13 +114,10 @@
+@@ -114,13 +116,10 @@
  %global have_dbus_display 0
  %endif
  
@@ -521,7 +995,7 @@ index 0472a1b..5f264f1 100644
  %global have_fdt 1
  %global have_opengl 1
  %global have_usbredir 1
-@@ -157,7 +154,7 @@
+@@ -157,7 +156,7 @@
  
  %define have_libcacard 1
  %if 0%{?rhel} >= 9
@@ -530,7 +1004,7 @@ index 0472a1b..5f264f1 100644
  %endif
  
  # LTO still has issues with qemu on armv7hl and aarch64
-@@ -202,7 +199,6 @@
+@@ -202,7 +201,6 @@
  %define requires_audio_alsa Requires: %{name}-audio-alsa = %{evr}
  %define requires_audio_oss Requires: %{name}-audio-oss = %{evr}
  %define requires_audio_pa Requires: %{name}-audio-pa = %{evr}
@@ -538,7 +1012,7 @@ index 0472a1b..5f264f1 100644
  %define requires_audio_sdl Requires: %{name}-audio-sdl = %{evr}
  %define requires_char_baum Requires: %{name}-char-baum = %{evr}
  %define requires_device_usb_host Requires: %{name}-device-usb-host = %{evr}
-@@ -288,7 +284,6 @@
+@@ -288,7 +286,6 @@
  %{requires_audio_dbus} \\
  %{requires_audio_oss} \\
  %{requires_audio_pa} \\
@@ -546,7 +1020,7 @@ index 0472a1b..5f264f1 100644
  %{requires_audio_sdl} \\
  %{requires_audio_jack} \\
  %{requires_audio_spice} \\
-@@ -343,7 +338,7 @@ Summary: QEMU is a FAST! processor emulator
+@@ -343,7 +340,7 @@ Summary: QEMU is a FAST! processor emulator
  Name: qemu
  Version: 8.1.0
  Release: %{baserelease}%{?rcrel}%{?dist}
@@ -555,7 +1029,15 @@ index 0472a1b..5f264f1 100644
  License: Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND FSFAP AND GPL-1.0-or-later AND GPL-2.0-only AND GPL-2.0-or-later AND GPL-2.0-or-later with GCC-exception-2.0 exception AND LGPL-2.0-only AND LGPL-2.0-or-later AND LGPL-2.1-only and LGPL-2.1-or-later AND MIT and public-domain and CC-BY-3.0
  URL: http://www.qemu.org/
  
-@@ -515,16 +510,11 @@ BuildRequires: SDL2_image-devel
+@@ -361,6 +358,7 @@ Source31: kvm-x86.conf
+ Source36: README.tests
+ 
+ Patch0001: 0001-tests-Disable-iotests-like-RHEL-does.patch
++#Patch0005: 0005-Enable-disable-devices-for-RHEL.patch
+ 
+ BuildRequires: meson >= %{meson_version}
+ BuildRequires: bison
+@@ -515,16 +513,11 @@ BuildRequires: SDL2_image-devel
  # Used by vnc-display-test
  BuildRequires: pkgconfig(gvnc-1.0)
  %endif
@@ -572,7 +1054,7 @@ index 0472a1b..5f264f1 100644
  
  
  # Requires for the Fedora 'qemu' metapackage
-@@ -755,12 +745,6 @@ Requires: %{name}-common%{?_isa} = %{epoch}:%{version}-%{release}
+@@ -755,12 +748,6 @@ Requires: %{name}-common%{?_isa} = %{epoch}:%{version}-%{release}
  %description audio-pa
  This package provides the additional PulseAudio audio driver for QEMU.
  
@@ -585,7 +1067,7 @@ index 0472a1b..5f264f1 100644
  %package  audio-sdl
  Summary: QEMU SDL audio driver
  Requires: %{name}-common%{?_isa} = %{epoch}:%{version}-%{release}
-@@ -1514,7 +1498,6 @@ mkdir -p %{static_builddir}
+@@ -1514,7 +1501,6 @@ mkdir -p %{static_builddir}
    --disable-linux-user             \\\\\\
    --disable-live-block-migration   \\\\\\
    --disable-lto                    \\\\\\
@@ -593,7 +1075,7 @@ index 0472a1b..5f264f1 100644
    --disable-lzo                    \\\\\\
    --disable-malloc-trim            \\\\\\
    --disable-membarrier             \\\\\\
-@@ -1693,7 +1676,6 @@ run_configure \\
+@@ -1693,7 +1679,6 @@ run_configure \\
    --enable-oss \\
    --enable-pa \\
    --enable-pie \\
@@ -601,7 +1083,7 @@ index 0472a1b..5f264f1 100644
  %if %{have_block_rbd}
    --enable-rbd \\
  %endif
-@@ -1726,7 +1708,7 @@ run_configure \\
+@@ -1726,7 +1711,7 @@ run_configure \\
    --enable-xkbcommon \\
    \\
    \\
@@ -610,7 +1092,7 @@ index 0472a1b..5f264f1 100644
    --target-list-exclude=moxie-softmmu \\
    --with-default-devices \\
    --enable-auth-pam \\
-@@ -1737,6 +1719,7 @@ run_configure \\
+@@ -1737,6 +1722,7 @@ run_configure \\
    --enable-curses \\
    --enable-dmg \\
    --enable-fuse \\
@@ -618,7 +1100,7 @@ index 0472a1b..5f264f1 100644
    --enable-gio \\
  %if %{have_block_gluster}
    --enable-glusterfs \\
-@@ -1751,7 +1734,6 @@ run_configure \\
+@@ -1751,7 +1737,6 @@ run_configure \\
    --enable-linux-io-uring \\
  %endif
    --enable-linux-user \\
@@ -626,7 +1108,7 @@ index 0472a1b..5f264f1 100644
    --enable-multiprocess \\
    --enable-parallels \\
  %if %{have_librdma}
-@@ -1760,7 +1742,6 @@ run_configure \\
+@@ -1760,7 +1745,6 @@ run_configure \\
    --enable-qcow1 \\
    --enable-qed \\
    --enable-qom-cast-debug \\
@@ -634,7 +1116,7 @@ index 0472a1b..5f264f1 100644
    --enable-sdl \\
  %if %{have_sdl_image}
    --enable-sdl-image \\
-@@ -1768,6 +1749,7 @@ run_configure \\
+@@ -1768,6 +1752,7 @@ run_configure \\
  %if %{have_libcacard}
    --enable-smartcard \\
  %endif
@@ -642,74 +1124,37 @@ index 0472a1b..5f264f1 100644
  %if %{have_spice}
    --enable-spice \\
    --enable-spice-protocol \\
-@@ -1793,24 +1775,24 @@ run_configure \\
-   --enable-zstd
- 
- %if %{tools_only}
--%make_build qemu-img
--%make_build qemu-io
--%make_build qemu-nbd
--%make_build storage-daemon/qemu-storage-daemon
--
--%make_build docs/qemu-img.1
--%make_build docs/qemu-nbd.8
--%make_build docs/qemu-storage-daemon.1
--%make_build docs/qemu-storage-daemon-qmp-ref.7
--
--%make_build qga/qemu-ga
--%make_build docs/qemu-ga.8
-+%make_build -j14 qemu-img
-+%make_build -j14 qemu-io
-+%make_build -j14 qemu-nbd
-+%make_build -j14 storage-daemon/qemu-storage-daemon
-+
-+%make_build -j14 docs/qemu-img.1
-+%make_build -j14 docs/qemu-nbd.8
-+%make_build -j14 docs/qemu-storage-daemon.1
-+%make_build -j14 docs/qemu-storage-daemon-qmp-ref.7
-+
-+%make_build -j14 qga/qemu-ga
-+%make_build -j14 docs/qemu-ga.8
- # endif tools_only
- %endif
- 
+@@ -1811,8 +1796,12 @@ run_configure \\
  
  %if !%{tools_only}
--%make_build
-+%make_build -j14
+ %make_build
++
++cp -a %{kvm_target}-softmmu/qemu-system-%{kvm_target} qemu-kvm
++
  popd
  
++
  # Fedora build for qemu-user-static
-@@ -1824,7 +1806,7 @@ run_configure \\
-   --disable-install-blobs \\
-   --static
- 
--%make_build
-+%make_build -j14
- popd  # static
- %endif
- # endif !tools_only
-@@ -2032,7 +2014,7 @@ pushd %{qemu_kvm_build}
- echo "Testing %{name}-build"
- # 2022-06: ppc64le random qtest segfaults with no discernable pattern
- %ifnarch %{power64}
--%make_build check
-+%make_build -j14 check
+ %if %{user_static}
+ pushd %{static_builddir}
+@@ -1884,6 +1873,8 @@ install -D -p -m 644 %{_sourcedir}/95-kvm-memlock.conf %{buildroot}%{_sysconfdir
+ %if %{have_kvm}
+ install -D -p -m 0644 %{_sourcedir}/vhost.conf %{buildroot}%{_sysconfdir}/modprobe.d/vhost.conf
+ install -D -p -m 0644 %{modprobe_kvm_conf} %{buildroot}%{_sysconfdir}/modprobe.d/kvm.conf
++install -D -p -m 0755 %{qemu_kvm_build}/%{kvm_target}-softmmu/qemu-system-%{kvm_target} %{buildroot}%{_libexecdir}/qemu-kvm
++
  %endif
  
- popd
-@@ -2278,9 +2260,9 @@ useradd -r -u 107 -g qemu -G kvm -d / -s /sbin/nologin \\
- %{_libdir}/%{name}/ui-opengl.so
- %endif
+ # Copy some static data into place
+@@ -2281,6 +2272,7 @@ useradd -r -u 107 -g qemu -G kvm -d / -s /sbin/nologin \\
  
--
  %files block-dmg
  %{_libdir}/%{name}/block-dmg-bz2.so
 +%{_libdir}/%{name}/block-dmg-lzfse.so
  %if %{have_block_gluster}
  %files block-gluster
  %{_libdir}/%{name}/block-gluster.so
-@@ -2300,8 +2282,6 @@ useradd -r -u 107 -g qemu -G kvm -d / -s /sbin/nologin \\
+@@ -2300,8 +2292,6 @@ useradd -r -u 107 -g qemu -G kvm -d / -s /sbin/nologin \\
  %{_libdir}/%{name}/audio-oss.so
  %files audio-pa
  %{_libdir}/%{name}/audio-pa.so
@@ -718,177 +1163,530 @@ index 0472a1b..5f264f1 100644
  %files audio-sdl
  %{_libdir}/%{name}/audio-sdl.so
  %if %{have_jack}
+@@ -2380,7 +2370,12 @@ useradd -r -u 107 -g qemu -G kvm -d / -s /sbin/nologin \\
+ # Deliberately empty
+ 
+ %files kvm-core
+-# Deliberately empty
++%{_libexecdir}/qemu-kvm
++
++%ifarch x86_64
++    %{_libdir}/%{name}/accel-tcg-%{kvm_target}.so
++%endif
++
+ %endif
+ 
+ 
 PATCH
 
+cat <<-PATCH > ../SOURCES/0005-Enable-disable-devices-for-RHEL.patch
+From: Miroslav Rezanina <mrezanin@redhat.com>
+Date: Wed, 7 Dec 2022 03:05:48 -0500
+Subject: Enable/disable devices for RHEL
 
-# patch -p1 <<-PATCH 
-# diff --git a/qemu.spec b/qemu.spec
-# index c55e6c4..a72ccab 100644
-# --- a/qemu.spec
-# +++ b/qemu.spec
-# @@ -6,7 +6,7 @@
-#  %global libfdt_version 1.6.0
-#  %global libseccomp_version 2.4.0
-#  %global libusbx_version 1.0.23
-# -%global meson_version 0.61.3
-# +%global meson_version 0.58.2
-#  %global usbredir_version 0.7.1
-#  %global ipxe_version 20200823-5.git4bd064de
+This commit adds all changes related to changes in supported devices.
+
+diff --git a/configs/devices/aarch64-softmmu/aarch64-rh-devices.mak b/configs/devices/aarch64-softmmu/aarch64-rh-devices.mak
+new file mode 100644
+index 0000000..720ec0c
+--- /dev/null
++++ b/configs/devices/aarch64-softmmu/aarch64-rh-devices.mak
+@@ -0,0 +1,41 @@
++include ../rh-virtio.mak
++
++CONFIG_ARM_GIC_KVM=y
++CONFIG_ARM_GICV3_TCG=y
++CONFIG_ARM_GIC=y
++CONFIG_ARM_SMMUV3=y
++CONFIG_ARM_V7M=y
++CONFIG_ARM_VIRT=y
++CONFIG_CXL=y
++CONFIG_CXL_MEM_DEVICE=y
++CONFIG_EDID=y
++CONFIG_PCIE_PORT=y
++CONFIG_PCI_DEVICES=y
++CONFIG_PCI_TESTDEV=y
++CONFIG_PFLASH_CFI01=y
++CONFIG_SCSI=y
++CONFIG_SEMIHOSTING=y
++CONFIG_USB=y
++CONFIG_USB_XHCI=y
++CONFIG_USB_XHCI_PCI=y
++CONFIG_USB_STORAGE_CORE=y
++CONFIG_USB_STORAGE_CLASSIC=y
++CONFIG_VFIO=y
++CONFIG_VFIO_PCI=y
++CONFIG_VIRTIO_MMIO=y
++CONFIG_VIRTIO_PCI=y
++CONFIG_VIRTIO_MEM=y
++CONFIG_VIRTIO_IOMMU=y
++CONFIG_XIO3130=y
++CONFIG_NVDIMM=y
++CONFIG_ACPI_APEI=y
++CONFIG_TPM=y
++CONFIG_TPM_EMULATOR=y
++CONFIG_TPM_TIS_SYSBUS=y
++CONFIG_PTIMER=y
++CONFIG_ARM_COMPATIBLE_SEMIHOSTING=y
++CONFIG_PVPANIC_PCI=y
++CONFIG_PXB=y
++CONFIG_VHOST_VSOCK=y
++CONFIG_VHOST_USER_VSOCK=y
++CONFIG_VHOST_USER_FS=y
+diff --git a/configs/devices/ppc64-softmmu/ppc64-rh-devices.mak b/configs/devices/ppc64-softmmu/ppc64-rh-devices.mak
+new file mode 100644
+index 0000000..dbb7d30
+--- /dev/null
++++ b/configs/devices/ppc64-softmmu/ppc64-rh-devices.mak
+@@ -0,0 +1,37 @@
++include ../rh-virtio.mak
++
++CONFIG_DIMM=y
++CONFIG_MEM_DEVICE=y
++CONFIG_NVDIMM=y
++CONFIG_PCI=y
++CONFIG_PCI_DEVICES=y
++CONFIG_PCI_TESTDEV=y
++CONFIG_PCI_EXPRESS=y
++CONFIG_PSERIES=y
++CONFIG_SCSI=y
++CONFIG_SPAPR_VSCSI=y
++CONFIG_TEST_DEVICES=y
++CONFIG_USB=y
++CONFIG_USB_OHCI=y
++CONFIG_USB_OHCI_PCI=y
++CONFIG_USB_SMARTCARD=y
++CONFIG_USB_STORAGE_CORE=y
++CONFIG_USB_STORAGE_CLASSIC=y
++CONFIG_USB_XHCI=y
++CONFIG_USB_XHCI_NEC=y
++CONFIG_USB_XHCI_PCI=y
++CONFIG_VFIO=y
++CONFIG_VFIO_PCI=y
++CONFIG_VGA=y
++CONFIG_VGA_PCI=y
++CONFIG_VHOST_USER=y
++CONFIG_VIRTIO_PCI=y
++CONFIG_VIRTIO_VGA=y
++CONFIG_WDT_IB6300ESB=y
++CONFIG_XICS=y
++CONFIG_XIVE=y
++CONFIG_TPM=y
++CONFIG_TPM_SPAPR=y
++CONFIG_TPM_EMULATOR=y
++CONFIG_VHOST_VSOCK=y
++CONFIG_VHOST_USER_VSOCK=y
+diff --git a/configs/devices/rh-virtio.mak b/configs/devices/rh-virtio.mak
+new file mode 100644
+index 0000000..94ede1b
+--- /dev/null
++++ b/configs/devices/rh-virtio.mak
+@@ -0,0 +1,10 @@
++CONFIG_VIRTIO=y
++CONFIG_VIRTIO_BALLOON=y
++CONFIG_VIRTIO_BLK=y
++CONFIG_VIRTIO_GPU=y
++CONFIG_VIRTIO_INPUT=y
++CONFIG_VIRTIO_INPUT_HOST=y
++CONFIG_VIRTIO_NET=y
++CONFIG_VIRTIO_RNG=y
++CONFIG_VIRTIO_SCSI=y
++CONFIG_VIRTIO_SERIAL=y
+diff --git a/configs/devices/s390x-softmmu/s390x-rh-devices.mak b/configs/devices/s390x-softmmu/s390x-rh-devices.mak
+new file mode 100644
+index 0000000..69a799a
+--- /dev/null
++++ b/configs/devices/s390x-softmmu/s390x-rh-devices.mak
+@@ -0,0 +1,18 @@
++include ../rh-virtio.mak
++
++CONFIG_PCI=y
++CONFIG_S390_CCW_VIRTIO=y
++CONFIG_S390_FLIC=y
++CONFIG_S390_FLIC_KVM=y
++CONFIG_SCLPCONSOLE=y
++CONFIG_SCSI=y
++CONFIG_VFIO=y
++CONFIG_VFIO_AP=y
++CONFIG_VFIO_CCW=y
++CONFIG_VFIO_PCI=y
++CONFIG_VHOST_USER=y
++CONFIG_VIRTIO_CCW=y
++CONFIG_WDT_DIAG288=y
++CONFIG_VHOST_VSOCK=y
++CONFIG_VHOST_USER_VSOCK=y
++CONFIG_VHOST_USER_FS=y
+diff --git a/configs/devices/x86_64-softmmu/x86_64-rh-devices.mak b/configs/devices/x86_64-softmmu/x86_64-rh-devices.mak
+new file mode 100644
+index 0000000..10cb0a1
+--- /dev/null
++++ b/configs/devices/x86_64-softmmu/x86_64-rh-devices.mak
+@@ -0,0 +1,109 @@
++include ../rh-virtio.mak
++
++CONFIG_ACPI=y
++CONFIG_ACPI_PCI=y
++CONFIG_ACPI_CPU_HOTPLUG=y
++CONFIG_ACPI_MEMORY_HOTPLUG=y
++CONFIG_ACPI_NVDIMM=y
++CONFIG_ACPI_SMBUS=y
++CONFIG_ACPI_VMGENID=y
++CONFIG_ACPI_X86=y
++CONFIG_ACPI_X86_ICH=y
++CONFIG_AHCI=y
++CONFIG_APIC=y
++CONFIG_APM=y
++CONFIG_BOCHS_DISPLAY=y
++CONFIG_CXL=y
++CONFIG_CXL_MEM_DEVICE=y
++CONFIG_DIMM=y
++CONFIG_E1000E_PCI_EXPRESS=y
++CONFIG_E1000_PCI=y
++CONFIG_EDU=y
++CONFIG_FDC=y
++CONFIG_FDC_SYSBUS=y
++CONFIG_FDC_ISA=y
++CONFIG_FW_CFG_DMA=y
++CONFIG_HDA=y
++CONFIG_HYPERV=y
++CONFIG_HYPERV_TESTDEV=y
++CONFIG_I2C=y
++CONFIG_I440FX=y
++CONFIG_I8254=y
++CONFIG_I8257=y
++CONFIG_I8259=y
++CONFIG_I82801B11=y
++CONFIG_IDE_CORE=y
++CONFIG_IDE_PCI=y
++CONFIG_IDE_PIIX=y
++CONFIG_IDE_QDEV=y
++CONFIG_IOAPIC=y
++CONFIG_IOH3420=y
++CONFIG_ISA_BUS=y
++CONFIG_ISA_DEBUG=y
++CONFIG_ISA_TESTDEV=y
++CONFIG_LPC_ICH9=y
++CONFIG_MC146818RTC=y
++CONFIG_MEM_DEVICE=y
++CONFIG_NVDIMM=y
++CONFIG_OPENGL=y
++CONFIG_PAM=y
++CONFIG_PC=y
++CONFIG_PCI=y
++CONFIG_PCIE_PORT=y
++CONFIG_PCI_DEVICES=y
++CONFIG_PCI_EXPRESS=y
++CONFIG_PCI_EXPRESS_Q35=y
++CONFIG_PCI_I440FX=y
++CONFIG_PCI_TESTDEV=y
++CONFIG_PCKBD=y
++CONFIG_PCSPK=y
++CONFIG_PC_ACPI=y
++CONFIG_PC_PCI=y
++CONFIG_PFLASH_CFI01=y
++CONFIG_PVPANIC_ISA=y
++CONFIG_PXB=y
++CONFIG_Q35=y
++CONFIG_RTL8139_PCI=y
++CONFIG_SCSI=y
++CONFIG_SERIAL=y
++CONFIG_SERIAL_ISA=y
++CONFIG_SERIAL_PCI=y
++CONFIG_SEV=y
++CONFIG_SMBIOS=y
++CONFIG_SMBUS_EEPROM=y
++CONFIG_TEST_DEVICES=y
++CONFIG_USB=y
++CONFIG_USB_EHCI=y
++CONFIG_USB_EHCI_PCI=y
++CONFIG_USB_SMARTCARD=y
++CONFIG_USB_STORAGE_CORE=y
++CONFIG_USB_STORAGE_CLASSIC=y
++CONFIG_USB_UHCI=y
++CONFIG_USB_XHCI=y
++CONFIG_USB_XHCI_NEC=y
++CONFIG_USB_XHCI_PCI=y
++CONFIG_VFIO=y
++CONFIG_VFIO_PCI=y
++CONFIG_VGA=y
++CONFIG_VGA_CIRRUS=y
++CONFIG_VGA_PCI=y
++CONFIG_VHOST_USER=y
++CONFIG_VHOST_USER_BLK=y
++CONFIG_VIRTIO_MEM=y
++CONFIG_VIRTIO_PCI=y
++CONFIG_VIRTIO_VGA=y
++CONFIG_VIRTIO_IOMMU=y
++CONFIG_VMMOUSE=y
++CONFIG_VMPORT=y
++CONFIG_VTD=y
++CONFIG_WDT_IB6300ESB=y
++CONFIG_WDT_IB700=y
++CONFIG_XIO3130=y
++CONFIG_TPM=y
++CONFIG_TPM_CRB=y
++CONFIG_TPM_TIS_ISA=y
++CONFIG_TPM_EMULATOR=y
++CONFIG_SGX=y
++CONFIG_VHOST_VSOCK=y
++CONFIG_VHOST_USER_VSOCK=y
++CONFIG_VHOST_USER_FS=y
+diff --git a/hw/arm/meson.build b/hw/arm/meson.build
+index 11eb911..97658e3 100644
+--- a/hw/arm/meson.build
++++ b/hw/arm/meson.build
+@@ -29,7 +29,7 @@ arm_ss.add(when: 'CONFIG_VEXPRESS', if_true: files('vexpress.c'))
+ arm_ss.add(when: 'CONFIG_ZYNQ', if_true: files('xilinx_zynq.c'))
+ arm_ss.add(when: 'CONFIG_SABRELITE', if_true: files('sabrelite.c'))
  
-# @@ -55,7 +55,7 @@
-#  %global user_static 1
-#  %if 0%{?rhel}
-#  # EPEL/RHEL do not have required -static builddeps
-# -%global user_static 0
-# +%global user_static 1
-#  %endif
+-arm_ss.add(when: 'CONFIG_ARM_V7M', if_true: files('armv7m.c'))
++#arm_ss.add(when: 'CONFIG_ARM_V7M', if_true: files('armv7m.c'))
+ arm_ss.add(when: 'CONFIG_EXYNOS4', if_true: files('exynos4210.c'))
+ arm_ss.add(when: 'CONFIG_PXA2XX', if_true: files('pxa2xx.c', 'pxa2xx_gpio.c', 'pxa2xx_pic.c'))
+ arm_ss.add(when: 'CONFIG_DIGIC', if_true: files('digic.c'))
+diff --git a/hw/block/fdc.c b/hw/block/fdc.c
+index d7cc4d3..12d0a60 100644
+--- a/hw/block/fdc.c
++++ b/hw/block/fdc.c
+@@ -49,6 +49,8 @@
+ #include "qom/object.h"
+ #include "fdc-internal.h"
  
-#  %global have_kvm 0
-# @@ -75,7 +75,7 @@
-#  %global have_spice 0
-#  %endif
-#  %if 0%{?rhel} >= 9
-# -%global have_spice 0
-# +%global have_spice 1
-#  %endif
++#include "hw/boards.h"
++
+ /********************************************************/
+ /* debug Floppy devices */
  
-#  # Matches xen ExclusiveArch
-# @@ -87,14 +87,14 @@
-#  %endif
+@@ -2346,6 +2348,14 @@ void fdctrl_realize_common(DeviceState *dev, FDCtrl *fdctrl, Error **errp)
+     FDrive *drive;
+     static int command_tables_inited = 0;
  
-#  %global have_liburing 0
-# -%if 0%{?fedora}
-# +%if 0%{?rhel}
-#  %ifnarch %{arm}
-#  %global have_liburing 1
-#  %endif
-#  %endif
++    /* Restricted for Red Hat Enterprise Linux: */
++    MachineClass *mc = MACHINE_GET_CLASS(qdev_get_machine());
++    if (!strstr(mc->name, "-rhel7.")) {
++        error_setg(errp, "Device %s is not supported with machine type %s",
++                   object_get_typename(OBJECT(dev)), mc->name);
++        return;
++    }
++
+     if (fdctrl->fallback == FLOPPY_DRIVE_TYPE_AUTO) {
+         error_setg(errp, "Cannot choose a fallback FDrive type of 'auto'");
+         return;
+diff --git a/hw/display/cirrus_vga.c b/hw/display/cirrus_vga.c
+index b80f98b..b149d35 100644
+--- a/hw/display/cirrus_vga.c
++++ b/hw/display/cirrus_vga.c
+@@ -2946,7 +2946,10 @@ static void pci_cirrus_vga_realize(PCIDevice *dev, Error **errp)
+     PCIDeviceClass *pc = PCI_DEVICE_GET_CLASS(dev);
+     int16_t device_id = pc->device_id;
  
-#  %global have_virgl 0
-# -%if 0%{?fedora}
-# +%if 0%{?rhel}
-#  %global have_virgl 1
-#  %endif
+-    /*
++     warn_report("'cirrus-vga' is deprecated, "
++                 "please use a different VGA card instead");
++
++     /*
+      * Follow real hardware, cirrus card emulated has 4 MB video memory.
+      * Also accept 8 MB/16 MB for backward compatibility.
+      */
+diff --git a/hw/ide/piix.c b/hw/ide/piix.c
+index 4e5e129..03ca06b 100644
+--- a/hw/ide/piix.c
++++ b/hw/ide/piix.c
+@@ -190,7 +190,8 @@ static void piix3_ide_class_init(ObjectClass *klass, void *data)
+     k->device_id = PCI_DEVICE_ID_INTEL_82371SB_1;
+     k->class_id = PCI_CLASS_STORAGE_IDE;
+     set_bit(DEVICE_CATEGORY_STORAGE, dc->categories);
+-    dc->hotpluggable = false;
++    /* Disabled for Red Hat Enterprise Linux: */
++    dc->user_creatable = false;
+ }
  
-# @@ -114,12 +114,9 @@
-#  %global have_dbus_display 0
-#  %endif
+ static const TypeInfo piix3_ide_info = {
+@@ -214,6 +215,8 @@ static void piix4_ide_class_init(ObjectClass *klass, void *data)
+     k->class_id = PCI_CLASS_STORAGE_IDE;
+     set_bit(DEVICE_CATEGORY_STORAGE, dc->categories);
+     dc->hotpluggable = false;
++    /* Disabled for Red Hat Enterprise Linux: */
++    dc->user_creatable = false;
+ }
  
-# -%global have_libblkio 0
-# -%if 0%{?fedora} >= 37
-#  %global have_libblkio 1
-# -%endif
+ static const TypeInfo piix4_ide_info = {
+diff --git a/hw/input/pckbd.c b/hw/input/pckbd.c
+index b92b63b..3b6235d 100644
+--- a/hw/input/pckbd.c
++++ b/hw/input/pckbd.c
+@@ -957,6 +957,8 @@ static void i8042_class_initfn(ObjectClass *klass, void *data)
+     dc->vmsd = &vmstate_kbd_isa;
+     adevc->build_dev_aml = i8042_build_aml;
+     set_bit(DEVICE_CATEGORY_INPUT, dc->categories);
++    /* Disabled for Red Hat Enterprise Linux: */
++    dc->user_creatable = false;
+ }
  
-# -%global have_sdl_image %{defined fedora}
-# +%global have_sdl_image %{defined rhel}
-#  %global have_fdt 1
-#  %global have_opengl 1
-#  %global have_usbredir 1
-# @@ -156,7 +153,7 @@
+ static const TypeInfo i8042_info = {
+diff --git a/hw/net/e1000.c b/hw/net/e1000.c
+index 093c2d4..1985628 100644
+--- a/hw/net/e1000.c
++++ b/hw/net/e1000.c
+@@ -1770,6 +1770,7 @@ static const E1000Info e1000_devices[] = {
+         .revision  = 0x03,
+         .phy_id2   = E1000_PHY_ID2_8254xx_DEFAULT,
+     },
++#if 0 /* Disabled for Red Hat Enterprise Linux 7 */
+     {
+         .name      = "e1000-82544gc",
+         .device_id = E1000_DEV_ID_82544GC_COPPER,
+@@ -1782,6 +1783,7 @@ static const E1000Info e1000_devices[] = {
+         .revision  = 0x03,
+         .phy_id2   = E1000_PHY_ID2_8254xx_DEFAULT,
+     },
++#endif
+ };
  
-#  %define have_libcacard 1
-#  %if 0%{?rhel} >= 9
-# -%define have_libcacard 0
-# +%define have_libcacard 1
-#  %endif
+ static void e1000_register_types(void)
+diff --git a/hw/ppc/spapr_cpu_core.c b/hw/ppc/spapr_cpu_core.c
+index b482d97..5c52e01 100644
+--- a/hw/ppc/spapr_cpu_core.c
++++ b/hw/ppc/spapr_cpu_core.c
+@@ -384,10 +384,12 @@ static const TypeInfo spapr_cpu_core_type_infos[] = {
+         .instance_size = sizeof(SpaprCpuCore),
+         .class_size = sizeof(SpaprCpuCoreClass),
+     },
++#if 0  /* Disabled for Red Hat Enterprise Linux */
+     DEFINE_SPAPR_CPU_CORE_TYPE("970_v2.2"),
+     DEFINE_SPAPR_CPU_CORE_TYPE("970mp_v1.0"),
+     DEFINE_SPAPR_CPU_CORE_TYPE("970mp_v1.1"),
+     DEFINE_SPAPR_CPU_CORE_TYPE("power5+_v2.1"),
++#endif
+     DEFINE_SPAPR_CPU_CORE_TYPE("power7_v2.3"),
+     DEFINE_SPAPR_CPU_CORE_TYPE("power7+_v2.1"),
+     DEFINE_SPAPR_CPU_CORE_TYPE("power8_v2.0"),
+diff --git a/hw/usb/meson.build b/hw/usb/meson.build
+index e94149e..4a8adbf 100644
+--- a/hw/usb/meson.build
++++ b/hw/usb/meson.build
+@@ -52,7 +52,7 @@ system_ss.add(when: 'CONFIG_USB_SMARTCARD', if_true: files('dev-smartcard-reader
+ if cacard.found()
+   usbsmartcard_ss = ss.source_set()
+   usbsmartcard_ss.add(when: 'CONFIG_USB_SMARTCARD',
+-                      if_true: [cacard, files('ccid-card-emulated.c', 'ccid-card-passthru.c')])
++                      if_true: [cacard, files('ccid-card-passthru.c')])
+   hw_usb_modules += {'smartcard': usbsmartcard_ss}
+ endif
  
-#  # LTO still has issues with qemu on armv7hl and aarch64
-# @@ -327,7 +324,7 @@ Summary: QEMU is a FAST! processor emulator
-#  Name: qemu
-#  Version: 7.2.0
-#  Release: %{baserelease}%{?rcrel}%{?dist}
-# -Epoch: 2
-# +Epoch: 1024
-#  License: GPLv2 and BSD and MIT and CC-BY
-#  URL: http://www.qemu.org/
+diff --git a/target/ppc/cpu-models.c b/target/ppc/cpu-models.c
+index 7dbb47d..69fddb0 100644
+--- a/target/ppc/cpu-models.c
++++ b/target/ppc/cpu-models.c
+@@ -66,6 +66,7 @@
+ #define POWERPC_DEF(_name, _pvr, _type, _desc)                              \\
+     POWERPC_DEF_SVR(_name, _desc, _pvr, POWERPC_SVR_NONE, _type)
  
-# @@ -511,12 +508,8 @@ BuildRequires: SDL2_image-devel
++#if 0  /* Embedded and 32-bit CPUs disabled for Red Hat Enterprise Linux */
+     /* Embedded PowerPC                                                      */
+     /* PowerPC 405 family                                                    */
+     /* PowerPC 405 cores                                                     */
+@@ -698,8 +699,10 @@
+                 "PowerPC 7447A v1.2 (G4)")
+     POWERPC_DEF("7457a_v1.2",    CPU_POWERPC_74x7A_v12,              7455,
+                 "PowerPC 7457A v1.2 (G4)")
++#endif
+     /* 64 bits PowerPC                                                       */
+ #if defined(TARGET_PPC64)
++#if 0  /* Disabled for Red Hat Enterprise Linux */
+     POWERPC_DEF("970_v2.2",      CPU_POWERPC_970_v22,                970,
+                 "PowerPC 970 v2.2")
+     POWERPC_DEF("970fx_v1.0",    CPU_POWERPC_970FX_v10,              970,
+@@ -718,6 +721,7 @@
+                 "PowerPC 970MP v1.1")
+     POWERPC_DEF("power5+_v2.1",  CPU_POWERPC_POWER5P_v21,            POWER5P,
+                 "POWER5+ v2.1")
++#endif
+     POWERPC_DEF("power7_v2.3",   CPU_POWERPC_POWER7_v23,             POWER7,
+                 "POWER7 v2.3")
+     POWERPC_DEF("power7+_v2.1",  CPU_POWERPC_POWER7P_v21,            POWER7,
+@@ -898,12 +902,15 @@ PowerPCCPUAlias ppc_cpu_aliases[] = {
+     { "7447a", "7447a_v1.2" },
+     { "7457a", "7457a_v1.2" },
+     { "apollo7pm", "7457a_v1.0" },
++#endif
+ #if defined(TARGET_PPC64)
++#if 0  /* Disabled for Red Hat Enterprise Linux */
+     { "970", "970_v2.2" },
+     { "970fx", "970fx_v3.1" },
+     { "970mp", "970mp_v1.1" },
+     { "power5+", "power5+_v2.1" },
+     { "power5gs", "power5+_v2.1" },
++#endif
+     { "power7", "power7_v2.3" },
+     { "power7+", "power7+_v2.1" },
+     { "power8e", "power8e_v2.1" },
+@@ -913,12 +920,14 @@ PowerPCCPUAlias ppc_cpu_aliases[] = {
+     { "power10", "power10_v2.0" },
+ #endif
  
-#  %if %{user_static}
-#  BuildRequires: glibc-static glib2-static zlib-static
-# -%if 0%{?fedora} >= 37
-# -BuildRequires: pcre2-static
-# -%else
-#  BuildRequires: pcre-static
-#  %endif
-# -%endif
++#if 0  /* Disabled for Red Hat Enterprise Linux */
+     /* Generic PowerPCs */
+ #if defined(TARGET_PPC64)
+     { "ppc64", "970fx_v3.1" },
+ #endif
+     { "ppc32", "604" },
+     { "ppc", "604" },
++#endif
  
+     { NULL, NULL }
+ };
+diff --git a/target/s390x/cpu_models_sysemu.c b/target/s390x/cpu_models_sysemu.c
+index 63981bf..87a4480 100644
+--- a/target/s390x/cpu_models_sysemu.c
++++ b/target/s390x/cpu_models_sysemu.c
+@@ -35,6 +35,9 @@ static void check_unavailable_features(const S390CPUModel *max_model,
+         (max_model->def->gen == model->def->gen &&
+          max_model->def->ec_ga < model->def->ec_ga)) {
+         list_add_feat("type", unavailable);
++    } else if (model->def->gen < 11 && kvm_enabled()) {
++        /* Older CPU models are not supported on Red Hat Enterprise Linux */
++        list_add_feat("type", unavailable);
+     }
  
-#  # Requires for the Fedora 'qemu' metapackage
-# @@ -1501,7 +1494,6 @@ mkdir -p %{static_builddir}
-#    --disable-linux-user             \\\\\\
-#    --disable-live-block-migration   \\\\\\
-#    --disable-lto                    \\\\\\
-# -  --disable-lzfse                  \\\\\\
-#    --disable-lzo                    \\\\\\
-#    --disable-malloc-trim            \\\\\\
-#    --disable-membarrier             \\\\\\
-# @@ -1596,7 +1588,7 @@ run_configure() {
-#          --with-pkgversion="%{name}-%{version}-%{release}" \\
-#          --with-suffix="%{name}" \\
-#          --firmwarepath="%firmwaredirs" \\
-# -        --meson="%{__meson}" \\
-# +        --meson=internal \\
-#          --enable-trace-backends=dtrace \\
-#          --with-coroutine=ucontext \\
-#          --with-git=git \\
-# @@ -1721,6 +1713,7 @@ run_configure \\
-#    --enable-curses \\
-#    --enable-dmg \\
-#    --enable-fuse \\
-# +  --enable-fuse-lseek \\
-#    --enable-gio \\
-#  %if %{have_block_gluster}
-#    --enable-glusterfs \\
-# @@ -1735,7 +1728,6 @@ run_configure \\
-#    --enable-linux-io-uring \\
-#  %endif
-#    --enable-linux-user \\
-# -  --enable-live-block-migration \\
-#    --enable-multiprocess \\
-#    --enable-vnc-jpeg \\
-#    --enable-parallels \\
-# @@ -1745,7 +1737,6 @@ run_configure \\
-#    --enable-qcow1 \\
-#    --enable-qed \\
-#    --enable-qom-cast-debug \\
-# -  --enable-replication \\
-#    --enable-sdl \\
-#  %if %{have_sdl_image}
-#    --enable-sdl-image \\
-# @@ -1753,6 +1744,7 @@ run_configure \\
-#  %if %{have_libcacard}
-#    --enable-smartcard \\
-#  %endif
-# +  --enable-sparse \\
-#  %if %{have_spice}
-#    --enable-spice \\
-#    --enable-spice-protocol \\
-# @@ -2267,9 +2260,9 @@ useradd -r -u 107 -g qemu -G kvm -d / -s /sbin/nologin \\
-#  %{_libdir}/%{name}/ui-opengl.so
-#  %endif
- 
-# -
-#  %files block-dmg
-#  %{_libdir}/%{name}/block-dmg-bz2.so
-# +%{_libdir}/%{name}/block-dmg-lzfse.so
-#  %if %{have_block_gluster}
-#  %files block-gluster
-#  %{_libdir}/%{name}/block-gluster.so
-# PATCH
+     /* detect missing features if any to properly report them */
+diff --git a/target/s390x/kvm/kvm.c b/target/s390x/kvm/kvm.c
+index a9e5880..4b5df17 100644
+--- a/target/s390x/kvm/kvm.c
++++ b/target/s390x/kvm/kvm.c
+@@ -2529,6 +2529,14 @@ void kvm_s390_apply_cpu_model(const S390CPUModel *model, Error **errp)
+         error_setg(errp, "KVM doesn't support CPU models");
+         return;
+     }
++
++    /* Older CPU models are not supported on Red Hat Enterprise Linux */
++    if (model->def->gen < 11) {
++        error_setg(errp, "KVM: Unsupported CPU type specified: %s",
++                   MACHINE(qdev_get_machine())->cpu_type);
++        return;
++    }
++
+     prop.cpuid = s390_cpuid_from_cpu_model(model);
+     prop.ibc = s390_ibc_from_cpu_model(model);
+     /* configure cpu features indicated via STFL(e) */
+PATCH
 
 # Some changes are just easier with sed.
 sed -i 's/defined rhel/defined nullified/g' edk2.spec
 sed -i 's/defined fedora/defined rhel/g' edk2.spec
-sed -i "s/^Version:\([\t ]*\).*/Version:\1$(date +%Y%m%d)/g" passt.spec 
+sed -i 's/\.\/edk2\-build\.py \-\-config/.\/edk2-build.py --jobs 6 --config/g' edk2.spec 
 
-# Increase the QEMU build jobs.
-JOBS="$(($(lscpu -e=core | grep -v CORE | sort | uniq | wc -l)+2))"
-sed -i "s/%make_build/%make_build -j$JOBS/g" qemu.spec
-unset JOBS
+sed -i "s/^Version:\([\t ]*\).*/Version:\1$(date +%Y%m%d)/g" passt.spec 
 
 # Use a release string of 1024 so the virt-manager rebuild will be seen as an upgrade.
 sed -E -i 's/^Release\: .\%\{\?dist\}/Release: 1024\%\{\?dist\}/g' virt-manager.spec
+
+
+## Check whether all of the build dependencies, available in the distro 
+## repositories, are installed. Note that some build dependencies may be 
+## replaced during the build process below.
+## dnf builddep --spec  --enablerepo=* *.spec
+
 
 # Build the spec files.
 rpmbuild -ba --rebuild --target=$(uname -m) mesa.spec 2>&1 | tee mesa.log > /dev/null && \
@@ -1017,20 +1815,26 @@ printf "\e[1;92m# The gtk-vnc rpmbuild finished.\e[0;0m\n"
 # 529/714 qemu:qtest+qtest-rx / qtest-rx/vnc-display-test                           ERROR          50.26s   killed by signal 6 SIGABRT
 # 594/714 qemu:qtest+qtest-tricore / qtest-tricore/vnc-display-test                 ERROR          51.44s   killed by signal 6 SIGABRT
 
+
+
+
+# The qemu.spec patch is updating the jobs, but we might switch back to using this in the future.
+# JOBS="$(($(lscpu -e=core | grep -v CORE | sort | uniq | wc -l)+2))"
+# sed -i "s/%make_build/%make_build -j$JOBS/g" qemu.spec
+# unset JOBS
+
 rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) qemu.spec 2>&1 | tee qemu.log > /dev/null && \
 rpm -i -U --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " qemu.spec ) || \
 { printf "\n\e[1;91m# The qemu rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
 printf "\e[1;92m# The qemu rpmbuild finished.\e[0;0m\n"
 
-
-# # QEMU will look for the gvnc-1.0 package config. We include the upgrade flag so the upstream gtk-vnc2 package gets removed.
-# rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) gtk-vnc.spec 2>&1 | tee gtk-vnc.log > /dev/null && \
-# rpm -i -U --replacepkgs --replacefiles $(ls -q $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " gtk-vnc.spec ) 2>/dev/null) || \
-# { printf "\n\e[1;91m# The gtk-vnc rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
-# printf "\e[1;92m# The gtk-vnc rpmbuild finished.\e[0;0m\n"
-
-
-
+# The libguestfs build originally required a qemu-kvm binary, so a symlink was used. Since the the 
+# has been updated to generate a qemu-kvm binary, and the requirement has been removed from the 
+# libguestfs spec file.
+# [ ! -f /usr/bin/qemu-kvm ] && printf "\n\n\e[1;93m# The /usr/bin/qemu-kvm file is missing.\e[0;0m"
+# [ ! -f /usr/libexec/qemu-kvm ] && printf "\n\n\e[1;93m# The /usr/libexec/qemu-kvm file is missing.\e[0;0m"
+# [ ! -f /usr/bin/qemu-kvm ] && [ -f /usr/bin/qemu-system-x86_64 ] && sudo ln -s /usr/bin/qemu-system-x86_64 /usr/bin/qemu-kvm
+# [ ! -f /usr/libexec/qemu-kvm ] && [ -f /usr/bin/qemu-kvm ] && sudo ln -s /usr/bin/qemu-kvm /usr/libexec/qemu-kvm
 
 rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) libosinfo.spec 2>&1 | tee libosinfo.log > /dev/null && \
 rpm -i -U --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " libosinfo.spec ) || \
@@ -1042,6 +1846,16 @@ rpm -i -U --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .
 { printf "\n\e[1;91m# The osinfo-db-tools rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
 printf "\e[1;92m# The osinfo-db-tools rpmbuild finished.\e[0;0m\n"
 
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" -D "with_modular_daemons 1" --target=$(uname -m) libvirt.spec 2>&1 | tee libvirt.log > /dev/null && \
+rpm -i -U --replacepkgs --replacefiles $(rpmspec -q --builtrpms --undefine="dist" -D "dist .btrh9"  -D "with_modular_daemons 1" --target=$(uname -m) --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " libvirt.spec | sed 's/libvirt-admin/libvirt-daemon/g' ) || \
+{ printf "\n\e[1;91m# The libvirt rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
+printf "\e[1;92m# The libvirt rpmbuild finished.\e[0;0m\n"
+
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) libvirt-python.spec 2>&1 | tee libvirt-python.log > /dev/null && \
+rpm -i -U --replacepkgs --replacefiles  $(ls -q $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " libvirt-python.spec ) 2>/dev/null) || \
+{ printf "\n\e[1;91m# The libvirt-python rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
+printf "\e[1;92m# The libvirt-python rpmbuild finished.\e[0;0m\n"
+
 rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) libvirt-glib.spec 2>&1 | tee libvirt-glib.log > /dev/null && \
 rpm -i -U --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " libvirt-glib.spec ) || \
 { printf "\n\e[1;91m# The libvirt-glib rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
@@ -1052,20 +1866,20 @@ rpm -i -U --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .
 { printf "\n\e[1;91m# The libvirt-dbus rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
 printf "\e[1;92m# The libvirt-dbus rpmbuild finished.\e[0;0m\n"
 
-rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" -D "with_modular_daemons 1" --target=$(uname -m) libvirt.spec 2>&1 | tee libvirt.log > /dev/null && \
-rpm -i -U --replacepkgs --replacefiles $(rpmspec -q --builtrpms --undefine="dist" -D "dist .btrh9"  -D "with_modular_daemons 1" --target=$(uname -m) --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " libvirt.spec | sed 's/libvirt-admin/libvirt-daemon/g' ) || \
-{ printf "\n\e[1;91m# The libvirt rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
-printf "\e[1;92m# The libvirt rpmbuild finished.\e[0;0m\n"
-
 rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) libvirt-designer.spec 2>&1 | tee libvirt-designer.log > /dev/null && \
 rpm -i -U --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " libvirt-designer.spec ) || \
 { printf "\n\e[1;91m# The libvirt-designer rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
 printf "\e[1;92m# The libvirt-designer rpmbuild finished.\e[0;0m\n"
 
-rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) libvirt-python.spec 2>&1 | tee libvirt-python.log > /dev/null && \
-rpm -i -U --replacepkgs --replacefiles  $(ls -q $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " libvirt-python.spec ) 2>/dev/null) || \
-{ printf "\n\e[1;91m# The libvirt-python rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
-printf "\e[1;92m# The libvirt-python rpmbuild finished.\e[0;0m\n"
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) libguestfs.spec 2>&1 | tee libguestfs.log > /dev/null && \
+rpm -i -U --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " libguestfs.spec ) || \
+{ printf "\n\e[1;91m# The libguestfs rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
+printf "\e[1;92m# The libguestfs rpmbuild finished.\e[0;0m\n"
+
+rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) guestfs-tools.spec 2>&1 | tee guestfs-tools.log > /dev/null && \
+rpm -i -U --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " guestfs-tools.spec ) || \
+{ printf "\n\e[1;91m# The guestfs-tools rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
+printf "\e[1;92m# The guestfs-tools rpmbuild finished.\e[0;0m\n"
 
 rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) lxqt-build-tools.spec 2>&1 | tee lxqt-build-tools.log > /dev/null && \
 rpm -i -U --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " lxqt-build-tools.spec ) || \
@@ -1130,7 +1944,7 @@ dnf --quiet --enablerepo=remi --enablerepo=remi-debuginfo --urlprotocol=https --
 dnf --quiet --enablerepo=baseos --enablerepo=baseos-debug --enablerepo=crb --enablerepo=crb-debuginfo --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download pcsc-lite pcsc-lite-debuginfo pcsc-lite-debugsource pcsc-lite-devel pcsc-lite-devel-debuginfo pcsc-lite-libs pcsc-lite-libs-debuginfo pcsc-lite-ccid pcsc-lite-ccid-debuginfo pcsc-lite-ccid-debugsource
 
 # mesa-libgbm
-dnf --quiet --enablerepo=appstream --enablerepo=appstream-debug --enablerepo=crb --enablerepo=crb-debuginfo --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download mesa-libgbm mesa-libgbm-devel mesa-libgbm-debuginfo
+# dnf --quiet --enablerepo=appstream --enablerepo=appstream-debug --enablerepo=crb --enablerepo=crb-debuginfo --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download mesa-libgbm mesa-libgbm-devel mesa-libgbm-debuginfo
 
 # usbredir
 dnf --quiet --enablerepo=appstream --enablerepo=appstream-debug --enablerepo=crb --enablerepo=crb-debuginfo --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download usbredir usbredir-devel usbredir-debuginfo usbredir-debugsource
@@ -1204,7 +2018,9 @@ if [ ! \$(sudo dnf repolist --quiet epel 2>&1 | grep -Eo "^epel") ]; then
 fi
 
 # To generate a current/updated list of RPM files for installation, run the following command.
-export INSTALLPKGS=\$(echo \`ls qemu*rpm spice*rpm opus*rpm usbredir*rpm openbios*rpm capstone*rpm python3-capstone*rpm libblkio*rpm lzfse*rpm virglrenderer*rpm libcacard*rpm edk2*rpm SLOF*rpm SDL2*rpm libogg-devel*rpm pcsc-lite*rpm mesa-libgbm-devel*rpm usbredir-devel*rpm opus-devel*rpm gobject-introspection-devel*rpm python3-markdown*rpm virt-manager*rpm virt-viewer*rpm virt-install*rpm virt-backup*rpm passt*rpm libphodav*rpm gvnc*rpm gtk-vnc*rpm chunkfs*rpm osinfo*rpm libosinfo*rpm libvirt*rpm python3-libvirt*rpm chezdav*rpm fcode-utils*rpm python3-pefile*rpm python3-virt-firmware*rpm | grep -Ev 'qemu-guest-agent|qemu-tests|debuginfo|debugsource|\\.src\\.rpm'\`)
+
+# Install the basic qemu/libvirt/virt-manager/spice packages.
+export INSTALLPKGS=\$(echo \`ls qemu*rpm spice*rpm opus*rpm usbredir*rpm openbios*rpm capstone*rpm python3-capstone*rpm libblkio*rpm lzfse*rpm virglrenderer*rpm libcacard*rpm edk2*rpm SLOF*rpm SDL2*rpm libogg-devel*rpm pcsc-lite*rpm mesa-libgbm-devel*rpm usbredir-devel*rpm opus-devel*rpm gobject-introspection-devel*rpm python3-markdown*rpm virt-manager*rpm virt-viewer*rpm virt-install*rpm virt-backup*rpm passt*rpm libphodav*rpm gvnc*rpm gtk-vnc*rpm chunkfs*rpm osinfo*rpm libosinfo*rpm libvirt*rpm python3-libvirt*rpm chezdav*rpm fcode-utils*rpm python3-pefile*rpm python3-virt-firmware*rpm libguestfs*rpm python3-libguestfs*rpm guestfs-tools*rpm | grep -Ev 'qemu-guest-agent|qemu-tests|debuginfo|debugsource|\\.src\\.rpm'\`)
 
 # Add the remmina packages.
 ## export INSTALLPKGS=\$(echo \$INSTALLPKGS \`ls remmina*rpm | grep -Ev 'debuginfo|debugsource|\\.src\\.rpm'\`)
@@ -1221,8 +2037,8 @@ export INSTALLPKGS=\$(echo \`ls qemu*rpm spice*rpm opus*rpm usbredir*rpm openbio
 # Add the pcre2-static package.
 ## export INSTALLPKGS=\$(echo \$INSTALLPKGS \`ls pcre2-static-*rpm | grep -Ev 'debuginfo|debugsource|\\.src\\.rpm'\`)
 
-# Add the qt version of virt manager.
-## export INSTALLPKGS=\$(echo \$INSTALLPKGS \`ls qtermwidget*rpm liblxqt*rpm libqtxdg*rpm lxqt-build-tools*rpm qt-remote-viewer*rpm qt-virt-manager*rpm | grep -Ev 'debuginfo|debugsource|\\.src\\.rpm'\`)
+# Add the qt version of virt manager. The gnutls/scrub packages are suggested by the spec file, but not required.
+## export INSTALLPKGS=\$(echo \$INSTALLPKGS \`ls pcsc-lite*rpm libcacard*rpm spice*rpm qt-virt-manager*rpm qtermwidget*rpm qt-remote-viewer*rpm liblxqt*rpm libqtxdg*rpm lxqt-build-tools*rpm gnutls scrub | grep -Ev 'debuginfo|debugsource|\\.src\\.rpm'\`)
 
 # This looks is a list of packages which may have been installed using 
 # the system repos, and are either a) not being replaced/upgraded or 
@@ -1234,7 +2050,10 @@ export INSTALLPKGS=\$(echo \`ls qemu*rpm spice*rpm opus*rpm usbredir*rpm openbio
 # Of note are the qemu-kvm-DEVICES and the virtuiofsd packages. The former
 # are being replaced by packages without "kvm" in the name. And the latter
 # package was renamed to qemu-virtiofsd.
-export REMOVEPKGS=\$(echo \`echo 'edk2-debugsource edk2-tools-debuginfo virglrenderer-debuginfo virglrenderer-debugsource virglrenderer-test-server-debuginfo virt-install virt-manager virt-manager-common virt-viewer virt-viewer-debuginfo virt-viewer-debugsource virt-backup gtk-vnc2 gtk-vnc2-devel gtk-vnc-debuginfo gtk-vnc-debugsource gvnc gvnc-devel gvncpulse gvncpulse-devel gvnc-tools libvirt-client libvirt-client-debuginfo libvirt-daemon libvirt-daemon-config-network libvirt-daemon-debuginfo libvirt-daemon-driver-interface libvirt-daemon-driver-interface-debuginfo libvirt-daemon-driver-network libvirt-daemon-driver-network-debuginfo libvirt-daemon-driver-nodedev libvirt-daemon-driver-nodedev-debuginfo libvirt-daemon-driver-nwfilter libvirt-daemon-driver-nwfilter-debuginfo libvirt-daemon-driver-qemu libvirt-daemon-driver-qemu-debuginfo libvirt-daemon-driver-secret libvirt-daemon-driver-secret-debuginfo libvirt-daemon-driver-storage libvirt-daemon-driver-storage-core libvirt-daemon-driver-storage-core-debuginfo libvirt-daemon-driver-storage-disk libvirt-daemon-driver-storage-disk-debuginfo libvirt-daemon-driver-storage-iscsi libvirt-daemon-driver-storage-iscsi-debuginfo libvirt-daemon-driver-storage-logical libvirt-daemon-driver-storage-logical-debuginfo libvirt-daemon-driver-storage-mpath libvirt-daemon-driver-storage-mpath-debuginfo libvirt-daemon-driver-storage-rbd libvirt-daemon-driver-storage-rbd-debuginfo libvirt-daemon-driver-storage-scsi libvirt-daemon-driver-storage-scsi-debuginfo libvirt-daemon-kvm libvirt-debuginfo libvirt-devel libvirt-glib libvirt-libs libvirt-libs-debuginfo libvirt-lock-sanlock-debuginfo libvirt-nss-debuginfo libvirt-wireshark-debuginfo python3-libvirt qemu-ga-win qemu-guest-agent qemu-guest-agent-debuginfo qemu-img qemu-img-debuginfo qemu-kvm qemu-kvm-audio-pa qemu-kvm-audio-pa-debuginfo qemu-kvm-block-curl qemu-kvm-block-curl-debuginfo qemu-kvm-block-rbd qemu-kvm-block-rbd-debuginfo qemu-kvm-block-ssh-debuginfo qemu-kvm-common qemu-kvm-common-debuginfo qemu-kvm-core qemu-kvm-core-debuginfo qemu-kvm-debuginfo qemu-kvm-debugsource qemu-kvm-device-display-virtio-gpu qemu-kvm-device-display-virtio-gpu-debuginfo qemu-kvm-device-display-virtio-gpu-gl qemu-kvm-device-display-virtio-gpu-gl-debuginfo qemu-kvm-device-display-virtio-gpu-pci qemu-kvm-device-display-virtio-gpu-pci-debuginfo qemu-kvm-device-display-virtio-gpu-pci-gl qemu-kvm-device-display-virtio-gpu-pci-gl-debuginfo qemu-kvm-device-display-virtio-vga qemu-kvm-device-display-virtio-vga-debuginfo qemu-kvm-device-display-virtio-vga-gl qemu-kvm-device-display-virtio-vga-gl-debuginfo qemu-kvm-device-usb-host qemu-kvm-device-usb-host-debuginfo qemu-kvm-device-usb-redirect qemu-kvm-device-usb-redirect-debuginfo qemu-kvm-docs qemu-kvm-tests-debuginfo qemu-kvm-tools qemu-kvm-tools-debuginfo qemu-kvm-ui-egl-headless qemu-kvm-ui-egl-headless-debuginfo qemu-kvm-ui-opengl qemu-kvm-ui-opengl-debuginfo qemu-pr-helper qemu-pr-helper-debuginfo libosinfo libosinfo-debuginfo libosinfo-debugsource python3-libvirt python3-libvirt-debuginfo pcsc-lite pcsc-lite-debuginfo pcsc-lite-debugsource pcsc-lite-devel pcsc-lite-devel-debuginfo pcsc-lite-libs pcsc-lite-libs-debuginfo pcsc-lite-ccid pcsc-lite-ccid-debuginfo pcsc-lite-ccid-debugsource' | tr ' ' '\\n' | while read PKG ; do { rpm --quiet -q \$PKG && rpm -q \$PKG | grep -v '\\.btrh9\\.' ; } ; done\`)
+export REMOVEPKGS=\$(echo \`echo 'edk2-debugsource edk2-tools-debuginfo virglrenderer-debuginfo virglrenderer-debugsource virglrenderer-test-server-debuginfo virt-install virt-manager virt-manager-common virt-viewer virt-viewer-debuginfo virt-viewer-debugsource virt-backup gtk-vnc2 gtk-vnc2-devel gtk-vnc-debuginfo gtk-vnc-debugsource gvnc gvnc-devel gvncpulse gvncpulse-devel gvnc-tools libvirt-client libvirt-client-debuginfo libvirt-daemon libvirt-daemon-config-network libvirt-daemon-debuginfo libvirt-daemon-driver-interface libvirt-daemon-driver-interface-debuginfo libvirt-daemon-driver-network libvirt-daemon-driver-network-debuginfo libvirt-daemon-driver-nodedev libvirt-daemon-driver-nodedev-debuginfo libvirt-daemon-driver-nwfilter libvirt-daemon-driver-nwfilter-debuginfo libvirt-daemon-driver-qemu libvirt-daemon-driver-qemu-debuginfo libvirt-daemon-driver-secret libvirt-daemon-driver-secret-debuginfo libvirt-daemon-driver-storage libvirt-daemon-driver-storage-core libvirt-daemon-driver-storage-core-debuginfo libvirt-daemon-driver-storage-disk libvirt-daemon-driver-storage-disk-debuginfo libvirt-daemon-driver-storage-iscsi libvirt-daemon-driver-storage-iscsi-debuginfo libvirt-daemon-driver-storage-logical libvirt-daemon-driver-storage-logical-debuginfo libvirt-daemon-driver-storage-mpath libvirt-daemon-driver-storage-mpath-debuginfo libvirt-daemon-driver-storage-rbd libvirt-daemon-driver-storage-rbd-debuginfo libvirt-daemon-driver-storage-scsi libvirt-daemon-driver-storage-scsi-debuginfo libvirt-daemon-kvm libvirt-debuginfo libvirt-devel libvirt-glib libvirt-libs libvirt-libs-debuginfo libvirt-lock-sanlock-debuginfo libvirt-nss-debuginfo libvirt-wireshark-debuginfo python3-libvirt qemu-ga-win qemu-guest-agent qemu-guest-agent-debuginfo qemu-img qemu-img-debuginfo qemu-kvm qemu-kvm-audio-pa qemu-kvm-audio-pa-debuginfo qemu-kvm-block-curl qemu-kvm-block-curl-debuginfo qemu-kvm-block-rbd qemu-kvm-block-rbd-debuginfo qemu-kvm-block-ssh-debuginfo qemu-kvm-common qemu-kvm-common-debuginfo qemu-kvm-core qemu-kvm-core-debuginfo qemu-kvm-debuginfo qemu-kvm-debugsource qemu-kvm-device-display-virtio-gpu qemu-kvm-device-display-virtio-gpu-debuginfo qemu-kvm-device-display-virtio-gpu-gl qemu-kvm-device-display-virtio-gpu-gl-debuginfo qemu-kvm-device-display-virtio-gpu-pci qemu-kvm-device-display-virtio-gpu-pci-debuginfo qemu-kvm-device-display-virtio-gpu-pci-gl qemu-kvm-device-display-virtio-gpu-pci-gl-debuginfo qemu-kvm-device-display-virtio-vga qemu-kvm-device-display-virtio-vga-debuginfo qemu-kvm-device-display-virtio-vga-gl qemu-kvm-device-display-virtio-vga-gl-debuginfo qemu-kvm-device-usb-host qemu-kvm-device-usb-host-debuginfo qemu-kvm-device-usb-redirect qemu-kvm-device-usb-redirect-debuginfo qemu-kvm-docs qemu-kvm-tests-debuginfo qemu-kvm-tools qemu-kvm-tools-debuginfo qemu-kvm-ui-egl-headless qemu-kvm-ui-egl-headless-debuginfo qemu-kvm-ui-opengl qemu-kvm-ui-opengl-debuginfo qemu-pr-helper qemu-pr-helper-debuginfo libosinfo libosinfo-debuginfo libosinfo-debugsource python3-libvirt python3-libvirt-debuginfo pcsc-lite-debuginfo pcsc-lite-debugsource pcsc-lite-devel-debuginfo  pcsc-lite-libs-debuginfo pcsc-lite-ccid-debuginfo pcsc-lite-ccid-debugsource mesa-libgbm-debuginfo' | tr ' ' '\\n' | while read PKG ; do { rpm --quiet -q \$PKG && rpm -q \$PKG | grep -v '\\.btrh9\\.' ; } ; done\`)
+
+# This is handled seperately since the obsoleted qemu-virtiofsd package may be tagged with el9 or btrh9.
+export REMOVEPKGS=\$(echo \$REMOVEPKGS \$(echo \`echo 'qemu-virtiofsd' | tr ' ' '\\n' | while read PKG ; do { rpm --quiet -q \$PKG && rpm -q \$PKG ; } ; done\`))
 
 # Ensure previous attempts/transactions don't break the install attempt.
 dnf clean all --enablerepo=* &>/dev/null
@@ -1246,8 +2065,9 @@ else
 printf "%s\\n" "install \$INSTALLPKGS" "run" "exit" | dnf shell --assumeyes && dnf --assumeyes reinstall \$INSTALLPKGS || exit 1
 fi
 
-[ ! -f /usr/bin/qemu-kvm ] && [ -f /usr/bin/qemu-system-x86_64 ] && sudo ln -s /usr/bin/qemu-system-x86_64 /usr/bin/qemu-kvm
-[ ! -f /usr/libexec/qemu-kvm ] && [ -f /usr/bin/qemu-kvm ] && sudo ln -s /usr/bin/qemu-kvm /usr/libexec/qemu-kvm
+# This shouldn't be needed anymore.
+#[ ! -f /usr/bin/qemu-kvm ] && [ -f /usr/bin/qemu-system-x86_64 ] && sudo ln -s /usr/bin/qemu-system-x86_64 /usr/bin/qemu-kvm
+#[ ! -f /usr/libexec/qemu-kvm ] && [ -f /usr/bin/qemu-kvm ] && sudo ln -s /usr/bin/qemu-kvm /usr/libexec/qemu-kvm
 
 EOF
 
