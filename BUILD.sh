@@ -196,7 +196,7 @@ dnf --quiet --assumeyes --allowerasing \
  geolite2-city geolite2-country perl-Expect perl-IO-Tty libldm-devel libldm php-devel \
  php-cli php-common php-fedora-autoloader php-nikic-php-parser4 golang golang-src golang-bin \
  debootstrap keyrings-filesystem dpkg debian-keyring ubu-keyring hfsplus-tools kpartx \
- ntfs-3g ntfsprogs ntfs-3g-system-compression ntfs-3g-libs which zerofree hexedit || exit 1
+ ntfs-3g ntfsprogs ntfs-3g-system-compression ntfs-3g-libs which zerofree hexedit perl-JSON || exit 1
 
 # Packages needed to enable X11 forwarding support along with some graphical tools
 # which are helpful when we need to troubleshoot. 
@@ -1681,6 +1681,9 @@ sed -i "s/^Version:\([\t ]*\).*/Version:\1$(date +%Y%m%d)/g" passt.spec
 # Use a release string of 1024 so the virt-manager rebuild will be seen as an upgrade.
 sed -E -i 's/^Release\: .\%\{\?dist\}/Release: 1024\%\{\?dist\}/g' virt-manager.spec
 
+sed -E -i 's/^Epoch:(\W*) [0-9]*/Epoch:\1 1024/g' libguestfs.spec 
+sed -E -i 's/^Release\:(\W*) .\%\{\?dist\}/Release:\1 1024\%\{\?dist\}/g' libguestfs.spec
+sed -E -i 's/^Release\:(\W*) .\%\{\?dist\}/Release:\1 1024\%\{\?dist\}/g' guestfs-tools.spec
 
 ## Check whether all of the build dependencies, available in the distro 
 ## repositories, are installed. Note that some build dependencies may be 
@@ -2005,6 +2008,11 @@ tee $HOME/RPMS/INSTALL.sh <<-EOF > /dev/null
 #   OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SCRIPT. THIS 
 #   APPLIES REGARDLESS OF JURISDICTION, PHYSICAL OR VIRTUAL LOCATION, AND
 #   sREMAINS APPLICABLE EVEN IF YOU HAVE BEEN ADVISED OF THE RISKS.
+
+
+# Quickly Install Everuthing (Except the vala/ocaml pcakages)
+# sudo dnf install \`ls *rpm | grep -Ev "\\.src\\.|debuginfo|debugsource|devel|ocaml|vala"\` \`ls libguestfs-devel*rpm libvirt-gobject-devel*rpm libvirt-gconfig-devel*rpm libvirt-glib-devel*rpm  libvirt-devel*rpm libvirt-designer-devel*rpm libguestfs-gobject-devel*rpm gobject-introspection-devel*rpm pcre2-devel*rpm libosinfo-devel*rpm\`
+
 
 if [ ! \$(sudo dnf repolist --quiet baseos 2>&1 | grep -Eo "^baseos") ]; then  
  printf "\nThe baseos repo is required but doesn't appear to be enabled.\n\n"
