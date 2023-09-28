@@ -101,6 +101,43 @@ sed -i 's/cdn.remirepo.net/rpms.remirepo.net/g' /etc/yum.repos.d/remi-safe.repo
 sed -i 's/cdn.remirepo.net/rpms.remirepo.net/g' /etc/yum.repos.d/remi-modular.repo
 sed -i 's/http:\/\//https:\/\//g' /etc/yum.repos.d/remi-modular.repo 
 
+# Try and catch any problems with the repo configurations early, so we don't waste time.
+if [ ! $(sudo dnf repolist --quiet appstream 2>&1 | grep -Eo "^appstream") ] || \
+[ ! $(sudo dnf repolist --quiet appstream-debuginfo 2>&1 | grep -Eo "^appstream-debuginfo") ] || \
+[ ! $(sudo dnf repolist --quiet baseos 2>&1 | grep -Eo "^baseos") ] || \
+[ ! $(sudo dnf repolist --quiet baseos-debuginfo 2>&1 | grep -Eo "^baseos-debuginfo") ] || \
+[ ! $(sudo dnf repolist --quiet crb 2>&1 | grep -Eo "^crb") ] || \
+[ ! $(sudo dnf repolist --quiet crb-debuginfo 2>&1 | grep -Eo "^crb-debuginfo") ] || \
+[ ! $(sudo dnf repolist --quiet elrepo 2>&1 | grep -Eo "^elrepo") ] || \
+[ ! $(sudo dnf repolist --quiet epel 2>&1 | grep -Eo "^epel") ] || \
+[ ! $(sudo dnf repolist --quiet extras 2>&1 | grep -Eo "^extras") ] || \
+[ ! $(sudo dnf repolist --quiet plus 2>&1 | grep -Eo "^plus") ] || \
+[ ! $(sudo dnf repolist --quiet remi 2>&1 | grep -Eo "^remi") ] || \
+[ ! $(sudo dnf repolist --quiet remi-debuginfo 2>&1 | grep -Eo "^remi-debuginfo") ] || \
+[ ! $(sudo dnf repolist --quiet remi-modular 2>&1 | grep -Eo "^remi-modular") ] || \
+[ ! $(sudo dnf repolist --quiet remi-safe 2>&1 | grep -Eo "^remi-safe") ] || \
+[ ! $(sudo dnf repolist --quiet rpmfusion-free-updates 2>&1 | grep -Eo "^rpmfusion-free-updates") ] || \
+[ ! $(sudo dnf repolist --quiet rpmfusion-nonfree-updates 2>&1 | grep -Eo "^rpmfusion-nonfree-updates") ]; then
+printf "\n\e[1;91m# One of the RHEL/Alma package repositories used by this build script is missing.\e[0;0m\n\n"
+exit 1
+fi
+
+if [ "$(curl -Lso /dev/null --write-out '%{http_code}' https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/36/Everything/source/tree)" != "200" ] || \
+[ "$(curl -Lso /dev/null --write-out '%{http_code}' https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/36/Everything/source/tree/repodata/repomd.xml)" != "200" ] || \
+[ "$(curl -Lso /dev/null --write-out '%{http_code}' https://archives.fedoraproject.org/pub/archive/fedora/linux/updates/36/Everything/source/tree)" != "200" ] || \
+[ "$(curl -Lso /dev/null --write-out '%{http_code}' https://archives.fedoraproject.org/pub/archive/fedora/linux/updates/36/Everything/source/tree/repodata/repomd.xml)" != "200" ] || \
+[ "$(curl -Lso /dev/null --write-out '%{http_code}' https://mirrors.kernel.org/fedora/releases/38/Everything/source/tree)" != "200" ] || \
+[ "$(curl -Lso /dev/null --write-out '%{http_code}' https://mirrors.kernel.org/fedora/releases/38/Everything/source/tree/repodata/repomd.xml)" != "200" ] || \
+[ "$(curl -Lso /dev/null --write-out '%{http_code}' https://mirrors.kernel.org/fedora/updates/38/Everything/source/tree)" != "200" ] || \
+[ "$(curl -Lso /dev/null --write-out '%{http_code}' https://mirrors.kernel.org/fedora/updates/38/Everything/source/tree/repodata/repomd.xml)" != "200" ] || \
+[ "$(curl -Lso /dev/null --write-out '%{http_code}' https://mirrors.kernel.org/fedora/development/rawhide/Everything/source/tree)" != "200" ] || \
+[ "$(curl -Lso /dev/null --write-out '%{http_code}' https://mirrors.kernel.org/fedora/development/rawhide/Everything/source/tree/repodata/repomd.xml)" != "200" ] || \
+[ "$(curl -Lso /dev/null --write-out '%{http_code}' https://mirrors.kernel.org/fedora/development/rawhide/Modular/source/tree)" != "200" ] || \
+[ "$(curl -Lso /dev/null --write-out '%{http_code}' https://mirrors.kernel.org/fedora/development/rawhide/Modular/source/tree/repodata/repomd.xml)" != "200" ]; then
+printf "\n\e[1;91m# One of the Fedora source code repositories used by this build script is missing or invalid.\e[0;0m\n\n" ;
+exit 1
+fi
+
 # As a final step we clean the cache, and reload it so the new GPG keys get approved.
 dnf --enablerepo=* clean all && dnf --enablerepo=* --quiet --assumeyes makecache && \
 dnf --quiet --assumeyes update && \
@@ -196,7 +233,8 @@ dnf --quiet --assumeyes --allowerasing \
  geolite2-city geolite2-country perl-Expect perl-IO-Tty libldm-devel libldm php-devel \
  php-cli php-common php-fedora-autoloader php-nikic-php-parser4 golang golang-src golang-bin \
  debootstrap keyrings-filesystem dpkg debian-keyring ubu-keyring hfsplus-tools kpartx \
- ntfs-3g ntfsprogs ntfs-3g-system-compression ntfs-3g-libs which zerofree hexedit perl-JSON || exit 1
+ ntfs-3g ntfsprogs ntfs-3g-system-compression ntfs-3g-libs which zerofree hexedit perl-JSON \
+ clevis clevis-luks jq jose libjose luksmeta libluksmeta oniguruma || exit 1
 
 # Packages needed to enable X11 forwarding support along with some graphical tools
 # which are helpful when we need to troubleshoot. 
@@ -291,8 +329,8 @@ EOF
 # Archived Fedora Update Repo
 # https://archives.fedoraproject.org/pub/archive/fedora/linux/updates/##/Everything/source/tree
 
-dnf download --quiet --source mesa avahi pcre2 || exit 1
-dnf download --quiet --disablerepo=* --repofrompath="fc36,https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/36/Everything/source/tree" --repofrompath="fc36-updates,https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/36/Everything/source/tree" --source phodav spice-gtk libguestfs guestfs-tools || exit 1
+dnf download --quiet --source mesa avahi pcre2 libguestfs guestfs-tools || exit 1
+dnf download --quiet --disablerepo=* --repofrompath="fc36,https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/36/Everything/source/tree" --repofrompath="fc36-updates,https://archives.fedoraproject.org/pub/archive/fedora/linux/updates/36/Everything/source/tree" --source phodav spice-gtk || exit 1
 dnf download --quiet --disablerepo=* --repofrompath="fc38,https://mirrors.kernel.org/fedora/releases/38/Everything/source/tree" --repofrompath="fc38-updates,https://mirrors.kernel.org/fedora/updates/38/Everything/source/tree" --source libvirt-designer || exit 1
 dnf download --quiet --disablerepo=* --repofrompath="rawhide,https://mirrors.kernel.org/fedora/development/rawhide/Everything/source/tree" --source edk2 fcode-utils libcacard lzfse openbios python-pefile python-virt-firmware qemu SLOF spice spice-protocol virglrenderer virt-manager virt-viewer virt-backup passt libvirt libvirt-glib libvirt-dbus libvirt-python osinfo-db-tools libosinfo qt-virt-manager qtermwidget lxqt-build-tools liblxqt libqtxdg chunkfs gtk-vnc remmina xorg-x11-drv-nouveau || exit 1
 rpm -i *src.rpm || exit 1
@@ -578,10 +616,10 @@ PATCH
 
 patch -p1 <<-PATCH
 diff --git a/libguestfs.spec b/libguestfs.spec
-index 359e6a8..ab5848f 100644
+index 17eee1b..a5ca381 100644
 --- a/libguestfs.spec
 +++ b/libguestfs.spec
-@@ -117,10 +117,8 @@ BuildRequires: rpm-devel
+@@ -141,10 +141,8 @@ BuildRequires: rpm-devel
  BuildRequires: cpio
  BuildRequires: libconfig-devel
  BuildRequires: xz-devel
@@ -592,7 +630,7 @@ index 359e6a8..ab5848f 100644
  BuildRequires: systemd-units
  BuildRequires: netpbm-progs
  BuildRequires: icoutils
-@@ -130,9 +128,7 @@ BuildRequires: perl(Expect)
+@@ -154,9 +152,7 @@ BuildRequires: perl(Expect)
  %endif
  BuildRequires: libacl-devel
  BuildRequires: libcap-devel
@@ -602,22 +640,7 @@ index 359e6a8..ab5848f 100644
  BuildRequires: jansson-devel
  BuildRequires: systemd-devel
  BuildRequires: bash-completion
-@@ -173,14 +169,10 @@ BuildRequires: rubygem(json)
- BuildRequires: rubygem(rdoc)
- BuildRequires: rubygem(test-unit)
- BuildRequires: ruby-irb
--%if !0%{?rhel}
- BuildRequires: php-devel
--%endif
- BuildRequires: gobject-introspection-devel
- BuildRequires: gjs
--%if !0%{?rhel}
- BuildRequires: vala
--%endif
- %ifarch %{golang_arches}
- BuildRequires: golang
- %endif
-@@ -204,10 +196,8 @@ BuildRequires: bzip2
+@@ -228,10 +224,8 @@ BuildRequires: clevis-luks
  BuildRequires: coreutils
  BuildRequires: cpio
  BuildRequires: cryptsetup
@@ -628,7 +651,7 @@ index 359e6a8..ab5848f 100644
  BuildRequires: dhclient
  BuildRequires: diffutils
  BuildRequires: dosfstools
-@@ -221,24 +211,18 @@ BuildRequires: gfs2-utils
+@@ -245,24 +239,18 @@ BuildRequires: gfs2-utils
  %endif
  BuildRequires: grep
  BuildRequires: gzip
@@ -653,7 +676,7 @@ index 359e6a8..ab5848f 100644
  BuildRequires: libselinux
  BuildRequires: libxml2
  BuildRequires: lsof
-@@ -246,9 +230,7 @@ BuildRequires: lsscsi
+@@ -270,9 +258,7 @@ BuildRequires: lsscsi
  BuildRequires: lvm2
  BuildRequires: lzop
  BuildRequires: mdadm
@@ -663,7 +686,7 @@ index 359e6a8..ab5848f 100644
  BuildRequires: openssh-clients
  BuildRequires: parted
  BuildRequires: pciutils
-@@ -274,15 +256,11 @@ BuildRequires: tar
+@@ -298,15 +284,11 @@ BuildRequires: tar
  BuildRequires: udev
  BuildRequires: util-linux
  BuildRequires: vim-minimal
@@ -679,7 +702,7 @@ index 359e6a8..ab5848f 100644
  %if !0%{?rhel}
  %ifnarch %{arm} aarch64 s390 s390x riscv64
  # http://zfs-fuse.net/issues/94
-@@ -321,15 +299,13 @@ Requires:      tar
+@@ -349,15 +331,13 @@ Requires:      xz
  
  # For qemu direct and libvirt backends.
  Requires:      qemu-kvm-core
@@ -697,7 +720,7 @@ index 359e6a8..ab5848f 100644
  Recommends:    libvirt-daemon-config-network
  Requires:      libvirt-daemon-driver-qemu >= 7.1.0
  Requires:      libvirt-daemon-driver-secret
-@@ -355,7 +331,6 @@ Conflicts:     libguestfs-winsupport
+@@ -383,7 +363,6 @@ Conflicts:     libguestfs-winsupport
  Conflicts:     libguestfs-winsupport < 7.2
  %endif
  
@@ -705,7 +728,7 @@ index 359e6a8..ab5848f 100644
  %description
  Libguestfs is a library for accessing and modifying virtual machine
  disk images.  http://libguestfs.org
-@@ -370,14 +345,12 @@ For enhanced features, install:
+@@ -398,14 +377,12 @@ For enhanced features, install:
  %if !0%{?rhel}
       libguestfs-forensics  adds filesystem forensics support
            libguestfs-gfs2  adds Global Filesystem (GFS2) support
@@ -721,22 +744,7 @@ index 359e6a8..ab5848f 100644
             libguestfs-xfs  adds XFS support
  %if !0%{?rhel}
             libguestfs-zfs  adds ZFS support
-@@ -396,14 +369,10 @@ Language bindings:
-               lua-guestfs  Lua bindings
-    ocaml-libguestfs-devel  OCaml bindings
-          perl-Sys-Guestfs  Perl bindings
--%if !0%{?rhel}
-            php-libguestfs  PHP bindings
--%endif
-        python3-libguestfs  Python 3 bindings
-           ruby-libguestfs  Ruby bindings
--%if !0%{?rhel}
-           libguestfs-vala  Vala language bindings
--%endif
- 
- 
- %package appliance
-@@ -465,7 +434,6 @@ disk images containing GFS2.
+@@ -487,7 +464,6 @@ disk images containing GFS2.
  %endif
  
  
@@ -744,7 +752,7 @@ index 359e6a8..ab5848f 100644
  %ifnarch ppc
  %package hfsplus
  Summary:       HFS+ support for %{name}
-@@ -476,7 +444,6 @@ Requires:      %{name}%{?_isa} = %{epoch}:%{version}-%{release}
+@@ -498,7 +474,6 @@ Requires:      %{name}%{?_isa} = %{epoch}:%{version}-%{release}
  This adds HFS+ support to %{name}.  Install it if you want to process
  disk images containing HFS+ / Mac OS Extended filesystems.
  %endif
@@ -752,7 +760,7 @@ index 359e6a8..ab5848f 100644
  
  
  %package rescue
-@@ -499,7 +466,6 @@ This adds rsync support to %{name}.  Install it if you want to use
+@@ -522,7 +497,6 @@ This adds rsync support to %{name}.  Install it if you want to use
  rsync to upload or download files into disk images.
  
  
@@ -760,7 +768,7 @@ index 359e6a8..ab5848f 100644
  %package ufs
  Summary:       UFS (BSD) support for %{name}
  License:       LGPLv2+
-@@ -508,7 +474,6 @@ Requires:      %{name}%{?_isa} = %{epoch}:%{version}-%{release}
+@@ -531,7 +505,6 @@ Requires:      %{name}%{?_isa} = %{epoch}:%{version}-%{release}
  %description ufs
  This adds UFS support to %{name}.  Install it if you want to process
  disk images containing UFS (BSD filesystems).
@@ -768,23 +776,7 @@ index 359e6a8..ab5848f 100644
  
  
  %package xfs
-@@ -619,7 +584,6 @@ Provides:      ruby(guestfs) = %{version}
- ruby-%{name} contains Ruby bindings for %{name}.
- 
- 
--%if !0%{?rhel}
- %package -n php-%{name}
- Summary:       PHP bindings for %{name}
- Requires:      %{name}%{?_isa} = %{epoch}:%{version}-%{release}
-@@ -628,7 +592,6 @@ Requires: php(api) = %{php_core_api}
- 
- %description -n php-%{name}
- php-%{name} contains PHP bindings for %{name}.
--%endif
- 
- 
- %package -n lua-guestfs
-@@ -662,7 +625,6 @@ This package is needed if you want to write software using the
+@@ -683,7 +656,6 @@ This package is needed if you want to write software using the
  GObject bindings.  It also contains GObject Introspection information.
  
  
@@ -792,7 +784,7 @@ index 359e6a8..ab5848f 100644
  %package vala
  Summary:       Vala for %{name}
  Requires:      %{name}-devel%{?_isa} = %{epoch}:%{version}-%{release}
-@@ -671,7 +633,6 @@ Requires:      vala
+@@ -692,7 +664,6 @@ Requires:      vala
  
  %description vala
  %{name}-vala contains GObject bindings for %{name}.
@@ -800,8 +792,8 @@ index 359e6a8..ab5848f 100644
  
  
  
-@@ -751,9 +712,6 @@ else
- fi
+@@ -765,9 +736,6 @@ sed -e "s|/var/cache/yum|\$(pwd)/cachedir|" -e "s|/var/cache/dnf|\$(pwd)/cachedir|
+ extra=--with-supermin-packager-config=\$(pwd)/yum.conf
  
  %{configure} \\
 -%if 0%{?rhel} && !0%{?eln}
@@ -810,18 +802,17 @@ index 359e6a8..ab5848f 100644
    PYTHON=%{__python3} \\
    --with-default-backend=libvirt \\
    --enable-appliance-format-auto \\
-@@ -762,10 +720,6 @@ fi
+@@ -776,9 +744,7 @@ extra=--with-supermin-packager-config=\$(pwd)/yum.conf
  %else
    --with-extra="rhel=%{rhel},release=%{release},libvirt" \\
  %endif
 -%if 0%{?rhel} && !0%{?eln}
--  --with-qemu="qemu-kvm qemu-system-%{_build_arch} qemu" \\
--  --disable-php \\
+   --with-qemu="qemu-kvm qemu-system-%{_build_arch} qemu" \\
 -%endif
  %ifnarch %{golang_arches}
    --disable-golang \\
  %endif
-@@ -837,28 +791,19 @@ function move_to
+@@ -850,28 +816,19 @@ function move_to
      echo "\$1" >> "\$2"
  }
  
@@ -856,7 +847,7 @@ index 359e6a8..ab5848f 100644
  move_to iputils         zz-packages-rescue
  move_to lsof            zz-packages-rescue
  move_to openssh-clients zz-packages-rescue
-@@ -875,11 +820,9 @@ move_to zfs-fuse        zz-packages-zfs
+@@ -888,11 +845,9 @@ move_to zfs-fuse        zz-packages-zfs
  remove zfs-fuse
  %endif
  
@@ -868,7 +859,7 @@ index 359e6a8..ab5848f 100644
  
  popd
  
-@@ -973,12 +916,10 @@ rm ocaml/html/.gitignore
+@@ -986,12 +941,10 @@ rm ocaml/html/.gitignore
  %{_libdir}/guestfs/supermin.d/zz-packages-gfs2
  %endif
  
@@ -881,7 +872,7 @@ index 359e6a8..ab5848f 100644
  
  %files rsync
  %{_libdir}/guestfs/supermin.d/zz-packages-rsync
-@@ -988,10 +929,8 @@ rm ocaml/html/.gitignore
+@@ -1001,10 +954,8 @@ rm ocaml/html/.gitignore
  %{_bindir}/virt-rescue
  %{_mandir}/man1/virt-rescue.1*
  
@@ -892,21 +883,7 @@ index 359e6a8..ab5848f 100644
  
  %files xfs
  %{_libdir}/guestfs/supermin.d/zz-packages-xfs
-@@ -1063,13 +1002,11 @@ rm ocaml/html/.gitignore
- %{_mandir}/man3/guestfs-ruby.3*
- 
- 
--%if !0%{?rhel}
- %files -n php-%{name}
- %doc php/README-PHP
- %dir %{_sysconfdir}/php.d
- %{_sysconfdir}/php.d/guestfs_php.ini
- %{_libdir}/php/modules/guestfs_php.so
--%endif
- 
- 
- %files -n lua-guestfs
-@@ -1094,11 +1031,9 @@ rm ocaml/html/.gitignore
+@@ -1105,11 +1056,9 @@ rm ocaml/html/.gitignore
  %{_mandir}/man3/guestfs-gobject.3*
  
  
@@ -918,7 +895,7 @@ index 359e6a8..ab5848f 100644
  
  
  %ifarch %{golang_arches}
-@@ -4978,3 +4913,4 @@ rm ocaml/html/.gitignore
+@@ -5008,3 +4957,4 @@ rm ocaml/html/.gitignore
  
  * Sat Apr  4 2009 Richard Jones <rjones@redhat.com> - 0.9.9-1
  - Initial build.
@@ -926,8 +903,9 @@ index 359e6a8..ab5848f 100644
 PATCH
 
 patch -p1 <<-PATCH
+patch -p1 <<-PATCH
 diff --git a/qemu.spec b/qemu.spec
-index 0472a1b..2f41096 100644
+index 6f8807a..51b9305 100644
 --- a/qemu.spec
 +++ b/qemu.spec
 @@ -14,11 +14,13 @@
@@ -953,16 +931,22 @@ index 0472a1b..2f41096 100644
  %endif
  
  %global have_kvm 0
-@@ -75,7 +77,7 @@
- %global have_spice 0
+@@ -70,12 +72,10 @@
  %endif
- %if 0%{?rhel} >= 9
+ 
+ # Matches spice ExclusiveArch
+-%global have_spice 1
+ %ifnarch %{ix86} x86_64 %{arm} aarch64
+ %global have_spice 0
+-%endif
+-%if 0%{?rhel} >= 9
 -%global have_spice 0
++%else
 +%global have_spice 1
  %endif
  
  # Matches xen ExclusiveArch
-@@ -87,14 +89,14 @@
+@@ -87,14 +87,14 @@
  %endif
  
  %global have_liburing 0
@@ -979,7 +963,7 @@ index 0472a1b..2f41096 100644
  %global have_virgl 1
  %endif
  
-@@ -114,13 +116,10 @@
+@@ -114,13 +114,10 @@
  %global have_dbus_display 0
  %endif
  
@@ -995,7 +979,7 @@ index 0472a1b..2f41096 100644
  %global have_fdt 1
  %global have_opengl 1
  %global have_usbredir 1
-@@ -157,7 +156,7 @@
+@@ -157,7 +154,7 @@
  
  %define have_libcacard 1
  %if 0%{?rhel} >= 9
@@ -1004,7 +988,7 @@ index 0472a1b..2f41096 100644
  %endif
  
  # LTO still has issues with qemu on armv7hl and aarch64
-@@ -202,7 +201,6 @@
+@@ -202,7 +199,6 @@
  %define requires_audio_alsa Requires: %{name}-audio-alsa = %{evr}
  %define requires_audio_oss Requires: %{name}-audio-oss = %{evr}
  %define requires_audio_pa Requires: %{name}-audio-pa = %{evr}
@@ -1012,7 +996,7 @@ index 0472a1b..2f41096 100644
  %define requires_audio_sdl Requires: %{name}-audio-sdl = %{evr}
  %define requires_char_baum Requires: %{name}-char-baum = %{evr}
  %define requires_device_usb_host Requires: %{name}-device-usb-host = %{evr}
-@@ -288,7 +286,6 @@
+@@ -288,7 +284,6 @@
  %{requires_audio_dbus} \\
  %{requires_audio_oss} \\
  %{requires_audio_pa} \\
@@ -1020,16 +1004,7 @@ index 0472a1b..2f41096 100644
  %{requires_audio_sdl} \\
  %{requires_audio_jack} \\
  %{requires_audio_spice} \\
-@@ -343,7 +340,7 @@ Summary: QEMU is a FAST! processor emulator
- Name: qemu
- Version: 8.1.0
- Release: %{baserelease}%{?rcrel}%{?dist}
--Epoch: 2
-+Epoch: 1024
- License: Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND FSFAP AND GPL-1.0-or-later AND GPL-2.0-only AND GPL-2.0-or-later AND GPL-2.0-or-later with GCC-exception-2.0 exception AND LGPL-2.0-only AND LGPL-2.0-or-later AND LGPL-2.1-only and LGPL-2.1-or-later AND MIT and public-domain and CC-BY-3.0
- URL: http://www.qemu.org/
- 
-@@ -361,6 +358,7 @@ Source31: kvm-x86.conf
+@@ -361,6 +356,7 @@ Source31: kvm-x86.conf
  Source36: README.tests
  
  Patch0001: 0001-tests-Disable-iotests-like-RHEL-does.patch
@@ -1037,7 +1012,7 @@ index 0472a1b..2f41096 100644
  
  BuildRequires: meson >= %{meson_version}
  BuildRequires: bison
-@@ -515,16 +513,11 @@ BuildRequires: SDL2_image-devel
+@@ -515,16 +511,11 @@ BuildRequires: SDL2_image-devel
  # Used by vnc-display-test
  BuildRequires: pkgconfig(gvnc-1.0)
  %endif
@@ -1054,7 +1029,7 @@ index 0472a1b..2f41096 100644
  
  
  # Requires for the Fedora 'qemu' metapackage
-@@ -755,12 +748,6 @@ Requires: %{name}-common%{?_isa} = %{epoch}:%{version}-%{release}
+@@ -755,12 +746,6 @@ Requires: %{name}-common%{?_isa} = %{epoch}:%{version}-%{release}
  %description audio-pa
  This package provides the additional PulseAudio audio driver for QEMU.
  
@@ -1067,7 +1042,7 @@ index 0472a1b..2f41096 100644
  %package  audio-sdl
  Summary: QEMU SDL audio driver
  Requires: %{name}-common%{?_isa} = %{epoch}:%{version}-%{release}
-@@ -1514,7 +1501,6 @@ mkdir -p %{static_builddir}
+@@ -1514,7 +1499,6 @@ mkdir -p %{static_builddir}
    --disable-linux-user             \\\\\\
    --disable-live-block-migration   \\\\\\
    --disable-lto                    \\\\\\
@@ -1075,7 +1050,7 @@ index 0472a1b..2f41096 100644
    --disable-lzo                    \\\\\\
    --disable-malloc-trim            \\\\\\
    --disable-membarrier             \\\\\\
-@@ -1693,7 +1679,6 @@ run_configure \\
+@@ -1693,7 +1677,6 @@ run_configure \\
    --enable-oss \\
    --enable-pa \\
    --enable-pie \\
@@ -1083,7 +1058,7 @@ index 0472a1b..2f41096 100644
  %if %{have_block_rbd}
    --enable-rbd \\
  %endif
-@@ -1726,7 +1711,7 @@ run_configure \\
+@@ -1726,7 +1709,7 @@ run_configure \\
    --enable-xkbcommon \\
    \\
    \\
@@ -1092,7 +1067,7 @@ index 0472a1b..2f41096 100644
    --target-list-exclude=moxie-softmmu \\
    --with-default-devices \\
    --enable-auth-pam \\
-@@ -1737,6 +1722,7 @@ run_configure \\
+@@ -1737,6 +1720,7 @@ run_configure \\
    --enable-curses \\
    --enable-dmg \\
    --enable-fuse \\
@@ -1100,7 +1075,7 @@ index 0472a1b..2f41096 100644
    --enable-gio \\
  %if %{have_block_gluster}
    --enable-glusterfs \\
-@@ -1751,7 +1737,6 @@ run_configure \\
+@@ -1751,7 +1735,6 @@ run_configure \\
    --enable-linux-io-uring \\
  %endif
    --enable-linux-user \\
@@ -1108,7 +1083,7 @@ index 0472a1b..2f41096 100644
    --enable-multiprocess \\
    --enable-parallels \\
  %if %{have_librdma}
-@@ -1760,7 +1745,6 @@ run_configure \\
+@@ -1760,7 +1743,6 @@ run_configure \\
    --enable-qcow1 \\
    --enable-qed \\
    --enable-qom-cast-debug \\
@@ -1116,7 +1091,7 @@ index 0472a1b..2f41096 100644
    --enable-sdl \\
  %if %{have_sdl_image}
    --enable-sdl-image \\
-@@ -1768,6 +1752,7 @@ run_configure \\
+@@ -1768,6 +1750,7 @@ run_configure \\
  %if %{have_libcacard}
    --enable-smartcard \\
  %endif
@@ -1124,7 +1099,7 @@ index 0472a1b..2f41096 100644
  %if %{have_spice}
    --enable-spice \\
    --enable-spice-protocol \\
-@@ -1811,8 +1796,12 @@ run_configure \\
+@@ -1811,8 +1794,12 @@ run_configure \\
  
  %if !%{tools_only}
  %make_build
@@ -1137,7 +1112,7 @@ index 0472a1b..2f41096 100644
  # Fedora build for qemu-user-static
  %if %{user_static}
  pushd %{static_builddir}
-@@ -1884,6 +1873,8 @@ install -D -p -m 644 %{_sourcedir}/95-kvm-memlock.conf %{buildroot}%{_sysconfdir
+@@ -1884,6 +1871,8 @@ install -D -p -m 644 %{_sourcedir}/95-kvm-memlock.conf %{buildroot}%{_sysconfdir
  %if %{have_kvm}
  install -D -p -m 0644 %{_sourcedir}/vhost.conf %{buildroot}%{_sysconfdir}/modprobe.d/vhost.conf
  install -D -p -m 0644 %{modprobe_kvm_conf} %{buildroot}%{_sysconfdir}/modprobe.d/kvm.conf
@@ -1146,7 +1121,7 @@ index 0472a1b..2f41096 100644
  %endif
  
  # Copy some static data into place
-@@ -2281,6 +2272,7 @@ useradd -r -u 107 -g qemu -G kvm -d / -s /sbin/nologin \\
+@@ -2281,6 +2270,7 @@ useradd -r -u 107 -g qemu -G kvm -d / -s /sbin/nologin \\
  
  %files block-dmg
  %{_libdir}/%{name}/block-dmg-bz2.so
@@ -1154,7 +1129,7 @@ index 0472a1b..2f41096 100644
  %if %{have_block_gluster}
  %files block-gluster
  %{_libdir}/%{name}/block-gluster.so
-@@ -2300,8 +2292,6 @@ useradd -r -u 107 -g qemu -G kvm -d / -s /sbin/nologin \\
+@@ -2300,8 +2290,6 @@ useradd -r -u 107 -g qemu -G kvm -d / -s /sbin/nologin \\
  %{_libdir}/%{name}/audio-oss.so
  %files audio-pa
  %{_libdir}/%{name}/audio-pa.so
@@ -1163,7 +1138,7 @@ index 0472a1b..2f41096 100644
  %files audio-sdl
  %{_libdir}/%{name}/audio-sdl.so
  %if %{have_jack}
-@@ -2380,7 +2370,12 @@ useradd -r -u 107 -g qemu -G kvm -d / -s /sbin/nologin \\
+@@ -2380,7 +2368,12 @@ useradd -r -u 107 -g qemu -G kvm -d / -s /sbin/nologin \\
  # Deliberately empty
  
  %files kvm-core
@@ -1679,17 +1654,19 @@ sed -i 's/\.\/edk2\-build\.py \-\-config/.\/edk2-build.py --jobs 6 --config/g' e
 sed -i "s/^Version:\([\t ]*\).*/Version:\1$(date +%Y%m%d)/g" passt.spec 
 
 # Use a release string of 1024 so the virt-manager rebuild will be seen as an upgrade.
-sed -E -i 's/^Release\: .\%\{\?dist\}/Release: 1024\%\{\?dist\}/g' virt-manager.spec
-
+sed -E -i 's/^Epoch:(\W*) [0-9]*/Epoch:\1 1024/g' qemu.spec 
 sed -E -i 's/^Epoch:(\W*) [0-9]*/Epoch:\1 1024/g' libguestfs.spec 
+
+sed -E -i 's/^Release\:(\W*) .\%\{\?dist\}/Release:\1 1024\%\{\?dist\}/g' remmina.spec
+sed -E -i 's/^Release\:(\W*) .\%\{\?dist\}/Release:\1 1024\%\{\?dist\}/g' virt-manager.spec
 sed -E -i 's/^Release\:(\W*) .\%\{\?dist\}/Release:\1 1024\%\{\?dist\}/g' libguestfs.spec
 sed -E -i 's/^Release\:(\W*) .\%\{\?dist\}/Release:\1 1024\%\{\?dist\}/g' guestfs-tools.spec
+sed -E -i 's/^Release\:(\W*) \%\{baserelease\}\%\{\?rcrel\}\%\{\?dist\}/Release:\1 \%\{baserelease\}\%\{\?rcrel\}.btrh9/g' qemu.spec
 
 ## Check whether all of the build dependencies, available in the distro 
 ## repositories, are installed. Note that some build dependencies may be 
 ## replaced during the build process below.
 ## dnf builddep --spec  --enablerepo=* *.spec
-
 
 # Build the spec files.
 rpmbuild -ba --rebuild --target=$(uname -m) mesa.spec 2>&1 | tee mesa.log > /dev/null && \
@@ -1818,18 +1795,15 @@ printf "\e[1;92m# The gtk-vnc rpmbuild finished.\e[0;0m\n"
 # 529/714 qemu:qtest+qtest-rx / qtest-rx/vnc-display-test                           ERROR          50.26s   killed by signal 6 SIGABRT
 # 594/714 qemu:qtest+qtest-tricore / qtest-tricore/vnc-display-test                 ERROR          51.44s   killed by signal 6 SIGABRT
 
-
-
-
-# The qemu.spec patch is updating the jobs, but we might switch back to using this in the future.
-# JOBS="$(($(lscpu -e=core | grep -v CORE | sort | uniq | wc -l)+2))"
-# sed -i "s/%make_build/%make_build -j$JOBS/g" qemu.spec
-# unset JOBS
-
-rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) qemu.spec 2>&1 | tee qemu.log > /dev/null && \
-rpm -i -U --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " qemu.spec ) || \
+rpmbuild -ba --rebuild --target=$(uname -m) qemu.spec 2>&1 | tee qemu.log > /dev/null && \
+rpm -i -U --replacepkgs --replacefiles $(rpmspec -q --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " qemu.spec ) || \
 { printf "\n\e[1;91m# The qemu rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
 printf "\e[1;92m# The qemu rpmbuild finished.\e[0;0m\n"
+
+# rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) qemu.spec 2>&1 | tee qemu.log > /dev/null && \
+# rpm -i -U --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{PROVIDES}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " qemu.spec ) || \
+# { printf "\n\e[1;91m# The qemu rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
+# printf "\e[1;92m# The qemu rpmbuild finished.\e[0;0m\n"
 
 # The libguestfs build originally required a qemu-kvm binary, so a symlink was used. Since the the 
 # has been updated to generate a qemu-kvm binary, and the requirement has been removed from the 
@@ -1944,31 +1918,31 @@ printf "\e[1;92m# The remmina rpmbuild finished.\e[0;0m\n"
 dnf --quiet --enablerepo=remi --enablerepo=remi-debuginfo --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download SDL2_image SDL2_image-debuginfo SDL2_image-devel SDL2_image-debugsource
 
 # pcsc-lite
-dnf --quiet --enablerepo=baseos --enablerepo=baseos-debug --enablerepo=crb --enablerepo=crb-debuginfo --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download pcsc-lite pcsc-lite-debuginfo pcsc-lite-debugsource pcsc-lite-devel pcsc-lite-devel-debuginfo pcsc-lite-libs pcsc-lite-libs-debuginfo pcsc-lite-ccid pcsc-lite-ccid-debuginfo pcsc-lite-ccid-debugsource
+dnf --quiet --enablerepo=baseos --enablerepo=baseos-debuginfo --enablerepo=crb --enablerepo=crb-debuginfo --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download pcsc-lite pcsc-lite-debuginfo pcsc-lite-debugsource pcsc-lite-devel pcsc-lite-devel-debuginfo pcsc-lite-libs pcsc-lite-libs-debuginfo pcsc-lite-ccid pcsc-lite-ccid-debuginfo pcsc-lite-ccid-debugsource
 
 # mesa-libgbm
-# dnf --quiet --enablerepo=appstream --enablerepo=appstream-debug --enablerepo=crb --enablerepo=crb-debuginfo --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download mesa-libgbm mesa-libgbm-devel mesa-libgbm-debuginfo
+# dnf --quiet --enablerepo=appstream --enablerepo=appstream-debuginfo --enablerepo=crb --enablerepo=crb-debuginfo --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download mesa-libgbm mesa-libgbm-devel mesa-libgbm-debuginfo
 
 # usbredir
-dnf --quiet --enablerepo=appstream --enablerepo=appstream-debug --enablerepo=crb --enablerepo=crb-debuginfo --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download usbredir usbredir-devel usbredir-debuginfo usbredir-debugsource
+dnf --quiet --enablerepo=appstream --enablerepo=appstream-debuginfo --enablerepo=crb --enablerepo=crb-debuginfo --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download usbredir usbredir-devel usbredir-debuginfo usbredir-debugsource
 
 # opus
-dnf --quiet --enablerepo=appstream --enablerepo=appstream-debug --enablerepo=crb --enablerepo=crb-debuginfo --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download opus opus-devel opus-debuginfo opus-debugsource
+dnf --quiet --enablerepo=appstream --enablerepo=appstream-debuginfo --enablerepo=crb --enablerepo=crb-debuginfo --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download opus opus-devel opus-debuginfo opus-debugsource
 
 # gobject-introspection
-dnf --quiet --enablerepo=baseos --enablerepo=baseos-debug --enablerepo=crb --enablerepo=crb-debuginfo --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download gobject-introspection gobject-introspection-devel gobject-introspection-debuginfo gobject-introspection-debugsource
+dnf --quiet --enablerepo=baseos --enablerepo=baseos-debuginfo --enablerepo=crb --enablerepo=crb-debuginfo --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download gobject-introspection gobject-introspection-devel gobject-introspection-debuginfo gobject-introspection-debugsource
 
 # libogg
-dnf --quiet --enablerepo=appstream --enablerepo=appstream-debug --enablerepo=crb --enablerepo=crb-debuginfo --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download libogg libogg-devel libogg-debuginfo libogg-debugsource
+dnf --quiet --enablerepo=appstream --enablerepo=appstream-debuginfo --enablerepo=crb --enablerepo=crb-debuginfo --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download libogg libogg-devel libogg-debuginfo libogg-debugsource
 
 # capstone
-dnf --quiet --enablerepo=appstream --enablerepo=appstream-debug --enablerepo=crb --enablerepo=crb-debuginfo --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download capstone capstone-devel capstone-debuginfo capstone-debugsource python3-capstone python3-capstone-debuginfo
+dnf --quiet --enablerepo=appstream --enablerepo=appstream-debuginfo --enablerepo=crb --enablerepo=crb-debuginfo --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download capstone capstone-devel capstone-debuginfo capstone-debugsource python3-capstone python3-capstone-debuginfo
 
 # python3-markdown
 dnf --quiet --enablerepo=crb --enablerepo=crb-debuginfo --arch=noarch --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/noarch/ download python3-markdown
 
 # vala
-dnf --quiet --enablerepo=baseos --enablerepo=baseos-debug --enablerepo=crb --enablerepo=crb-debuginfo --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download vala libvala libvala-devel vala-debuginfo vala-debugsource valadoc-debuginfo libvala-debuginfo
+dnf --quiet --enablerepo=baseos --enablerepo=baseos-debuginfo --enablerepo=crb --enablerepo=crb-debuginfo --arch=x86_64 --urlprotocol=https --downloaddir=$HOME/rpmbuild/RPMS/x86_64/ download vala libvala libvala-devel vala-debuginfo vala-debugsource valadoc-debuginfo libvala-debuginfo
 
 # Consolidate the RPMs.
 mkdir $HOME/RPMS/
