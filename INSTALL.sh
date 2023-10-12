@@ -23,7 +23,7 @@
 
 
 # Quickly Install Everuthing (Except the vala/ocaml pcakages)
-# sudo dnf install `ls *rpm | grep -Ev "\.src\.|debuginfo|debugsource|devel|ocaml|vala"` `ls libguestfs-devel*rpm libvirt-gobject-devel*rpm libvirt-gconfig-devel*rpm libvirt-glib-devel*rpm  libvirt-devel*rpm libvirt-designer-devel*rpm libguestfs-gobject-devel*rpm gobject-introspection-devel*rpm pcre2-devel*rpm libosinfo-devel*rpm`
+# sudo dnf install `ls *rpm | grep -Ev "\.src\.|debuginfo|debugsource|devel|ocaml|vala"` `ls libguestfs-devel*rpm libvirt-gobject-devel*rpm libvirt-gconfig-devel*rpm libvirt-glib-devel*rpm  libvirt-devel*rpm libguestfs-gobject-devel*rpm gobject-introspection-devel*rpm pcre2-devel*rpm libosinfo-devel*rpm`
 
 
 if [ ! $(sudo dnf repolist --quiet baseos 2>&1 | grep -Eo "^baseos") ]; then  

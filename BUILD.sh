@@ -234,7 +234,8 @@ dnf --quiet --assumeyes --allowerasing \
  php-cli php-common php-fedora-autoloader php-nikic-php-parser4 golang golang-src golang-bin \
  debootstrap keyrings-filesystem dpkg debian-keyring ubu-keyring hfsplus-tools kpartx \
  ntfs-3g ntfsprogs ntfs-3g-system-compression ntfs-3g-libs which zerofree hexedit perl-JSON \
- clevis clevis-luks jq jose libjose luksmeta libluksmeta oniguruma || exit 1
+ clevis clevis-luks jq jose libjose luksmeta libluksmeta oniguruma libnbd-devel \
+ kernel-cross-headers || exit 1
 
 # Packages needed to enable X11 forwarding support along with some graphical tools
 # which are helpful when we need to troubleshoot. 
@@ -331,8 +332,8 @@ EOF
 
 dnf download --quiet --source mesa avahi pcre2 libguestfs guestfs-tools || exit 1
 dnf download --quiet --disablerepo=* --repofrompath="fc36,https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/36/Everything/source/tree" --repofrompath="fc36-updates,https://archives.fedoraproject.org/pub/archive/fedora/linux/updates/36/Everything/source/tree" --source phodav spice-gtk || exit 1
-dnf download --quiet --disablerepo=* --repofrompath="fc38,https://mirrors.kernel.org/fedora/releases/38/Everything/source/tree" --repofrompath="fc38-updates,https://mirrors.kernel.org/fedora/updates/38/Everything/source/tree" --source libvirt-designer || exit 1
-dnf download --quiet --disablerepo=* --repofrompath="rawhide,https://mirrors.kernel.org/fedora/development/rawhide/Everything/source/tree" --source edk2 fcode-utils libcacard lzfse openbios python-pefile python-virt-firmware qemu SLOF spice spice-protocol virglrenderer virt-manager virt-viewer virt-backup passt libvirt libvirt-glib libvirt-dbus libvirt-python osinfo-db-tools libosinfo qt-virt-manager qtermwidget lxqt-build-tools liblxqt libqtxdg chunkfs gtk-vnc remmina xorg-x11-drv-nouveau || exit 1
+dnf download --quiet --disablerepo=* --repofrompath="fc38,https://mirrors.kernel.org/fedora/releases/38/Everything/source/tree" --repofrompath="fc38-updates,https://mirrors.kernel.org/fedora/updates/38/Everything/source/tree" --source qemu || exit 1
+dnf download --quiet --disablerepo=* --repofrompath="rawhide,https://mirrors.kernel.org/fedora/development/rawhide/Everything/source/tree" --source edk2 fcode-utils libcacard lzfse openbios python-pefile python-virt-firmware SLOF spice spice-protocol virglrenderer virt-manager virt-viewer virt-backup passt libvirt libvirt-glib libvirt-dbus libvirt-python osinfo-db-tools libosinfo qt-virt-manager qtermwidget lxqt-build-tools liblxqt libqtxdg chunkfs gtk-vnc remmina xorg-x11-drv-nouveau || exit 1
 rpm -i *src.rpm || exit 1
 
 # Patch the source/spec files.
@@ -902,10 +903,10 @@ index 17eee1b..a5ca381 100644
 +
 PATCH
 
-patch -p1 <<-PATCH
+# QEMU 7.2.6 PATCH
 patch -p1 <<-PATCH
 diff --git a/qemu.spec b/qemu.spec
-index 6f8807a..51b9305 100644
+index 7090e51..c791c9e 100644
 --- a/qemu.spec
 +++ b/qemu.spec
 @@ -14,11 +14,13 @@
@@ -963,7 +964,7 @@ index 6f8807a..51b9305 100644
  %global have_virgl 1
  %endif
  
-@@ -114,13 +114,10 @@
+@@ -114,12 +114,10 @@
  %global have_dbus_display 0
  %endif
  
@@ -972,14 +973,13 @@ index 6f8807a..51b9305 100644
  %global have_libblkio 1
 -%endif
  
--%global have_gvnc_devel %{defined fedora}
 -%global have_sdl_image %{defined fedora}
 +%global have_gvnc_devel 1
 +%global have_sdl_image 1
  %global have_fdt 1
  %global have_opengl 1
  %global have_usbredir 1
-@@ -157,7 +154,7 @@
+@@ -156,7 +154,7 @@
  
  %define have_libcacard 1
  %if 0%{?rhel} >= 9
@@ -988,35 +988,7 @@ index 6f8807a..51b9305 100644
  %endif
  
  # LTO still has issues with qemu on armv7hl and aarch64
-@@ -202,7 +199,6 @@
- %define requires_audio_alsa Requires: %{name}-audio-alsa = %{evr}
- %define requires_audio_oss Requires: %{name}-audio-oss = %{evr}
- %define requires_audio_pa Requires: %{name}-audio-pa = %{evr}
--%define requires_audio_pipewire Requires: %{name}-audio-pipewire = %{evr}
- %define requires_audio_sdl Requires: %{name}-audio-sdl = %{evr}
- %define requires_char_baum Requires: %{name}-char-baum = %{evr}
- %define requires_device_usb_host Requires: %{name}-device-usb-host = %{evr}
-@@ -288,7 +284,6 @@
- %{requires_audio_dbus} \\
- %{requires_audio_oss} \\
- %{requires_audio_pa} \\
--%{requires_audio_pipewire} \\
- %{requires_audio_sdl} \\
- %{requires_audio_jack} \\
- %{requires_audio_spice} \\
-@@ -361,6 +356,7 @@ Source31: kvm-x86.conf
- Source36: README.tests
- 
- Patch0001: 0001-tests-Disable-iotests-like-RHEL-does.patch
-+#Patch0005: 0005-Enable-disable-devices-for-RHEL.patch
- 
- BuildRequires: meson >= %{meson_version}
- BuildRequires: bison
-@@ -515,16 +511,11 @@ BuildRequires: SDL2_image-devel
- # Used by vnc-display-test
- BuildRequires: pkgconfig(gvnc-1.0)
- %endif
--BuildRequires: pipewire-devel
+@@ -509,12 +507,8 @@ BuildRequires: SDL2_image-devel
  
  %if %{user_static}
  BuildRequires: glibc-static glib2-static zlib-static
@@ -1029,20 +1001,18 @@ index 6f8807a..51b9305 100644
  
  
  # Requires for the Fedora 'qemu' metapackage
-@@ -755,12 +746,6 @@ Requires: %{name}-common%{?_isa} = %{epoch}:%{version}-%{release}
- %description audio-pa
- This package provides the additional PulseAudio audio driver for QEMU.
+@@ -749,9 +743,8 @@ This package provides the additional OSS audio driver for QEMU.
  
--%package  audio-pipewire
--Summary: QEMU Pipewire audio driver
+ %package  audio-pa
+ Summary: QEMU PulseAudio audio driver
 -Requires: %{name}-common%{?_isa} = %{epoch}:%{version}-%{release}
--%description audio-pipewire
--This package provides the additional Pipewire audio driver for QEMU.
--
+ %description audio-pa
+-This package provides the additional PulseAudi audio driver for QEMU.
++This package provides the additional PulseAudio audio driver for QEMU.
+ 
  %package  audio-sdl
  Summary: QEMU SDL audio driver
- Requires: %{name}-common%{?_isa} = %{epoch}:%{version}-%{release}
-@@ -1514,7 +1499,6 @@ mkdir -p %{static_builddir}
+@@ -1499,7 +1492,6 @@ mkdir -p %{static_builddir}
    --disable-linux-user             \\\\\\
    --disable-live-block-migration   \\\\\\
    --disable-lto                    \\\\\\
@@ -1050,24 +1020,7 @@ index 6f8807a..51b9305 100644
    --disable-lzo                    \\\\\\
    --disable-malloc-trim            \\\\\\
    --disable-membarrier             \\\\\\
-@@ -1693,7 +1677,6 @@ run_configure \\
-   --enable-oss \\
-   --enable-pa \\
-   --enable-pie \\
--  --enable-pipewire \\
- %if %{have_block_rbd}
-   --enable-rbd \\
- %endif
-@@ -1726,7 +1709,7 @@ run_configure \\
-   --enable-xkbcommon \\
-   \\
-   \\
--  --audio-drv-list=pipewire,pa,sdl,alsa,%{?jack_drv}oss \\
-+  --audio-drv-list=pa,sdl,alsa,%{?jack_drv}oss \\
-   --target-list-exclude=moxie-softmmu \\
-   --with-default-devices \\
-   --enable-auth-pam \\
-@@ -1737,6 +1720,7 @@ run_configure \\
+@@ -1719,6 +1711,7 @@ run_configure \\
    --enable-curses \\
    --enable-dmg \\
    --enable-fuse \\
@@ -1075,15 +1028,15 @@ index 6f8807a..51b9305 100644
    --enable-gio \\
  %if %{have_block_gluster}
    --enable-glusterfs \\
-@@ -1751,7 +1735,6 @@ run_configure \\
+@@ -1733,7 +1726,6 @@ run_configure \\
    --enable-linux-io-uring \\
  %endif
    --enable-linux-user \\
 -  --enable-live-block-migration \\
    --enable-multiprocess \\
+   --enable-vnc-jpeg \\
    --enable-parallels \\
- %if %{have_librdma}
-@@ -1760,7 +1743,6 @@ run_configure \\
+@@ -1743,7 +1735,6 @@ run_configure \\
    --enable-qcow1 \\
    --enable-qed \\
    --enable-qom-cast-debug \\
@@ -1091,7 +1044,7 @@ index 6f8807a..51b9305 100644
    --enable-sdl \\
  %if %{have_sdl_image}
    --enable-sdl-image \\
-@@ -1768,6 +1750,7 @@ run_configure \\
+@@ -1751,6 +1742,7 @@ run_configure \\
  %if %{have_libcacard}
    --enable-smartcard \\
  %endif
@@ -1099,7 +1052,7 @@ index 6f8807a..51b9305 100644
  %if %{have_spice}
    --enable-spice \\
    --enable-spice-protocol \\
-@@ -1811,8 +1794,12 @@ run_configure \\
+@@ -1790,8 +1782,12 @@ run_configure \\
  
  %if !%{tools_only}
  %make_build
@@ -1112,7 +1065,7 @@ index 6f8807a..51b9305 100644
  # Fedora build for qemu-user-static
  %if %{user_static}
  pushd %{static_builddir}
-@@ -1884,6 +1871,8 @@ install -D -p -m 644 %{_sourcedir}/95-kvm-memlock.conf %{buildroot}%{_sysconfdir
+@@ -1863,6 +1859,8 @@ install -D -p -m 644 %{_sourcedir}/95-kvm-memlock.conf %{buildroot}%{_sysconfdir
  %if %{have_kvm}
  install -D -p -m 0644 %{_sourcedir}/vhost.conf %{buildroot}%{_sysconfdir}/modprobe.d/vhost.conf
  install -D -p -m 0644 %{modprobe_kvm_conf} %{buildroot}%{_sysconfdir}/modprobe.d/kvm.conf
@@ -1121,7 +1074,16 @@ index 6f8807a..51b9305 100644
  %endif
  
  # Copy some static data into place
-@@ -2281,6 +2270,7 @@ useradd -r -u 107 -g qemu -G kvm -d / -s /sbin/nologin \\
+@@ -2011,7 +2009,7 @@ pushd %{qemu_kvm_build}
+ echo "Testing %{name}-build"
+ # 2022-06: ppc64le random qtest segfaults with no discernable pattern
+ %ifnarch %{power64}
+-%make_build check
++# %make_build check
+ %endif
+ 
+ popd
+@@ -2266,6 +2264,7 @@ useradd -r -u 107 -g qemu -G kvm -d / -s /sbin/nologin \\
  
  %files block-dmg
  %{_libdir}/%{name}/block-dmg-bz2.so
@@ -1129,16 +1091,7 @@ index 6f8807a..51b9305 100644
  %if %{have_block_gluster}
  %files block-gluster
  %{_libdir}/%{name}/block-gluster.so
-@@ -2300,8 +2290,6 @@ useradd -r -u 107 -g qemu -G kvm -d / -s /sbin/nologin \\
- %{_libdir}/%{name}/audio-oss.so
- %files audio-pa
- %{_libdir}/%{name}/audio-pa.so
--%files audio-pipewire
--%{_libdir}/%{name}/audio-pipewire.so
- %files audio-sdl
- %{_libdir}/%{name}/audio-sdl.so
- %if %{have_jack}
-@@ -2380,7 +2368,12 @@ useradd -r -u 107 -g qemu -G kvm -d / -s /sbin/nologin \\
+@@ -2359,7 +2358,12 @@ useradd -r -u 107 -g qemu -G kvm -d / -s /sbin/nologin \\
  # Deliberately empty
  
  %files kvm-core
@@ -1153,6 +1106,258 @@ index 6f8807a..51b9305 100644
  
  
 PATCH
+
+# # QEMU 8.1.1 PATCH
+# patch -p1 <<-PATCH
+# diff --git a/qemu.spec b/qemu.spec
+# index 6f8807a..51b9305 100644
+# --- a/qemu.spec
+# +++ b/qemu.spec
+# @@ -14,11 +14,13 @@
+#  %global need_qemu_kvm 0
+#  %ifarch %{ix86}
+#  %global kvm_package   system-x86
+# +%global kvm_target    i386
+#  # need_qemu_kvm should only ever be used by x86
+#  %global need_qemu_kvm 1
+#  %endif
+#  %ifarch x86_64
+#  %global kvm_package   system-x86
+# +%global kvm_target    x86_64
+#  # need_qemu_kvm should only ever be used by x86
+#  %global need_qemu_kvm 1
+#  %endif
+# @@ -55,7 +57,7 @@
+#  %global user_static 1
+#  %if 0%{?rhel}
+#  # EPEL/RHEL do not have required -static builddeps
+# -%global user_static 0
+# +%global user_static 1
+#  %endif
+ 
+#  %global have_kvm 0
+# @@ -70,12 +72,10 @@
+#  %endif
+ 
+#  # Matches spice ExclusiveArch
+# -%global have_spice 1
+#  %ifnarch %{ix86} x86_64 %{arm} aarch64
+#  %global have_spice 0
+# -%endif
+# -%if 0%{?rhel} >= 9
+# -%global have_spice 0
+# +%else
+# +%global have_spice 1
+#  %endif
+ 
+#  # Matches xen ExclusiveArch
+# @@ -87,14 +87,14 @@
+#  %endif
+ 
+#  %global have_liburing 0
+# -%if 0%{?fedora}
+# +%if 0%{?rhel}
+#  %ifnarch %{arm}
+#  %global have_liburing 1
+#  %endif
+#  %endif
+ 
+#  %global have_virgl 0
+# -%if 0%{?fedora}
+# +%if 0%{?rhel}
+#  %global have_virgl 1
+#  %endif
+ 
+# @@ -114,13 +114,10 @@
+#  %global have_dbus_display 0
+#  %endif
+ 
+# -%global have_libblkio 0
+# -%if 0%{?fedora} >= 37
+#  %global have_libblkio 1
+# -%endif
+ 
+# -%global have_gvnc_devel %{defined fedora}
+# -%global have_sdl_image %{defined fedora}
+# +%global have_gvnc_devel 1
+# +%global have_sdl_image 1
+#  %global have_fdt 1
+#  %global have_opengl 1
+#  %global have_usbredir 1
+# @@ -157,7 +154,7 @@
+ 
+#  %define have_libcacard 1
+#  %if 0%{?rhel} >= 9
+# -%define have_libcacard 0
+# +%define have_libcacard 1
+#  %endif
+ 
+#  # LTO still has issues with qemu on armv7hl and aarch64
+# @@ -202,7 +199,6 @@
+#  %define requires_audio_alsa Requires: %{name}-audio-alsa = %{evr}
+#  %define requires_audio_oss Requires: %{name}-audio-oss = %{evr}
+#  %define requires_audio_pa Requires: %{name}-audio-pa = %{evr}
+# -%define requires_audio_pipewire Requires: %{name}-audio-pipewire = %{evr}
+#  %define requires_audio_sdl Requires: %{name}-audio-sdl = %{evr}
+#  %define requires_char_baum Requires: %{name}-char-baum = %{evr}
+#  %define requires_device_usb_host Requires: %{name}-device-usb-host = %{evr}
+# @@ -288,7 +284,6 @@
+#  %{requires_audio_dbus} \\
+#  %{requires_audio_oss} \\
+#  %{requires_audio_pa} \\
+# -%{requires_audio_pipewire} \\
+#  %{requires_audio_sdl} \\
+#  %{requires_audio_jack} \\
+#  %{requires_audio_spice} \\
+# @@ -361,6 +356,7 @@ Source31: kvm-x86.conf
+#  Source36: README.tests
+ 
+#  Patch0001: 0001-tests-Disable-iotests-like-RHEL-does.patch
+# +#Patch0005: 0005-Enable-disable-devices-for-RHEL.patch
+ 
+#  BuildRequires: meson >= %{meson_version}
+#  BuildRequires: bison
+# @@ -515,16 +511,11 @@ BuildRequires: SDL2_image-devel
+#  # Used by vnc-display-test
+#  BuildRequires: pkgconfig(gvnc-1.0)
+#  %endif
+# -BuildRequires: pipewire-devel
+ 
+#  %if %{user_static}
+#  BuildRequires: glibc-static glib2-static zlib-static
+# -%if 0%{?fedora} >= 37
+# -BuildRequires: pcre2-static
+# -%else
+#  BuildRequires: pcre-static
+#  %endif
+# -%endif
+ 
+ 
+#  # Requires for the Fedora 'qemu' metapackage
+# @@ -755,12 +746,6 @@ Requires: %{name}-common%{?_isa} = %{epoch}:%{version}-%{release}
+#  %description audio-pa
+#  This package provides the additional PulseAudio audio driver for QEMU.
+ 
+# -%package  audio-pipewire
+# -Summary: QEMU Pipewire audio driver
+# -Requires: %{name}-common%{?_isa} = %{epoch}:%{version}-%{release}
+# -%description audio-pipewire
+# -This package provides the additional Pipewire audio driver for QEMU.
+# -
+#  %package  audio-sdl
+#  Summary: QEMU SDL audio driver
+#  Requires: %{name}-common%{?_isa} = %{epoch}:%{version}-%{release}
+# @@ -1514,7 +1499,6 @@ mkdir -p %{static_builddir}
+#    --disable-linux-user             \\\\\\
+#    --disable-live-block-migration   \\\\\\
+#    --disable-lto                    \\\\\\
+# -  --disable-lzfse                  \\\\\\
+#    --disable-lzo                    \\\\\\
+#    --disable-malloc-trim            \\\\\\
+#    --disable-membarrier             \\\\\\
+# @@ -1693,7 +1677,6 @@ run_configure \\
+#    --enable-oss \\
+#    --enable-pa \\
+#    --enable-pie \\
+# -  --enable-pipewire \\
+#  %if %{have_block_rbd}
+#    --enable-rbd \\
+#  %endif
+# @@ -1726,7 +1709,7 @@ run_configure \\
+#    --enable-xkbcommon \\
+#    \\
+#    \\
+# -  --audio-drv-list=pipewire,pa,sdl,alsa,%{?jack_drv}oss \\
+# +  --audio-drv-list=pa,sdl,alsa,%{?jack_drv}oss \\
+#    --target-list-exclude=moxie-softmmu \\
+#    --with-default-devices \\
+#    --enable-auth-pam \\
+# @@ -1737,6 +1720,7 @@ run_configure \\
+#    --enable-curses \\
+#    --enable-dmg \\
+#    --enable-fuse \\
+# +  --enable-fuse-lseek \\
+#    --enable-gio \\
+#  %if %{have_block_gluster}
+#    --enable-glusterfs \\
+# @@ -1751,7 +1735,6 @@ run_configure \\
+#    --enable-linux-io-uring \\
+#  %endif
+#    --enable-linux-user \\
+# -  --enable-live-block-migration \\
+#    --enable-multiprocess \\
+#    --enable-parallels \\
+#  %if %{have_librdma}
+# @@ -1760,7 +1743,6 @@ run_configure \\
+#    --enable-qcow1 \\
+#    --enable-qed \\
+#    --enable-qom-cast-debug \\
+# -  --enable-replication \\
+#    --enable-sdl \\
+#  %if %{have_sdl_image}
+#    --enable-sdl-image \\
+# @@ -1768,6 +1750,7 @@ run_configure \\
+#  %if %{have_libcacard}
+#    --enable-smartcard \\
+#  %endif
+# +  --enable-sparse \\
+#  %if %{have_spice}
+#    --enable-spice \\
+#    --enable-spice-protocol \\
+# @@ -1811,8 +1794,12 @@ run_configure \\
+ 
+#  %if !%{tools_only}
+#  %make_build
+# +
+# +cp -a %{kvm_target}-softmmu/qemu-system-%{kvm_target} qemu-kvm
+# +
+#  popd
+ 
+# +
+#  # Fedora build for qemu-user-static
+#  %if %{user_static}
+#  pushd %{static_builddir}
+# @@ -1884,6 +1871,8 @@ install -D -p -m 644 %{_sourcedir}/95-kvm-memlock.conf %{buildroot}%{_sysconfdir
+#  %if %{have_kvm}
+#  install -D -p -m 0644 %{_sourcedir}/vhost.conf %{buildroot}%{_sysconfdir}/modprobe.d/vhost.conf
+#  install -D -p -m 0644 %{modprobe_kvm_conf} %{buildroot}%{_sysconfdir}/modprobe.d/kvm.conf
+# +install -D -p -m 0755 %{qemu_kvm_build}/%{kvm_target}-softmmu/qemu-system-%{kvm_target} %{buildroot}%{_libexecdir}/qemu-kvm
+# +
+#  %endif
+ 
+#  # Copy some static data into place
+# @@ -2281,6 +2270,7 @@ useradd -r -u 107 -g qemu -G kvm -d / -s /sbin/nologin \\
+ 
+#  %files block-dmg
+#  %{_libdir}/%{name}/block-dmg-bz2.so
+# +%{_libdir}/%{name}/block-dmg-lzfse.so
+#  %if %{have_block_gluster}
+#  %files block-gluster
+#  %{_libdir}/%{name}/block-gluster.so
+# @@ -2300,8 +2290,6 @@ useradd -r -u 107 -g qemu -G kvm -d / -s /sbin/nologin \\
+#  %{_libdir}/%{name}/audio-oss.so
+#  %files audio-pa
+#  %{_libdir}/%{name}/audio-pa.so
+# -%files audio-pipewire
+# -%{_libdir}/%{name}/audio-pipewire.so
+#  %files audio-sdl
+#  %{_libdir}/%{name}/audio-sdl.so
+#  %if %{have_jack}
+# @@ -2380,7 +2368,12 @@ useradd -r -u 107 -g qemu -G kvm -d / -s /sbin/nologin \\
+#  # Deliberately empty
+ 
+#  %files kvm-core
+# -# Deliberately empty
+# +%{_libexecdir}/qemu-kvm
+# +
+# +%ifarch x86_64
+# +    %{_libdir}/%{name}/accel-tcg-%{kvm_target}.so
+# +%endif
+# +
+#  %endif
+ 
+ 
+# PATCH
 
 cat <<-PATCH > ../SOURCES/0005-Enable-disable-devices-for-RHEL.patch
 From: Miroslav Rezanina <mrezanin@redhat.com>
@@ -1722,7 +1927,7 @@ rpm -i -U --replacepkgs --replacefiles $(ls -q  $(rpmspec -q --undefine="dist" -
 printf "\e[1;92m# The python-pefile rpmbuild finished.\e[0;0m\n"
 
 rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) python-virt-firmware.spec 2>&1 | tee python-virt-firmware.log > /dev/null && \
-rpm -i -U --replacepkgs --replacefiles $(ls -q  $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " python-virt-firmware.spec ) 2>/dev/null | grep -v "python3-virt-firmware-tests") || \
+rpm -i -U --replacepkgs --replacefiles $(ls -q  $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " python-virt-firmware.spec ) 2>/dev/null | grep -Ev "python3-virt-firmware-tests|uki-direct") || \
 { printf "\n\e[1;91m# The python-virt-firmware rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
 printf "\e[1;92m# The python-virt-firmware rpmbuild finished.\e[0;0m\n"
 
@@ -1843,10 +2048,11 @@ rpm -i -U --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .
 { printf "\n\e[1;91m# The libvirt-dbus rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
 printf "\e[1;92m# The libvirt-dbus rpmbuild finished.\e[0;0m\n"
 
-rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) libvirt-designer.spec 2>&1 | tee libvirt-designer.log > /dev/null && \
-rpm -i -U --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " libvirt-designer.spec ) || \
-{ printf "\n\e[1;91m# The libvirt-designer rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
-printf "\e[1;92m# The libvirt-designer rpmbuild finished.\e[0;0m\n"
+# Unmaintained Upstream / 2023-10-09
+# rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) libvirt-designer.spec 2>&1 | tee libvirt-designer.log > /dev/null && \
+# rpm -i -U --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " libvirt-designer.spec ) || \
+# { printf "\n\e[1;91m# The libvirt-designer rpmbuild failed.\e[0;0m\n\n" ; exit 1 ; }
+# printf "\e[1;92m# The libvirt-designer rpmbuild finished.\e[0;0m\n"
 
 rpmbuild -ba --rebuild --undefine="dist" -D "dist .btrh9" --target=$(uname -m) libguestfs.spec 2>&1 | tee libguestfs.log > /dev/null && \
 rpm -i -U --replacepkgs --replacefiles $(rpmspec -q --undefine="dist" -D "dist .btrh9" --queryformat="$HOME/rpmbuild/RPMS/%{ARCH}/%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm " libguestfs.spec ) || \
@@ -1985,7 +2191,7 @@ tee $HOME/RPMS/INSTALL.sh <<-EOF > /dev/null
 
 
 # Quickly Install Everuthing (Except the vala/ocaml pcakages)
-# sudo dnf install \`ls *rpm | grep -Ev "\\.src\\.|debuginfo|debugsource|devel|ocaml|vala"\` \`ls libguestfs-devel*rpm libvirt-gobject-devel*rpm libvirt-gconfig-devel*rpm libvirt-glib-devel*rpm  libvirt-devel*rpm libvirt-designer-devel*rpm libguestfs-gobject-devel*rpm gobject-introspection-devel*rpm pcre2-devel*rpm libosinfo-devel*rpm\`
+# sudo dnf install \`ls *rpm | grep -Ev "\\.src\\.|debuginfo|debugsource|devel|ocaml|vala"\` \`ls libguestfs-devel*rpm libvirt-gobject-devel*rpm libvirt-gconfig-devel*rpm libvirt-glib-devel*rpm  libvirt-devel*rpm libguestfs-gobject-devel*rpm gobject-introspection-devel*rpm pcre2-devel*rpm libosinfo-devel*rpm\`
 
 
 if [ ! \$(sudo dnf repolist --quiet baseos 2>&1 | grep -Eo "^baseos") ]; then  
