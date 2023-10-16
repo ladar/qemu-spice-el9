@@ -21,6 +21,11 @@
 #   APPLIES REGARDLESS OF JURISDICTION, PHYSICAL OR VIRTUAL LOCATION, AND
 #   sREMAINS APPLICABLE EVEN IF YOU HAVE BEEN ADVISED OF THE RISKS.
 
+
+# Quickly Install Everuthing (Except the vala/ocaml pcakages)
+# sudo dnf install `ls *rpm | grep -Ev "\.src\.|debuginfo|debugsource|devel|ocaml|vala|uki-direct"` `ls libguestfs-devel*rpm libvirt-gobject-devel*rpm libvirt-gconfig-devel*rpm libvirt-glib-devel*rpm  libvirt-devel*rpm libguestfs-gobject-devel*rpm gobject-introspection-devel*rpm pcre2-devel*rpm libosinfo-devel*rpm`
+
+
 if [ ! $(sudo dnf repolist --quiet baseos 2>&1 | grep -Eo "^baseos") ]; then  
  printf "\nThe baseos repo is required but doesn't appear to be enabled.\n\n"
  exit 1
@@ -38,7 +43,7 @@ fi
 # To generate a current/updated list of RPM files for installation, run the following command.
 
 # Install the basic qemu/libvirt/virt-manager/spice packages.
-export INSTALLPKGS=$(echo `ls qemu*rpm spice*rpm opus*rpm usbredir*rpm openbios*rpm capstone*rpm python3-capstone*rpm libblkio*rpm lzfse*rpm virglrenderer*rpm libcacard*rpm edk2*rpm SLOF*rpm SDL2*rpm libogg-devel*rpm pcsc-lite*rpm mesa-libgbm-devel*rpm usbredir-devel*rpm opus-devel*rpm gobject-introspection-devel*rpm python3-markdown*rpm virt-manager*rpm virt-viewer*rpm virt-install*rpm virt-backup*rpm passt*rpm libphodav*rpm gvnc*rpm gtk-vnc*rpm chunkfs*rpm osinfo*rpm libosinfo*rpm libvirt*rpm python3-libvirt*rpm chezdav*rpm fcode-utils*rpm python3-pefile*rpm python3-virt-firmware*rpm libguestfs*rpm python3-libguestfs*rpm guestfs-tools*rpm vala*rpm libvala*rpm | grep -Ev 'qemu-guest-agent|qemu-tests|debuginfo|debugsource|\.src\.rpm'`)
+export INSTALLPKGS=$(echo `ls qemu*rpm spice*rpm opus*rpm usbredir*rpm openbios*rpm capstone*rpm python3-capstone*rpm libblkio*rpm lzfse*rpm virglrenderer*rpm libcacard*rpm edk2*rpm SLOF*rpm SDL2*rpm libogg-devel*rpm pcsc-lite*rpm mesa-libgbm-devel*rpm usbredir-devel*rpm opus-devel*rpm gobject-introspection-devel*rpm python3-markdown*rpm virt-manager*rpm virt-viewer*rpm virt-install*rpm virt-backup*rpm passt*rpm libphodav*rpm gvnc*rpm gtk-vnc*rpm chunkfs*rpm osinfo*rpm libosinfo*rpm libvirt*rpm python3-libvirt*rpm chezdav*rpm fcode-utils*rpm python3-pefile*rpm python3-virt-firmware*rpm libguestfs*rpm python3-libguestfs*rpm guestfs-tools*rpm vala*rpm libvala*rpm | grep -Ev 'qemu-guest-agent|qemu-tests|debuginfo|debugsource|\.src\.rpm' ; echo vala`)
 
 # Add the remmina packages.
 ## export INSTALLPKGS=$(echo $INSTALLPKGS `ls remmina*rpm | grep -Ev 'debuginfo|debugsource|\.src\.rpm'`)
