@@ -22,8 +22,8 @@
 #   sREMAINS APPLICABLE EVEN IF YOU HAVE BEEN ADVISED OF THE RISKS.
 
 
-# Quickly Install Everuthing (Except the vala/ocaml pcakages)
-# sudo dnf install `ls *rpm | grep -Ev "\.src\.|debuginfo|debugsource|devel|ocaml|vala|uki-direct"` `ls libguestfs-devel*rpm libvirt-gobject-devel*rpm libvirt-gconfig-devel*rpm libvirt-glib-devel*rpm  libvirt-devel*rpm libguestfs-gobject-devel*rpm gobject-introspection-devel*rpm pcre2-devel*rpm libosinfo-devel*rpm`
+# Quickly Install Everything (Except the vala/ocaml/qxl/xspice pcakages)
+# sudo dnf install --enablerepo=baseos --enablerepo=appstream --enablerepo=epel --enablerepo=crb `ls *rpm depends/libblkio*rpm | grep -Ev "\.src\.|debuginfo|debugsource|ocaml|vala|uki\-direct|xorg\-x11\-drv\-qxl|xorg\-x11\-server\-Xspice"` 
 
 
 if [ ! $(sudo dnf repolist --quiet baseos 2>&1 | grep -Eo "^baseos") ]; then  
