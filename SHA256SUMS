@@ -607,6 +607,14 @@ cac16f644d177d919c83ce43a147c1939cdee2be534d3438c1a98bf28f9727f9  qemu-8.1.2-512
 6b157c81a04bd6bb553bb97d33e663f6d304c470a252a7be668c42ef2502bc10  qemu-user-debuginfo-8.1.2-5120.btrh9.x86_64.rpm.06
 b07b84e071bb62ee22efb99d867e587c7ec24629d05b7352ee117e0b7a9dc4db  qemu-user-debuginfo-8.1.2-5120.btrh9.x86_64.rpm.07
 48521c0ed73db1ce7e7ac91721f35f75593c7f0469ed6534a61f6855edd5b84c  qemu-user-debuginfo-8.1.2-5120.btrh9.x86_64.rpm.08
+27cbe24fb18f8a1830ddd92d27ba2fd5e6ef666bd127920b782bc7e124deea7d  uboot-images-2023.10-0.9.btrh9.noarch.rpm.01
+897cde6d638e936d1fd5219b4456f8de7e81a415765a37d3b444cbf9c0d7f619  uboot-images-2023.10-0.9.btrh9.noarch.rpm.02
+46687743f5c6aae17f6a2ee757c152b900d9c00bc07f9abf29d272b94982a603  uboot-images-2023.10-0.9.btrh9.noarch.rpm.03
+86243932806e95581876e55df7a8ed7f40839250f70ea9d536e82ac4faa1f7dc  uboot-images-2023.10-0.9.btrh9.noarch.rpm.04
+0e6f89d169c347ee1568cc155fd6c8877cfd987cefcda5605fdbde0e17ef1fee  uboot-images-2023.10-0.9.btrh9.noarch.rpm.05
+60280b2472cbcb4a962600f0a3e267df7e8fe2fdf8420378063f9cb63d9a34b8  uboot-images-2023.10-0.9.btrh9.noarch.rpm.06
+de5ab6488b611576648cc343eef509108878ef74288818f5e88cd7faffbebb61  uboot-images-2023.10-0.9.btrh9.noarch.rpm.07
+e7700714f6d75d2d36d14b8879029207aaa519a34e35a7d780cfec95a7b46956  uboot-images-2023.10-0.9.btrh9.noarch.rpm.08
 ec9d3cd66252c7fb3d5bd429abf149b01f99f779ce6d9fcca1ccdbc5bb0df758  depends/SDL2_image-2.6.3-1.el9.x86_64.rpm
 ac34c5b5f0afeee5eea7a90354f3c72445a7cdad8ce734d292927109e5a8ee4b  depends/SDL2_image-debuginfo-2.0.5-6.el9.remi.x86_64.rpm
 dc6beb96db55cb35d94495122c7a40e8707aafce4b385e889d649cd0b3c034b2  depends/SDL2_image-debugsource-2.0.5-6.el9.remi.x86_64.rpm
